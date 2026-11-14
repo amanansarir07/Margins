@@ -6,7 +6,7 @@
 }
 
 .launch-site{background:var(--ink-navy);color:var(--light-surface);min-height:100svh;overflow:hidden;position:relative}
-.app:has(.launch-site){display:block;padding:0;background:var(--ink-navy)}
+.app-launch{display:block;padding:0;background:var(--ink-navy)}
 .launch-scene{height:100svh;inset:0;position:absolute;width:100%}
 .launch-stars{fill:var(--light-surface);opacity:.9}
 .launch-stars circle:nth-child(4n){animation:launch-twinkle 2.8s ease-in-out infinite alternate}

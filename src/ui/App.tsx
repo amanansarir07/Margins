@@ -73,7 +73,7 @@ export function App() {
   }
 
   return (
-    <main className="app">
+    <main className={`app${state.screen === "title" ? " app-launch" : ""}`}>
       {state.screen === "title" && (
         <TitleScreen
           missionStars={missionStars}
