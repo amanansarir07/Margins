@@ -62,6 +62,10 @@ function calculateStars(result: EvaluationResult, scenario: ScenarioRecord) {
   );
 }
 
+function failedResources(result: EvaluationResult) {
+  return resourceNames.filter((name) => result.resources[name].margin < 0);
+}
+
 interface DebriefScreenProps {
   design: Design;
   scenario: ScenarioRecord;
@@ -262,6 +266,24 @@ export function DebriefScreen({
       </div>
       <article className="panel">
         <p className="panel-label">Why</p>
+        {!result.success && (
+          <div className="failure-summary" role="status">
+            <strong>WHAT BROKE</strong>
+            {failedResources(result).length > 0 ? (
+              failedResources(result).map((name) => {
+                const resource = result.resources[name];
+                return (
+                  <span key={name}>
+                    {name.toUpperCase()}: {resource.used.toFixed(1)} used /{" "}
+                    {resource.limit.toFixed(1)} limit
+                  </span>
+                );
+              })
+            ) : (
+              <span>Launch or component compatibility failed.</span>
+            )}
+          </div>
+        )}
         <ul className="reason-list debrief-reasons">
           {result.reasons.map((reason) => (
             <li key={reason}>{reason}</li>

@@ -1340,6 +1340,101 @@ body {
   pointer-events: auto;
 }
 
+.design-feedback {
+  align-items: center;
+  background: var(--signal-mint);
+  border: 3px solid var(--ink-navy);
+  box-shadow: var(--shadow);
+  color: var(--ink-navy);
+  display: flex;
+  gap: 0.65rem;
+  margin: 1rem auto;
+  max-width: 70rem;
+  padding: 0.65rem 0.85rem;
+}
+
+.design-feedback strong,
+.flight-hazards-heading strong {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+}
+
+.design-feedback span {
+  font-size: 0.85rem;
+}
+
+.flight-hazards {
+  background: var(--light-surface);
+  border: 3px solid var(--ink-navy);
+  color: var(--ink-navy);
+  margin-top: 1rem;
+  padding: 0.8rem;
+}
+
+.flight-hazards-heading {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.65rem;
+}
+
+.flight-hazards-heading span {
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.flight-hazard-track {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+}
+
+.flight-hazard-marker {
+  border-left: 6px solid var(--launchpad-yellow);
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.35rem 0.5rem;
+}
+
+.flight-hazard-marker.active {
+  background: var(--launchpad-yellow);
+  border-left-color: var(--rocket-red);
+}
+
+.flight-hazard-marker.passed {
+  border-left-color: var(--signal-mint);
+  opacity: 0.65;
+}
+
+.flight-hazard-marker span,
+.flight-hazard-marker small {
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.flight-hazard-marker strong {
+  font-size: 0.8rem;
+}
+
+.failure-summary {
+  background: #ffe4e1;
+  border: 3px solid var(--rocket-red);
+  color: var(--ink-navy);
+  display: grid;
+  gap: 0.3rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+}
+
+.failure-summary strong {
+  color: var(--rocket-red);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+}
+
+.failure-summary span {
+  font-size: 0.9rem;
+}
+
 .workbench-callouts ol {
   display: grid;
   gap: 0.7rem;
@@ -2364,5 +2459,15 @@ body {
 
   .slot-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .design-feedback {
+    align-items: start;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .flight-hazard-track {
+    grid-template-columns: 1fr 1fr;
   }
 }

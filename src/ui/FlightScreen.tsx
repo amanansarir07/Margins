@@ -221,6 +221,7 @@ export function FlightScreen({
             timeline={timeline}
             progress={progress}
             launched={launched}
+            currentPhase={currentPoint?.phase}
           />
           <TelemetryStrip point={currentPoint} />
           <div className="flight-progress">
@@ -235,6 +236,11 @@ export function FlightScreen({
               />
             </div>
           </div>
+          <HazardTimeline
+            events={timeline.events}
+            currentDay={timeline.durationDays * progress}
+            activeEventId={activeEvent?.id}
+          />
           <Button
             className="button-muted"
             type="button"
@@ -303,11 +309,13 @@ function FlightCanvas({
   timeline,
   progress,
   launched,
+  currentPhase,
 }: {
   destination: string;
   timeline: FlightTimeline;
   progress: number;
   launched: boolean;
+  currentPhase?: string;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const stars = useMemo(
@@ -391,8 +399,45 @@ function FlightCanvas({
       className="flight-canvas"
       ref={canvasRef}
       role="img"
-      aria-label={`Animated spacecraft flight to ${destination}, currently ${timeline.points[0]?.phase ?? "launch"}`}
+      aria-label={`Animated spacecraft flight to ${destination}, currently ${currentPhase ?? "launch"}`}
     />
+  );
+}
+
+function HazardTimeline({
+  events,
+  currentDay,
+  activeEventId,
+}: {
+  events: FlightTimeline["events"];
+  currentDay: number;
+  activeEventId?: string;
+}) {
+  return (
+    <section className="flight-hazards" aria-label="Known flight hazards">
+      <div className="flight-hazards-heading">
+        <strong>KNOWN HAZARDS</strong>
+        <span>DAY {Math.round(currentDay)}</span>
+      </div>
+      <div className="flight-hazard-track">
+        {events.map((event) => {
+          const distance = Math.max(0, event.day - currentDay);
+          const passed = currentDay > event.day && activeEventId !== event.id;
+          const active = activeEventId === event.id;
+          return (
+            <div
+              className={`flight-hazard-marker${passed ? " passed" : ""}${active ? " active" : ""}`}
+              key={event.id}
+              title={`${event.name}, day ${Math.round(event.day)}`}
+            >
+              <span>{active ? "NOW" : passed ? "DONE" : `IN ${Math.round(distance)}D`}</span>
+              <strong>{event.name}</strong>
+              <small>{event.resource.toUpperCase()}</small>
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 

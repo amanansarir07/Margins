@@ -69,6 +69,21 @@ function statusFor(used: number, limit: number) {
   return ratio > 1 ? "danger" : ratio > 0.85 ? "warning" : "healthy";
 }
 
+function resourceImpact(
+  before: ReturnType<typeof previewResources>,
+  after: ReturnType<typeof previewResources>,
+) {
+  const changes = (["mass", "power", "budget"] as const)
+    .map((name) => {
+      const delta = after.resources[name].used - before.resources[name].used;
+      if (Math.abs(delta) < 0.05) return null;
+      const unit = name === "mass" ? "kg" : name === "power" ? "W" : "$M";
+      return `${name} ${delta > 0 ? "+" : ""}${delta.toFixed(1)} ${unit}`;
+    })
+    .filter((change): change is string => Boolean(change));
+  return changes.length > 0 ? changes.join(" · ") : "No mass, power, or budget change";
+}
+
 export function WorkshopScreen({
   design,
   scenario,
@@ -86,6 +101,7 @@ export function WorkshopScreen({
 }) {
   const [drawer, setDrawer] = useState<Slot | null>(null);
   const [bouncedSlot, setBouncedSlot] = useState<Slot | null>(null);
+  const [designFeedback, setDesignFeedback] = useState("Select a part to see its impact.");
   const [showCallouts, setShowCallouts] = useState(firstWorkbenchSession);
   const preview = previewResources(design, scenario, options);
 
@@ -100,25 +116,28 @@ export function WorkshopScreen({
 
   const placePart = (slot: Slot, id: string) => {
     const key = slotForDesignKey(slot);
+    let nextDesign = design;
     if (slot === "instruments") {
       const selected = design.instrumentIds.includes(id);
-      onDesignChange({
+      nextDesign = {
         ...design,
         instrumentIds: selected
           ? design.instrumentIds.filter((instrumentId) => instrumentId !== id)
           : [...design.instrumentIds, id],
-      });
+      };
     } else if (slot === "mitigations") {
       const selected = design.mitigationIds ?? [];
-      onDesignChange({
+      nextDesign = {
         ...design,
         mitigationIds: selected.includes(id)
           ? selected.filter((mitigationId) => mitigationId !== id)
           : [...selected, id],
-      });
+      };
     } else if (key) {
-      onDesignChange({ ...design, [key]: id });
+      nextDesign = { ...design, [key]: id };
     }
+    onDesignChange(nextDesign);
+    setDesignFeedback(resourceImpact(preview, previewResources(nextDesign, scenario, options)));
     playSound("snap");
     vibrate(8);
     setBouncedSlot(slot);
@@ -339,6 +358,10 @@ export function WorkshopScreen({
       <Button className="lock-design-button" type="button" onClick={onContinue}>
         RUN GO / NO-GO CHECK
       </Button>
+      <div className="design-feedback" role="status" aria-live="polite">
+        <strong>LAST CHANGE</strong>
+        <span>{designFeedback}</span>
+      </div>
       {showCallouts && (
         <aside className="workbench-callouts" aria-label="Workbench tips">
           <ol>
