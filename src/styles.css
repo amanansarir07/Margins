@@ -65,6 +65,145 @@ body {
   text-align: center;
 }
 
+.mission-select {
+  margin: 0 auto;
+  max-width: 76rem;
+  width: 100%;
+}
+
+.mission-select-header,
+.mission-select-footer {
+  align-items: end;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.mission-select-header h1 {
+  font-family: "Bowlby One SC", sans-serif;
+  font-size: clamp(2rem, 8vw, 5rem);
+  line-height: 0.95;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.mission-progress {
+  border: 3px solid var(--ink-navy);
+  box-shadow: var(--shadow);
+  display: grid;
+  padding: 0.75rem;
+  text-align: right;
+}
+
+.mission-progress span {
+  font-size: 0.8rem;
+}
+
+.solar-map {
+  background: var(--light-surface);
+  border: 3px solid var(--ink-navy);
+  box-shadow: var(--shadow);
+  margin: 2rem 0;
+  min-height: 22rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.solar-map svg {
+  display: block;
+  height: 100%;
+  min-height: 22rem;
+  width: 100%;
+}
+
+.solar-route {
+  fill: none;
+  stroke: var(--deep-sky);
+  stroke-dasharray: 8 10;
+  stroke-width: 3;
+}
+
+.solar-star {
+  fill: var(--launchpad-yellow);
+  stroke: var(--ink-navy);
+  stroke-width: 3;
+}
+
+.solar-label {
+  fill: var(--ink-navy);
+  font-family: "Bowlby One SC", sans-serif;
+  font-size: 16px;
+  text-anchor: middle;
+}
+
+.orbit-dot {
+  fill: var(--signal-mint);
+  stroke: var(--ink-navy);
+  stroke-width: 3;
+}
+
+.mission-pin {
+  align-items: center;
+  background: var(--launchpad-yellow);
+  border: 3px solid var(--ink-navy);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  color: var(--ink-navy);
+  cursor: pointer;
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.65rem;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.mission-pin:hover,
+.mission-pin:focus-visible {
+  transform: translate(-50%, -54%);
+  box-shadow: 7px 7px 0 var(--ink-navy);
+}
+
+.mission-pin:focus-visible {
+  outline: 3px solid var(--deep-sky);
+  outline-offset: 3px;
+}
+
+.mission-pin-dot {
+  background: var(--signal-mint);
+  border: 3px solid var(--ink-navy);
+  border-radius: 50%;
+  height: 1rem;
+  justify-self: center;
+  width: 1rem;
+}
+
+.mission-pin-mars .mission-pin-dot {
+  background: var(--rocket-red);
+}
+
+.mission-pin-europa .mission-pin-dot {
+  background: var(--deep-sky);
+}
+
+.mission-pin small {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.mission-pin.locked {
+  background: var(--lunar-grey);
+  cursor: not-allowed;
+  filter: grayscale(1);
+  opacity: 0.7;
+}
+
+.mission-select-footer p {
+  font-size: 0.9rem;
+  margin: 0;
+}
+
 .eyebrow {
   color: var(--accent);
   font-size: 0.75rem;

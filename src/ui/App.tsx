@@ -1,4 +1,4 @@
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { gameData } from "../engine/loadData";
 import { BriefingScreen } from "./BriefingScreen";
 import { appReducer, initialState } from "./state";
@@ -8,10 +8,16 @@ import { ReviewScreen } from "./ReviewScreen";
 import { DebriefScreen } from "./DebriefScreen";
 import { FlightScreen } from "./FlightScreen";
 import { KitScreen } from "./KitScreen";
-import { saveBestScore, saveLastDesign } from "./storage";
+import {
+  loadMissionStars,
+  saveBestScore,
+  saveLastDesign,
+  saveMissionStars,
+} from "./storage";
 
 export function App() {
   const [state, dispatch] = useReducer(appReducer, initialState);
+  const [missionStars] = useState(loadMissionStars);
   const scenario = gameData.scenarios.find(
     (item) => item.id === state.design.scenarioId,
   );
@@ -24,6 +30,20 @@ export function App() {
     if (state.result) saveBestScore(state.result.score);
   }, [state.result]);
 
+  useEffect(() => {
+    if (!state.result || !scenario) return;
+    const margins = Object.values(state.result.resources);
+    const stars =
+      (state.result.success ? 1 : 0) +
+      (state.result.resources.budget.used < scenario.limits.budgetM ? 1 : 0) +
+      (margins.every(
+        (resource) => resource.margin / Math.max(resource.limit, 1) > 0.15,
+      )
+        ? 1
+        : 0);
+    saveMissionStars(scenario.id, stars);
+  }, [scenario, state.result]);
+
   if (window.location.pathname === "/kit") {
     return <KitScreen />;
   }
@@ -32,7 +52,14 @@ export function App() {
     <main className="app">
       {state.screen === "title" && (
         <TitleScreen
-          onStartSolo={() => dispatch({ type: "START_SOLO" })}
+          missionStars={missionStars}
+          onSelectScenario={(scenarioId) => {
+            dispatch({
+              type: "SET_DESIGN",
+              design: { ...state.design, scenarioId },
+            });
+            dispatch({ type: "START_SOLO" });
+          }}
           onStartSandbox={() => dispatch({ type: "START_SANDBOX" })}
         />
       )}
