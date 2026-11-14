@@ -4,6 +4,7 @@ import { BriefingScreen } from "./BriefingScreen";
 import { appReducer, initialState } from "./state";
 import { TitleScreen } from "./TitleScreen";
 import { WorkshopScreen } from "./WorkshopScreen";
+import { ReviewScreen } from "./ReviewScreen";
 
 export function App() {
   const [state, dispatch] = useReducer(appReducer, initialState);
@@ -28,6 +29,13 @@ export function App() {
           scenario={scenario}
           onDesignChange={(design) => dispatch({ type: "SET_DESIGN", design })}
           onContinue={() => dispatch({ type: "GO_TO", screen: "review" })}
+        />
+      )}
+      {state.screen === "review" && scenario && (
+        <ReviewScreen
+          design={state.design}
+          scenario={scenario}
+          onBack={() => dispatch({ type: "GO_TO", screen: "workshop" })}
         />
       )}
     </main>

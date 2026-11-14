@@ -422,6 +422,135 @@ body {
   margin-bottom: 0;
 }
 
+.review-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.check-list {
+  display: grid;
+  gap: 0.65rem;
+  list-style: none;
+  margin: 1.25rem 0 0;
+  padding: 0;
+}
+
+.check-row {
+  align-items: center;
+  background: var(--space-900);
+  border-left: 0.25rem solid;
+  border-radius: 0.5rem;
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: auto 1fr auto auto;
+  padding: 0.75rem;
+}
+
+.check-row.pass {
+  border-color: #4ade80;
+}
+
+.check-row.warn {
+  border-color: #fbbf24;
+}
+
+.check-row.fail {
+  border-color: #fb7185;
+}
+
+.check-indicator {
+  align-items: center;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  display: inline-flex;
+  height: 1.5rem;
+  justify-content: center;
+  width: 1.5rem;
+}
+
+.check-row.pass .check-indicator,
+.check-row.pass .check-status {
+  color: #86efac;
+}
+
+.check-row.warn .check-indicator,
+.check-row.warn .check-status {
+  color: #fbbf24;
+}
+
+.check-row.fail .check-indicator,
+.check-row.fail .check-status {
+  color: #fb7185;
+}
+
+.check-copy {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.check-copy span {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.check-status {
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.review-summary {
+  align-self: start;
+}
+
+.summary-stat {
+  align-items: baseline;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+}
+
+.summary-stat span {
+  color: var(--muted);
+}
+
+.summary-stat strong {
+  font-size: 1.35rem;
+}
+
+.reasons-label {
+  margin-top: 1.5rem;
+}
+
+.reason-list {
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.review-actions {
+  align-items: start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: space-between;
+  margin-top: 1.25rem;
+}
+
+.launch-action {
+  margin-left: auto;
+  text-align: right;
+}
+
+.launch-reason {
+  color: #fb7185;
+  font-size: 0.78rem;
+  margin: 0.5rem 0 0;
+  max-width: 20rem;
+}
+
 @media (min-width: 720px) {
   .app {
     padding: 3rem;
@@ -436,6 +565,10 @@ body {
   }
 
   .workshop-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem);
+  }
+
+  .review-grid {
     grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem);
   }
 }
