@@ -13,9 +13,9 @@
   {
     "id": "heavy-bus",
     "name": "Heavy Bus",
-    "massKg": 60,
-    "powerW": 30,
-    "costM": 80,
+    "massKg": 48,
+    "powerW": 24,
+    "costM": 42,
     "dataCapacityMbitPerDay": 180,
     "tier": "advanced",
     "source": "Game model",

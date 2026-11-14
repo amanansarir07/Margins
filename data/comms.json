@@ -6,7 +6,7 @@
     "powerW": 18,
     "dataMbitPerDay": 100,
     "costM": 35,
-    "antennaFactor": 1,
+    "antennaFactor": 0.4,
     "tier": "simple",
     "source": "Game model",
     "sourceNote": "Game model. Component balance value."
@@ -14,11 +14,11 @@
   {
     "id": "high-gain-radio",
     "name": "High-Gain Radio",
-    "massKg": 20,
-    "powerW": 30,
+    "massKg": 18,
+    "powerW": 25,
     "dataMbitPerDay": 240,
-    "costM": 70,
-    "antennaFactor": 1.5,
+    "costM": 45,
+    "antennaFactor": 2.5,
     "tier": "advanced",
     "source": "Game model",
     "sourceNote": "Game model. Component balance value."

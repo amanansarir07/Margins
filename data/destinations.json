@@ -37,7 +37,7 @@
     "surfaceGravity": 1.32,
     "sunlightComparedToEarth": 0.036,
     "propellantFactor": 0.5,
-    "downlinkDistanceFactor": 0.4,
+    "downlinkDistanceFactor": 0.8,
     "source": "Game model",
     "sourceNote": "Game model. Verify values in FACTS_TO_VERIFY.md."
   }

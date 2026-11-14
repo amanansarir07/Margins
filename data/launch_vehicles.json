@@ -4,10 +4,17 @@
     "name": "Light Lifter",
     "capacityByDestination": {
       "moon": 140,
-      "mars": 0,
-      "europa": 0
+      "mars": 220,
+      "europa": 220
     },
-    "supportedOrbits": ["flyby", "low"],
+    "supportedOrbits": [
+      "flyby",
+      "low",
+      "mars-flyby",
+      "mars-low",
+      "europa-flyby",
+      "europa-low"
+    ],
     "costM": 80,
     "source": "Game model",
     "sourceNote": "Game model. Launch compatibility and cost."

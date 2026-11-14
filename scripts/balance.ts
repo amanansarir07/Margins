@@ -9,30 +9,40 @@ function designsForScenario(scenarioId: string): Design[] {
   const orbitIds = gameData.orbits
     .filter((orbit) => orbit.destinationId === scenario.destinationId)
     .map((orbit) => orbit.id);
-  const launchVehicleIds = scenario.destinationId === "moon"
-    ? ["light-lifter", "heavy-lifter"]
-    : ["heavy-lifter"];
+  const launchVehicleIds = ["light-lifter", "heavy-lifter"];
   const designs: Design[] = [];
 
-  for (const powerId of ["solar-array", "large-solar-array", "nuclear-generator"]) {
+  const powerIds = scenario.requiredPowerKind === "nuclear"
+    ? ["nuclear-generator"]
+    : ["solar-array", "large-solar-array", "nuclear-generator"];
+  for (const powerId of powerIds) {
     for (const attitudeControlId of ["basic", "precise"]) {
       for (const instrumentIds of [
         ["spectrometer"],
         ["radar"],
         ["spectrometer", "radar"],
+        ["camera"],
       ]) {
-        for (const orbitId of orbitIds) {
-          designs.push({
-            scenarioId: scenario.id,
-            spacecraftBusId: "compact-bus",
-            powerId,
-            commsId: "standard-radio",
-            onboardComputerId: "simple",
-            attitudeControlId,
-            instrumentIds,
-            launchVehicleId: launchVehicleIds[0],
-            orbitId,
-          });
+        for (const spacecraftBusId of ["compact-bus", "heavy-bus"]) {
+          for (const commsId of ["standard-radio", "high-gain-radio"]) {
+            for (const onboardComputerId of ["simple", "advanced"]) {
+              for (const launchVehicleId of launchVehicleIds) {
+                for (const orbitId of orbitIds) {
+                  designs.push({
+                    scenarioId: scenario.id,
+                    spacecraftBusId,
+                    powerId,
+                    commsId,
+                    onboardComputerId,
+                    attitudeControlId,
+                    instrumentIds,
+                    launchVehicleId,
+                    orbitId,
+                  });
+                }
+              }
+            }
+          }
         }
       }
     }
@@ -52,7 +62,7 @@ describe("scenario balance reports", () => {
       const shapes = new Set(
         winners.map(
           ({ design }) =>
-            `${design.powerId}/${design.attitudeControlId}/${design.instrumentIds.join("+")}`,
+            `${design.spacecraftBusId}/${design.powerId}/${design.commsId}/${design.instrumentIds.join("+")}`,
         ),
       );
       const winningRate = winners.length / results.length;

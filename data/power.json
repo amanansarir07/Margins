@@ -15,7 +15,7 @@
     "id": "large-solar-array",
     "name": "Large Solar Array",
     "massKg": 40,
-    "powerW": 300,
+    "powerW": 400,
     "costM": 90,
     "destinationIds": ["moon", "mars", "europa"],
     "kind": "solar",
