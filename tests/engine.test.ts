@@ -138,7 +138,7 @@ describe("mission engine", () => {
     );
 
     expect(result.checks.power).toBe(false);
-    expect(result.reasons).toContain("This scenario requires nuclear power.");
+    expect(result.reasons).toContain("Use nuclear power for this mission.");
   });
 
   it("enforces Cadet component limits and removes Sandbox goals", () => {

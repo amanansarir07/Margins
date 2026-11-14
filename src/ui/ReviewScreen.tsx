@@ -9,7 +9,6 @@ import type {
   ScenarioRecord,
 } from "../engine/types";
 import { Button } from "./foundation/Button";
-import { Tooltip } from "./Tooltip";
 
 function CheckRow({
   label,
@@ -53,7 +52,6 @@ function CheckRow({
           <span>{help}</span>
         </span>
         <span className="check-status">{labelByStatus[status]}</span>
-        <Tooltip label={help} />
       </button>
     </li>
   );
@@ -108,56 +106,15 @@ export function ReviewScreen({
         <article className="panel">
           <div className="card-title-row">
             <div>
-              <p className="panel-label">Click each green line</p>
-              <h2>{canLaunch ? "Ready for launch." : "Resolve red lines."}</h2>
+              <p className="panel-label">Launch gates</p>
+              <h2>{canLaunch ? "GO" : "NO-GO"}</h2>
             </div>
-            <Tooltip label="Click a passing line to confirm it before launch." />
           </div>
           <ul className="check-list">
             <CheckRow
-              label="Mass"
-              pass={result.checks.mass}
-              margin={result.resources.mass.margin / result.resources.mass.limit}
-              help="The complete spacecraft must fit within the mission mass limit."
-              acknowledged={Boolean(acknowledged.Mass)}
-              onAcknowledge={() => acknowledge("Mass", result.checks.mass)}
-            />
-            <CheckRow
-              label="Power"
-              pass={result.checks.power}
-              margin={result.resources.power.margin / result.resources.power.limit}
-              help="The selected power system must cover the spacecraft load."
-              acknowledged={Boolean(acknowledged.Power)}
-              onAcknowledge={() => acknowledge("Power", result.checks.power)}
-            />
-            <CheckRow
-              label="Data"
-              pass={result.checks.data}
-              margin={result.resources.data.margin / result.resources.data.limit}
-              help="The instruments must stay within the daily data limit."
-              acknowledged={Boolean(acknowledged.Data)}
-              onAcknowledge={() => acknowledge("Data", result.checks.data)}
-            />
-            <CheckRow
-              label="Budget"
-              pass={result.checks.budget}
-              margin={result.resources.budget.margin / result.resources.budget.limit}
-              help="The complete mission must stay within the budget cap."
-              acknowledged={Boolean(acknowledged.Budget)}
-              onAcknowledge={() => acknowledge("Budget", result.checks.budget)}
-            />
-            <CheckRow
-              label="Time"
-              pass={result.checks.time}
-              margin={result.resources.time.margin / result.resources.time.limit}
-              help="Transit and orbit time must fit the program window."
-              acknowledged={Boolean(acknowledged.Time)}
-              onAcknowledge={() => acknowledge("Time", result.checks.time)}
-            />
-            <CheckRow
               label="Launch mass"
               pass={result.checks.launchCompatibility.mass}
-              help="The launch vehicle must carry the complete spacecraft."
+              help="Vehicle must carry the full spacecraft."
               acknowledged={Boolean(acknowledged["Launch mass"])}
               onAcknowledge={() =>
                 acknowledge("Launch mass", result.checks.launchCompatibility.mass)
@@ -166,7 +123,7 @@ export function ReviewScreen({
             <CheckRow
               label="Launch orbit"
               pass={result.checks.launchCompatibility.orbit}
-              help="The launch vehicle must support the selected orbit."
+              help="Vehicle must support the selected orbit."
               acknowledged={Boolean(acknowledged["Launch orbit"])}
               onAcknowledge={() =>
                 acknowledge("Launch orbit", result.checks.launchCompatibility.orbit)

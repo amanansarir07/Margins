@@ -61,6 +61,7 @@ export function App() {
       {state.screen === "title" && (
         <TitleScreen
           missionStars={missionStars}
+          difficulty={state.difficulty}
           onSelectScenario={(scenarioId) => {
             dispatch({
               type: "SET_DESIGN",
@@ -68,46 +69,16 @@ export function App() {
             });
             dispatch({ type: "START_SOLO" });
           }}
+          onDifficultyChange={(difficulty) =>
+            dispatch({ type: "SET_DIFFICULTY", difficulty })
+          }
           onStartSandbox={() => dispatch({ type: "START_SANDBOX" })}
         />
       )}
       {state.screen === "briefing" && scenario && (
         <BriefingScreen
           scenario={scenario}
-          difficulty={state.difficulty}
           sandbox={state.sandbox}
-          onScenarioChange={(scenarioId) => {
-            const nextScenario = gameData.scenarios.find(
-              (item) => item.id === scenarioId,
-            );
-            const nextOrbit = gameData.orbits.find(
-              (item) => item.destinationId === nextScenario?.destinationId,
-            );
-            const nextLaunchVehicle = gameData.launchVehicles.find(
-              (item) =>
-                nextScenario &&
-                (item.capacityByDestination[nextScenario.destinationId] ?? 0) > 0 &&
-                item.supportedOrbits.includes(nextOrbit?.id ?? ""),
-            );
-            if (nextScenario && nextOrbit && nextLaunchVehicle) {
-              dispatch({
-                type: "SET_DESIGN",
-                design: {
-                  ...state.design,
-                  scenarioId,
-                  orbitId: nextOrbit.id,
-                  launchVehicleId: nextLaunchVehicle.id,
-                  powerId:
-                    nextScenario.requiredPowerKind === "nuclear"
-                      ? "nuclear-generator"
-                      : state.design.powerId,
-                },
-              });
-            }
-          }}
-          onDifficultyChange={(difficulty) =>
-            dispatch({ type: "SET_DIFFICULTY", difficulty })
-          }
           onContinue={() => dispatch({ type: "GO_TO", screen: "workshop" })}
         />
       )}

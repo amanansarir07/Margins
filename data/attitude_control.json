@@ -9,7 +9,7 @@
     "scienceEfficiency": 0.8,
     "tier": "simple",
     "source": "Game model",
-    "sourceNote": "Component values supplied in the game plan."
+    "sourceNote": "Game model. Component balance values."
   },
   {
     "id": "precise",
@@ -21,6 +21,6 @@
     "scienceEfficiency": 1,
     "tier": "advanced",
     "source": "Game model",
-    "sourceNote": "Component values supplied in the game plan."
+    "sourceNote": "Game model. Component balance values."
   }
 ]

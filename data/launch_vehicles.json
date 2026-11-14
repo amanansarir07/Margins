@@ -10,7 +10,7 @@
     "supportedOrbits": ["flyby", "low"],
     "costM": 80,
     "source": "Game model",
-    "sourceNote": "Provisional launch compatibility and cost values."
+    "sourceNote": "Game model. Launch compatibility and cost."
   },
   {
     "id": "heavy-lifter",
@@ -33,6 +33,6 @@
     ],
     "costM": 150,
     "source": "Game model",
-    "sourceNote": "Provisional launch compatibility and cost values."
+    "sourceNote": "Game model. Launch compatibility and cost."
   }
 ]

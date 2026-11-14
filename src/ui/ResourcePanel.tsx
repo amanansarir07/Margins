@@ -5,7 +5,6 @@ import type {
   ResourceName,
   ScenarioRecord,
 } from "../engine/types";
-import { Tooltip } from "./Tooltip";
 
 const resourceLabels: Record<ResourceName, string> = {
   mass: "Mass",
@@ -23,15 +22,6 @@ const resourceUnits: Record<ResourceName, string> = {
   data: "Mbit/day",
   comms: "Mbit/day",
   time: "days",
-};
-
-const resourceHelp: Record<ResourceName, string> = {
-  mass: "The spacecraft mass, including propellant.",
-  power: "Power used by the spacecraft compared with available power.",
-  budget: "The mission cost compared with its budget cap.",
-  data: "Science data generated each day.",
-  comms: "Science data that must be sent home each day.",
-  time: "Transit and orbit time compared with the program limit.",
 };
 
 function getBarClass(used: number, limit: number) {
@@ -59,7 +49,6 @@ export function ResourcePanel({
           <p className="panel-label">Live design check</p>
           <h2 id="resources-title">Resource margins</h2>
         </div>
-        <Tooltip label="These bars update as you change the mission design." />
       </div>
       <div className="resource-list">
         {(Object.keys(resourceLabels) as ResourceName[]).map((name) => {
@@ -71,10 +60,7 @@ export function ResourcePanel({
           return (
             <div className="resource-row" key={name}>
               <div className="resource-heading">
-                <span>
-                  {resourceLabels[name]}{" "}
-                  <Tooltip label={resourceHelp[name]} />
-                </span>
+                <span>{resourceLabels[name]}</span>
                 <strong>
                   {resource.used.toFixed(1)} / {resource.limit.toFixed(1)}{" "}
                   {resourceUnits[name]}

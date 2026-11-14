@@ -204,6 +204,22 @@ body {
   margin: 0;
 }
 
+.difficulty-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.difficulty-button {
+  box-shadow: none;
+  padding: 0.55rem 0.7rem;
+  text-transform: uppercase;
+}
+
+.difficulty-button.selected {
+  background: var(--launchpad-yellow);
+}
+
 .eyebrow {
   color: var(--accent);
   font-size: 0.75rem;
@@ -285,6 +301,7 @@ body {
 .screen {
   margin: 0 auto;
   max-width: 70rem;
+  min-width: 0;
   width: 100%;
 }
 
@@ -1030,6 +1047,11 @@ body {
 .debrief-grid {
   display: grid;
   gap: 1rem;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.debrief-grid > * {
+  min-width: 0;
 }
 
 .score-list {
@@ -1167,6 +1189,52 @@ body {
 .fix-impact {
   color: var(--accent);
   font-size: 0.75rem;
+}
+
+.decision-value {
+  border-left: 3px solid var(--deep-sky);
+  font-weight: 700;
+  margin: 0.7rem 0 1.25rem;
+  padding-left: 0.7rem;
+}
+
+.workbench-callouts {
+  background: var(--launchpad-yellow);
+  border: 3px solid var(--ink-navy);
+  bottom: 1rem;
+  box-shadow: var(--shadow);
+  color: var(--ink-navy);
+  max-width: 22rem;
+  padding: 1rem;
+  position: fixed;
+  pointer-events: none;
+  right: 1rem;
+  z-index: 4;
+}
+
+.workbench-callouts .button {
+  pointer-events: auto;
+}
+
+.workbench-callouts ol {
+  display: grid;
+  gap: 0.7rem;
+  margin: 0 0 1rem;
+  padding-left: 1.3rem;
+}
+
+.score-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 1rem;
+}
+
+.score-inline span {
+  background: var(--lunar-grey);
+  border: 3px solid var(--ink-navy);
+  font-weight: 700;
+  padding: 0.45rem 0.6rem;
 }
 
 .debrief-hero,
@@ -1347,6 +1415,46 @@ body {
 @media (min-width: 720px) {
   .app {
     padding: 3rem;
+  }
+
+  @media (max-width: 430px) {
+    .app,
+    .patch-wall-page {
+      padding: 0.75rem;
+    }
+
+    .mission-select-header,
+    .mission-select-footer,
+    .debrief-hero,
+    .debrief-score-row,
+    .patch-wall-header {
+      align-items: start;
+      flex-direction: column;
+    }
+
+    .mission-progress,
+    .patch-wall-rank {
+      text-align: left;
+    }
+
+    .solar-map {
+      min-height: 27rem;
+    }
+
+    .solar-map svg {
+      min-height: 27rem;
+    }
+
+    .mission-pin {
+      max-width: 7rem;
+      padding: 0.45rem;
+    }
+
+    .workbench-callouts {
+      bottom: 0.75rem;
+      left: 0.75rem;
+      right: 0.75rem;
+    }
   }
 
   .briefing-grid {

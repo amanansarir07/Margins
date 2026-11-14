@@ -2,116 +2,116 @@
   {
     "id": "dust-storm",
     "name": "Dust Storm",
-    "description": "A Mars dust storm reduces available power and communications.",
+    "description": "Dust storm cuts power and communications.",
     "probability": 0.25,
     "effects": {
       "power": -25,
       "communications": -25,
       "reliability": -0.1
     },
-    "outcomes": ["A storm plan keeps the mission operating.", "The storm delays mapping and downlink."],
+    "outcomes": ["Margins absorb the storm.", "Storm delays mapping and downlink."],
     "source": "Game model",
-    "sourceNote": "Simplified Mars dust-storm event."
+    "sourceNote": "Game model. Mars dust-storm event."
   },
   {
     "id": "radiation-burst",
     "name": "Radiation Burst",
-    "description": "High radiation threatens electronics during the Europa mission.",
+    "description": "Radiation threatens Europa electronics.",
     "probability": 0.3,
     "effects": {
       "power": -20,
       "science": -10,
       "reliability": -0.15
     },
-    "outcomes": ["Radiation hardening protects the computer.", "The mission loses science and reliability."],
+    "outcomes": ["Shielding protects the computer.", "Science and reliability fall."],
     "source": "Game model",
-    "sourceNote": "Simplified high-radiation Europa event."
+    "sourceNote": "Game model. Europa radiation event."
   },
   {
     "id": "solar-flare",
     "name": "Solar Flare",
-    "description": "A burst of solar activity raises mission risk.",
+    "description": "Solar activity raises mission risk.",
     "probability": 0.2,
     "effects": {
       "power": -15,
       "data": -10,
       "reliability": -0.08
     },
-    "outcomes": ["Shielding limits damage.", "The mission loses some power and data margin."],
+    "outcomes": ["Shielding limits damage.", "Power and data margins fall."],
     "decision": {
-      "prompt": "The flare is crossing your observation window.",
+      "prompt": "The flare crosses the observation window.",
       "choices": [
         {
           "id": "safe-mode",
           "label": "ENTER SAFE MODE",
-          "detail": "Protect the instruments and suspend observations.",
-          "cost": "Lose 2 days of science.",
+          "detail": "Protect instruments. Suspend observations.",
+          "cost": "Lose 2 science days.",
           "saved": "Instrument reliability."
         },
         {
           "id": "keep-observing",
           "label": "KEEP OBSERVING",
-          "detail": "Keep the science plan running through the flare.",
+          "detail": "Keep observing through the flare.",
           "cost": "Risk instrument damage.",
-          "saved": "2 days of science if stable."
+          "saved": "2 science days if stable."
         }
       ]
     },
     "source": "Game model",
-    "sourceNote": "Simplified random event; not live DONKI data."
+    "sourceNote": "Game model. Not live DONKI data."
   },
   {
     "id": "instrument-fault",
     "name": "Instrument Fault",
-    "description": "An instrument needs a recovery procedure.",
+    "description": "Instrument fault needs recovery.",
     "probability": 0.15,
     "effects": {
       "science": -10,
       "time": 10,
       "reliability": -0.1
     },
-    "outcomes": ["Redundancy supports recovery.", "Science collection is reduced."],
+    "outcomes": ["Redundancy supports recovery.", "Science collection falls."],
     "source": "Game model",
-    "sourceNote": "Simplified random event."
+    "sourceNote": "Game model. Random event."
   },
   {
     "id": "comms-dropout",
     "name": "Communications Dropout",
-    "description": "A communications session is missed.",
+    "description": "A communications session fails.",
     "probability": 0.18,
     "effects": {
       "communications": -20,
       "data": -15,
       "reliability": -0.06
     },
-    "outcomes": ["A strong radio link restores the session.", "Queued data waits for the next pass."],
+    "outcomes": ["Strong radio restores the session.", "Queued data waits for next pass."],
     "source": "Game model",
-    "sourceNote": "Simplified random event."
+    "sourceNote": "Game model. Random event."
   },
   {
     "id": "power-dip",
     "name": "Power Dip",
-    "description": "Available power falls below its expected level.",
+    "description": "Available power falls.",
     "probability": 0.2,
     "effects": {
       "power": -25,
       "science": -5
     },
-    "outcomes": ["Power margin protects the science plan.", "Some observations are skipped."],
+    "outcomes": ["Power margin protects science.", "Some observations are skipped."],
     "source": "Game model",
-    "sourceNote": "Simplified random event."
+    "sourceNote": "Game model. Random event."
   },
   {
     "id": "budget-cut",
     "name": "Budget Cut",
-    "description": "Program funding is reduced.",
+    "description": "Program funding falls.",
     "probability": 0.1,
     "effects": {
       "budget": -35,
       "reliability": -0.04
     },
-    "outcomes": ["A low-cost design absorbs the cut.", "The mission must reduce scope."],
+    "outcomes": ["Low cost absorbs the cut.", "Mission scope must shrink."],
     "source": "Game model",
-    "sourceNote": "Simplified random event."
+    "sourceNote": "Game model. Random event."
   }
 ]

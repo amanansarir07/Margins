@@ -2,7 +2,7 @@
   {
     "id": "moon",
     "name": "Moon",
-    "description": "Earth's Moon",
+    "description": "Moon orbit target.",
     "distanceFromEarth": 384400,
     "oneWaySignalTime": 1.28,
     "typicalTripTime": 4,
@@ -11,12 +11,12 @@
     "propellantFactor": 0.15,
     "downlinkDistanceFactor": 1,
     "source": "Game model",
-    "sourceNote": "Provisional game-model values pending verification in FACTS_TO_VERIFY.md."
+    "sourceNote": "Game model. Verify values in FACTS_TO_VERIFY.md."
   },
   {
     "id": "mars",
     "name": "Mars",
-    "description": "The Red Planet",
+    "description": "Mars surface target.",
     "distanceFromEarth": 225000000,
     "oneWaySignalTime": 12.5,
     "typicalTripTime": 210,
@@ -25,12 +25,12 @@
     "propellantFactor": 0.35,
     "downlinkDistanceFactor": 0.7,
     "source": "Game model",
-    "sourceNote": "Provisional game-model values pending verification in FACTS_TO_VERIFY.md."
+    "sourceNote": "Game model. Verify values in FACTS_TO_VERIFY.md."
   },
   {
     "id": "europa",
     "name": "Europa",
-    "description": "An icy moon of Jupiter",
+    "description": "Europa ice target.",
     "distanceFromEarth": 628300000,
     "oneWaySignalTime": 34.9,
     "typicalTripTime": 1800,
@@ -39,6 +39,6 @@
     "propellantFactor": 0.5,
     "downlinkDistanceFactor": 0.4,
     "source": "Game model",
-    "sourceNote": "Provisional game-model values pending verification in FACTS_TO_VERIFY.md."
+    "sourceNote": "Game model. Verify values in FACTS_TO_VERIFY.md."
   }
 ]

@@ -8,7 +8,7 @@
     "dataProcessingMbitPerDay": 60,
     "tier": "simple",
     "source": "Game model",
-    "sourceNote": "Component values supplied in the game plan."
+    "sourceNote": "Game model. Component balance values."
   },
   {
     "id": "advanced",
@@ -20,6 +20,6 @@
     "tier": "advanced",
     "processedDataScienceMultiplier": 1.25,
     "source": "Game model",
-    "sourceNote": "Component values supplied in the game plan; processed-data science bonus is 25%."
+    "sourceNote": "Game model. Processed data adds 25% science."
   }
 ]

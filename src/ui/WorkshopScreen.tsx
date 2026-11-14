@@ -26,6 +26,15 @@ type Slot =
   | "orbit";
 
 type ShelfItem = { id: string; name: string; sourceNote: string };
+const WORKBENCH_TUTORIAL_KEY = "margins:workbench-callouts-seen";
+
+function firstWorkbenchSession() {
+  try {
+    return localStorage.getItem(WORKBENCH_TUTORIAL_KEY) !== "true";
+  } catch {
+    return true;
+  }
+}
 
 const slotLabels: Record<Slot, string> = {
   bus: "Spacecraft bus",
@@ -71,7 +80,17 @@ export function WorkshopScreen({
 }) {
   const [drawer, setDrawer] = useState<Slot | null>(null);
   const [bouncedSlot, setBouncedSlot] = useState<Slot | null>(null);
+  const [showCallouts, setShowCallouts] = useState(firstWorkbenchSession);
   const preview = previewResources(design, scenario, options);
+
+  const dismissCallouts = () => {
+    setShowCallouts(false);
+    try {
+      localStorage.setItem(WORKBENCH_TUTORIAL_KEY, "true");
+    } catch {
+      // The callouts can reappear when storage is unavailable.
+    }
+  };
 
   const placePart = (slot: Slot, id: string) => {
     const key = slotForDesignKey(slot);
@@ -292,6 +311,18 @@ export function WorkshopScreen({
       <Button className="lock-design-button" type="button" onClick={onContinue}>
         RUN GO / NO-GO CHECK
       </Button>
+      {showCallouts && (
+        <aside className="workbench-callouts" aria-label="Workbench tips">
+          <ol>
+            <li>Pick a part. Read its mass, power, and budget change.</li>
+            <li>Keep every gauge below its limit.</li>
+            <li>Swap parts before launch. Full design checks run at launch.</li>
+          </ol>
+          <Button className="button-muted" type="button" onClick={dismissCallouts}>
+            GOT IT
+          </Button>
+        </aside>
+      )}
       {drawer && (
         <PartDrawer
           slot={drawer}

@@ -8,7 +8,7 @@
     "dataCapacityMbitPerDay": 100,
     "tier": "simple",
     "source": "Game model",
-    "sourceNote": "Provisional component balance value."
+    "sourceNote": "Game model. Component balance value."
   },
   {
     "id": "heavy-bus",
@@ -19,6 +19,6 @@
     "dataCapacityMbitPerDay": 180,
     "tier": "advanced",
     "source": "Game model",
-    "sourceNote": "Provisional component balance value."
+    "sourceNote": "Game model. Component balance value."
   }
 ]

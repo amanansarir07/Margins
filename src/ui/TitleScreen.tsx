@@ -1,10 +1,13 @@
 import { gameData } from "../engine/loadData";
 import { playSound } from "../audio/sound";
 import { vibrate } from "../audio/haptics";
+import type { Difficulty } from "../engine/types";
 
 interface TitleScreenProps {
   missionStars: Record<string, number>;
+  difficulty: Difficulty;
   onSelectScenario: (scenarioId: string) => void;
+  onDifficultyChange: (difficulty: Difficulty) => void;
   onStartSandbox: () => void;
 }
 
@@ -26,7 +29,9 @@ function starsForDestination(
 
 export function TitleScreen({
   missionStars,
+  difficulty,
   onSelectScenario,
+  onDifficultyChange,
   onStartSandbox,
 }: TitleScreenProps) {
   const moonStars = starsForDestination("moon", missionStars);
@@ -98,9 +103,20 @@ export function TitleScreen({
         })}
       </div>
       <footer className="mission-select-footer">
-        <p>Moon: 1 star unlocks Mars. 3 total stars unlock Europa.</p>
+        <div className="difficulty-picker" aria-label="Difficulty">
+          {(["cadet", "engineer", "veteran"] as Difficulty[]).map((level) => (
+            <button
+              className={`button difficulty-button${difficulty === level ? " selected" : ""}`}
+              key={level}
+              type="button"
+              onClick={() => onDifficultyChange(level)}
+            >
+              {level}
+            </button>
+          ))}
+        </div>
         <button className="button button-muted" type="button" onClick={onStartSandbox}>
-          Open sandbox
+          OPEN SANDBOX
         </button>
       </footer>
     </section>

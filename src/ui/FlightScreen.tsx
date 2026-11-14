@@ -55,7 +55,7 @@ const fallbackDecisions: Record<string, EventDecisionChoice[]> = {
       label: "KEEP OBSERVING",
       detail: "Continue the science plan at full rate.",
       cost: "Use 5% more critical margin.",
-      saved: "The current observation window.",
+      saved: "Current observation window.",
     },
   ],
 };

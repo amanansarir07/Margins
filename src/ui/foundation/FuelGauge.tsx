@@ -1,3 +1,5 @@
+import { Gauge } from "./Gauge";
+
 interface FuelGaugeProps {
   value: number;
   max: number;

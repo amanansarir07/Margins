@@ -4,7 +4,7 @@
     "name": "Moon Ice Mapping",
     "enabled": true,
     "destinationId": "moon",
-    "objective": "Map water ice at the lunar south pole.",
+    "objective": "Map south-pole ice.",
     "requiredInstruments": [],
     "requiredInstrumentAnyOf": ["spectrometer", "radar"],
     "limits": {
@@ -21,14 +21,14 @@
     "criticalResources": ["power", "data"],
     "events": ["solar-flare", "instrument-fault", "comms-dropout", "power-dip", "budget-cut"],
     "source": "Game model",
-    "sourceNote": "Moon scenario values supplied for the first playable scenario; missing plan values are provisional."
+    "sourceNote": "Game model. Moon balance values."
   },
   {
     "id": "mars-minerals",
     "name": "Mars Surface Minerals",
     "enabled": true,
     "destinationId": "mars",
-    "objective": "Map surface minerals while surviving dust storms.",
+    "objective": "Map minerals through dust storms.",
     "requiredInstruments": [],
     "requiredInstrumentAnyOf": ["spectrometer", "radar"],
     "limits": {
@@ -44,16 +44,16 @@
     "transitTimeDays": 210,
     "criticalResources": ["power", "comms"],
     "events": ["dust-storm", "instrument-fault", "comms-dropout", "power-dip", "budget-cut"],
-    "difficultyHints": ["Dust storms can interrupt operations.", "Mars sunlight is weaker than Earth's."],
+    "difficultyHints": ["Mars sunlight is 43% of Earth's."],
     "source": "Game model",
-    "sourceNote": "Provisional Mars scenario values based on the requested minerals and dust-storm rules."
+    "sourceNote": "Game model. Mars minerals and dust storms."
   },
   {
     "id": "europa-ocean",
     "name": "Europa Hidden Ocean",
     "enabled": true,
     "destinationId": "europa",
-    "objective": "Study the ice shell and search for clues about the hidden ocean.",
+    "objective": "Map ice shell signals near the hidden ocean.",
     "requiredInstruments": [],
     "requiredInstrumentAnyOf": ["radar", "spectrometer"],
     "limits": {
@@ -71,8 +71,8 @@
     "requiredPowerKind": "nuclear",
     "radiationLevel": "high",
     "events": ["radiation-burst", "instrument-fault", "comms-dropout", "power-dip", "budget-cut"],
-    "difficultyHints": ["Solar power is too weak at Europa; choose nuclear power.", "Transit takes years and radiation is severe."],
+    "difficultyHints": ["Europa sunlight is 3.6% of Earth's; use nuclear power."],
     "source": "Game model",
-    "sourceNote": "Provisional Europa scenario values based on the requested ice-shell, nuclear-power, radiation, and years-of-transit rules."
+    "sourceNote": "Game model. Europa ice, radiation, and nuclear power."
   }
 ]

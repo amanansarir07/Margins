@@ -186,19 +186,11 @@ export function DebriefScreen({
         </article>
         <article className="panel">
           <p className="panel-label">Score breakdown</p>
-          <div className="score-list">
-            <ScoreRow label="Checks" value={result.scoreBreakdown.checks} max={600} />
-            <ScoreRow
-              label="Resource margins"
-              value={result.scoreBreakdown.resourceMargins}
-              max={200}
-            />
-            <ScoreRow label="Science" value={result.scoreBreakdown.science} max={100} />
-            <ScoreRow
-              label="Reliability"
-              value={result.scoreBreakdown.reliability}
-              max={100}
-            />
+          <div className="score-inline">
+            <span>Checks {result.scoreBreakdown.checks}</span>
+            <span>Margins {result.scoreBreakdown.resourceMargins}</span>
+            <span>Science {result.scoreBreakdown.science}</span>
+            <span>Reliability {result.scoreBreakdown.reliability}</span>
           </div>
         </article>
       </div>
@@ -268,30 +260,6 @@ function SuggestedFixCard({
         </div>
       )}
     </article>
-  );
-}
-
-function ScoreRow({
-  label,
-  value,
-  max,
-}: {
-  label: string;
-  value: number;
-  max: number;
-}) {
-  return (
-    <div className="score-row">
-      <div className="score-row-heading">
-        <span>{label}</span>
-        <strong>
-          {value}/{max}
-        </strong>
-      </div>
-      <div className="score-bar">
-        <span style={{ width: `${Math.min(100, (value / max) * 100)}%` }} />
-      </div>
-    </div>
   );
 }
 

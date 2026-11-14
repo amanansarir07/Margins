@@ -268,11 +268,11 @@ function makeWarnings(resources: ResourceReport): string[] {
     const resource = resources[name];
     if (resource.margin < 0) {
       return [
-        `${name} is over the limit by ${Math.abs(resource.margin).toFixed(1)}.`,
+        `${name} is over by ${Math.abs(resource.margin).toFixed(1)}.`,
       ];
     }
     if (resource.limit > 0 && resource.margin / resource.limit < 0.15) {
-      return [`${name} has a very small margin.`];
+      return [`${name} margin is under 15%.`];
     }
     return [];
   });
@@ -314,8 +314,8 @@ function changeExplanation(
       ? `adds ${powerImpact.toFixed(1)} W of power margin`
       : `uses ${Math.abs(powerImpact).toFixed(1)} W of power margin`;
   return evaluation.success
-    ? `${label} ${costText}, ${massText}, and ${powerText}; it clears the mission checks.`
-    : `${label} ${costText}, ${massText}, and ${powerText}; it is the closest remaining design because it scores ${evaluation.score}/1000.`;
+    ? `${label}: ${costText}; ${massText}; ${powerText}. Checks pass.`
+    : `${label}: ${costText}; ${massText}; ${powerText}. Score ${evaluation.score}/1000.`;
 }
 
 export function suggestFixes(
@@ -486,11 +486,11 @@ function eventOutcome(
 ): { outcome: string; explanation: string } {
   if (!occurred) {
     return {
-      outcome: "No event occurred.",
+      outcome: "No event.",
       explanation:
         marginRatio >= 0.25
-          ? "Healthy critical-resource margins kept this event from affecting the mission."
-          : "The seeded roll did not trigger this event after considering the tight margins.",
+          ? "Critical margins absorbed the event."
+          : "Seeded roll skipped this event.",
     };
   }
 
@@ -500,8 +500,8 @@ function eventOutcome(
     outcome,
     explanation:
       marginRatio >= 0.1
-        ? "The design had some margin, so the mission used it to absorb the event."
-        : "A tight critical-resource margin made this event costly.",
+        ? "Critical margin absorbed the event."
+        : "Tight margin made this event costly.",
   };
 }
 
@@ -619,24 +619,24 @@ export function evaluate(
           `${name} fails by ${Math.abs(resources[name].margin).toFixed(1)}.`,
       ),
     ...(!checks.launchCompatibility.mass
-      ? [`The launch vehicle cannot carry ${calculated.totalMass.toFixed(1)} kg.`]
+      ? [`Launch capacity is ${launchMass.toFixed(1)} kg; design mass is ${calculated.totalMass.toFixed(1)} kg.`]
       : []),
     ...(!checks.launchCompatibility.orbit
-      ? [`The launch vehicle does not support the ${calculated.orbit.name} orbit.`]
+      ? [`Launch vehicle lacks ${calculated.orbit.name} support.`]
       : []),
     ...(!hasRequiredInstrument
-      ? ["The mission needs a spectrometer or radar."]
+      ? ["Add a spectrometer or radar."]
       : []),
     ...(!checks.componentCompatibility
-      ? ["Cadet difficulty only allows simple components."]
+      ? ["Cadet mode blocks advanced components."]
       : []),
     ...(!checks.power &&
     scenario.requiredPowerKind &&
     calculated.power.kind !== scenario.requiredPowerKind
-      ? [`This scenario requires ${scenario.requiredPowerKind} power.`]
+      ? [`Use ${scenario.requiredPowerKind} power for this mission.`]
       : []),
     ...(!resolvedOptions.sandbox && adjustedScience < scenario.scienceGoal
-      ? [`Science returned ${adjustedScience} points; the goal is ${scenario.scienceGoal}.`]
+      ? [`Science returned ${adjustedScience}; goal is ${scenario.scienceGoal}.`]
       : []),
     ...events
       .filter((event) => event.occurred)
@@ -644,7 +644,7 @@ export function evaluate(
   ];
   if (success) {
     reasons.unshift(
-      `The mission clears every check and returns ${adjustedScience} science points.`,
+      `All checks pass. Science returned ${adjustedScience}.`,
     );
   }
 

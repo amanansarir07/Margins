@@ -9,7 +9,7 @@
     "antennaFactor": 1,
     "tier": "simple",
     "source": "Game model",
-    "sourceNote": "Provisional component balance value."
+    "sourceNote": "Game model. Component balance value."
   },
   {
     "id": "high-gain-radio",
@@ -21,6 +21,6 @@
     "antennaFactor": 1.5,
     "tier": "advanced",
     "source": "Game model",
-    "sourceNote": "Provisional component balance value."
+    "sourceNote": "Game model. Component balance value."
   }
 ]
