@@ -90,6 +90,12 @@ describe("mission engine", () => {
       .toHaveLength(2);
   });
 
+  it("places visible hazards before the end of the mission window", () => {
+    const timeline = simulateTimeline(baseDesign, moon, 9876);
+
+    expect(timeline.events.some((event) => event.day < timeline.durationDays)).toBe(true);
+  });
+
   it("uses the visible threat briefing as the flight event list", () => {
     const briefing = getThreatBriefing(moon, 9876);
     const timeline = simulateTimeline(baseDesign, moon, 9876);

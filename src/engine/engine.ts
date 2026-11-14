@@ -883,7 +883,11 @@ export function simulateTimeline(
   options?: MissionOptions,
 ): FlightTimeline {
   const evaluation = evaluate(design, scenario, seed, options);
-  const durationDays = Math.max(evaluation.resources.time.used, 1);
+  const durationDays = Math.max(
+    evaluation.resources.time.limit,
+    evaluation.resources.time.used,
+    1,
+  );
   const drainFactors = {
     mass: 0.1,
     power: 0.4,
