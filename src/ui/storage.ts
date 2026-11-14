@@ -4,6 +4,10 @@ const LAST_DESIGN_KEY = "margins:last-design";
 const BEST_SCORE_KEY = "margins:best-score";
 const MISSION_STARS_KEY = "margins:mission-stars";
 const PATCH_WALL_KEY = "margins:patch-wall";
+const AXIS_BESTS_KEY = "margins:axis-bests";
+
+export type AxisName = "science" | "cost" | "margin" | "resilience" | "schedule";
+export type AxisBests = Partial<Record<AxisName, number>>;
 
 export interface SavedMissionPatch {
   id: string;
@@ -131,6 +135,38 @@ export function saveMissionPatch(patch: SavedMissionPatch) {
     patches.unshift(patch);
     localStorage.setItem(PATCH_WALL_KEY, JSON.stringify(patches.slice(0, 30)));
   } catch (error) {
-    console.warn("Could not save the mission patch.", error);
+    console.warn("Could not save the patch wall.", error);
+  }
+}
+
+export function loadAxisBests(): AxisBests {
+  try {
+    const raw = localStorage.getItem(AXIS_BESTS_KEY);
+    if (!raw) return {};
+    const value: unknown = JSON.parse(raw);
+    if (typeof value !== "object" || value === null) return {};
+    return Object.fromEntries(
+      Object.entries(value).filter(
+        ([key, axis]) =>
+          ["science", "cost", "margin", "resilience", "schedule"].includes(key) &&
+          typeof axis === "number" &&
+          Number.isFinite(axis),
+      ),
+    ) as AxisBests;
+  } catch (error) {
+    console.warn("Could not load axis records.", error);
+    return {};
+  }
+}
+
+export function saveAxisBests(values: AxisBests): AxisBests {
+  try {
+    const current = loadAxisBests();
+    const next = { ...current, ...values };
+    localStorage.setItem(AXIS_BESTS_KEY, JSON.stringify(next));
+    return next;
+  } catch (error) {
+    console.warn("Could not save axis records.", error);
+    return loadAxisBests();
   }
 }

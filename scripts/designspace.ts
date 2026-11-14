@@ -52,6 +52,8 @@ type EvaluatedDesign = {
   science: number;
   score: number;
   minMargin: number;
+  resilience: number;
+  schedule: number;
   success: boolean;
   archetype: string;
 };
@@ -156,6 +158,11 @@ function evaluateSample(scenario: ScenarioRecord, seed: number) {
       science: result.sciencePoints,
       score: result.score,
       minMargin: minMargin(design, scenario),
+      resilience: result.reliability,
+      schedule:
+        result.resources.time.limit > 0
+          ? result.resources.time.margin / result.resources.time.limit
+          : 0,
       success: result.success,
       archetype: archetypeId(design),
     });
@@ -283,6 +290,8 @@ function analyze(scenario: ScenarioRecord, designs: EvaluatedDesign[]) {
       science: percentiles(designs.map((item) => item.science)),
       score: percentiles(designs.map((item) => item.score)),
       minMargin: percentiles(designs.map((item) => item.minMargin)),
+      resilience: percentiles(designs.map((item) => item.resilience)),
+      schedule: percentiles(designs.map((item) => item.schedule)),
     },
     topFivePercent: {
       count: top.length,

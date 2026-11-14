@@ -1104,6 +1104,81 @@ body {
   width: 100%;
 }
 
+.axis-panel {
+  margin-top: 1rem;
+}
+
+.axis-grid {
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin-top: 1rem;
+}
+
+.axis-card {
+  border: 3px solid var(--ink-navy);
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+  padding: 0.55rem;
+}
+
+.axis-card strong,
+.axis-card small {
+  text-transform: uppercase;
+}
+
+.axis-card span {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.axis-card small {
+  font-size: 0.7rem;
+}
+
+.axis-footnote {
+  grid-column: 1 / -1;
+  font-size: 0.75rem;
+}
+
+.axis-record-stamp {
+  margin: 1rem 0;
+}
+
+.design-space-chart {
+  margin-top: 1rem;
+}
+
+.scatter-chart {
+  display: block;
+  height: auto;
+  max-width: 100%;
+  outline: 0;
+  width: 100%;
+}
+
+.scatter-chart:focus {
+  outline: 3px solid var(--deep-sky);
+  outline-offset: 4px;
+}
+
+.scatter-chart text {
+  fill: var(--ink-navy);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.chart-description,
+.chart-hint {
+  font-size: 0.85rem;
+  margin: 0.75rem 0 0;
+}
+
+.chart-hint-button {
+  margin-top: 0.75rem;
+}
+
 .chart-legend {
   display: flex;
   flex-wrap: wrap;
@@ -1415,6 +1490,16 @@ body {
 @media (min-width: 720px) {
   .app {
     padding: 3rem;
+  }
+
+  @media (max-width: 430px) {
+    .axis-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .axis-footnote {
+      grid-column: 1 / -1;
+    }
   }
 
   @media (max-width: 430px) {

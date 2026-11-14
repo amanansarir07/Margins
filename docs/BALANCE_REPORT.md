@@ -57,6 +57,8 @@ Mandatory components are excluded from dominance flags because scenarios require
 | science | 32.00 | 72.00 | 104.00 | 144.00 | 165.00 | 205.00 | 256.00 |
 | score | 307.00 | 654.00 | 770.00 | 862.00 | 880.00 | 886.00 | 901.00 |
 | minMargin | -0.32 | -0.09 | 0.00 | 0.08 | 0.15 | 0.19 | 0.37 |
+| resilience | 0.72 | 0.98 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| schedule | 0.97 | 0.97 | 0.97 | 0.98 | 0.98 | 0.98 | 0.98 |
 
 ### Top 5% component usage
 
@@ -132,6 +134,8 @@ Mandatory components are excluded from dominance flags because scenarios require
 | science | 27.00 | 72.00 | 94.00 | 127.00 | 164.00 | 201.00 | 256.00 |
 | score | 307.00 | 732.00 | 757.00 | 849.00 | 862.00 | 868.00 | 885.00 |
 | minMargin | -1.53 | -0.55 | -0.09 | 0.05 | 0.14 | 0.20 | 0.35 |
+| resilience | 0.70 | 0.90 | 0.97 | 1.00 | 1.00 | 1.00 | 1.00 |
+| schedule | 0.80 | 0.80 | 0.81 | 0.81 | 0.81 | 0.81 | 0.81 |
 
 ### Top 5% component usage
 
@@ -207,6 +211,8 @@ Mandatory components are excluded from dominance flags because scenarios require
 | science | 17.00 | 65.00 | 92.00 | 122.00 | 155.00 | 195.00 | 256.00 |
 | score | 476.00 | 701.00 | 730.00 | 837.00 | 847.00 | 852.00 | 873.00 |
 | minMargin | -12.61 | -7.82 | -0.64 | 0.14 | 0.29 | 0.29 | 0.30 |
+| resilience | 0.69 | 0.85 | 0.93 | 1.00 | 1.00 | 1.00 | 1.00 |
+| schedule | 0.29 | 0.29 | 0.29 | 0.30 | 0.30 | 0.30 | 0.30 |
 
 ### Top 5% component usage
 

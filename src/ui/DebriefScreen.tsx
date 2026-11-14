@@ -11,8 +11,16 @@ import {
 } from "./missionPatch";
 import {
   saveMissionPatch,
+  loadAxisBests,
+  saveAxisBests,
+  type AxisName,
   type SavedMissionPatch,
 } from "./storage";
+import {
+  DesignSpaceAxes,
+  DesignSpaceChart,
+  getAxisValues,
+} from "./DesignSpaceChart";
 import type {
   Design,
   EvaluationResult,
@@ -92,6 +100,8 @@ export function DebriefScreen({
   const [visibleStars, setVisibleStars] = useState(0);
   const [scoreShown, setScoreShown] = useState(0);
   const [patchError, setPatchError] = useState("");
+  const [hint, setHint] = useState("");
+  const [newRecords, setNewRecords] = useState<AxisName[]>([]);
 
   useEffect(() => {
     setVisibleStars(0);
@@ -134,6 +144,21 @@ export function DebriefScreen({
     saveMissionPatch(patch);
   }, [patchSvg, patchTitle, result.score, scenario.id, seed, stars]);
 
+  useEffect(() => {
+    const values = getAxisValues(result);
+    const current = loadAxisBests();
+    const improved = (Object.entries(values) as Array<[AxisName, number]>).filter(
+      ([axis, value]) =>
+        current[axis] === undefined ||
+        (axis === "cost" ? value < current[axis] : value > current[axis]),
+    );
+    if (improved.length > 0) {
+      saveAxisBests(Object.fromEntries(improved));
+      setNewRecords(improved.map(([axis]) => axis));
+      playSound("success");
+    }
+  }, [result]);
+
   const savePatchImage = async () => {
     setPatchError("");
     try {
@@ -165,6 +190,17 @@ export function DebriefScreen({
             </span>
           ))}
         </div>
+        {newRecords.length > 0 && (
+          <div className="axis-record-stamp">
+            <Stamp tone="pass" sound>
+              NEW RECORD: {newRecords.join(", ")}
+            </Stamp>
+          </div>
+        )}
+        <article className="panel axis-panel">
+          <p className="panel-label">Design-space score axes</p>
+          <DesignSpaceAxes scenario={scenario} result={result} />
+        </article>
         <div className="debrief-score">
           <span>SCORE</span>
           <strong>{scoreShown}</strong>
@@ -211,6 +247,23 @@ export function DebriefScreen({
           <span className="muted">Used / limit</span>
         </div>
         <ResourceChart timeline={timeline} />
+      </article>
+      <article className="panel chart-panel design-space-panel">
+        <div className="card-title-row">
+          <div>
+            <p className="panel-label">Design space</p>
+            <h2>Cost / science frontier</h2>
+          </div>
+          <span className="muted">Successful designs</span>
+        </div>
+        <DesignSpaceChart
+          scenario={scenario}
+          design={design}
+          result={result}
+          patchSvg={patchSvg}
+          onHint={setHint}
+        />
+        {hint && <p className="chart-hint" aria-live="polite">{hint}</p>}
       </article>
       {!result.success && <SuggestedFixCard fixes={fixes} onApplyFix={onApplyFix} />}
       <Button className="button-primary wide-button" type="button" onClick={onRerun}>
