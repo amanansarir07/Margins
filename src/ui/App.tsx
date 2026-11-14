@@ -1,25 +1,25 @@
 import { useReducer } from "react";
+import { gameData } from "../engine/loadData";
+import { BriefingScreen } from "./BriefingScreen";
 import { appReducer, initialState } from "./state";
 import { TitleScreen } from "./TitleScreen";
 
 export function App() {
   const [state, dispatch] = useReducer(appReducer, initialState);
+  const scenario = gameData.scenarios.find(
+    (item) => item.id === state.design.scenarioId,
+  );
 
   return (
     <main className="app">
-      {state.screen === "title" ? (
+      {state.screen === "title" && (
         <TitleScreen onStartSolo={() => dispatch({ type: "START_SOLO" })} />
-      ) : (
-        <section className="placeholder-screen">
-          <p>More mission screens are being assembled.</p>
-          <button
-            className="button button-primary"
-            type="button"
-            onClick={() => dispatch({ type: "GO_TO", screen: "title" })}
-          >
-            Back to title
-          </button>
-        </section>
+      )}
+      {state.screen === "briefing" && scenario && (
+        <BriefingScreen
+          scenario={scenario}
+          onContinue={() => dispatch({ type: "GO_TO", screen: "workshop" })}
+        />
       )}
     </main>
   );
