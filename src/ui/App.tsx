@@ -7,6 +7,7 @@ import { WorkshopScreen } from "./WorkshopScreen";
 import { ReviewScreen } from "./ReviewScreen";
 import { DebriefScreen } from "./DebriefScreen";
 import { FlightScreen } from "./FlightScreen";
+import { KitScreen } from "./KitScreen";
 import { saveBestScore, saveLastDesign } from "./storage";
 
 export function App() {
@@ -22,6 +23,10 @@ export function App() {
   useEffect(() => {
     if (state.result) saveBestScore(state.result.score);
   }, [state.result]);
+
+  if (window.location.pathname === "/kit") {
+    return <KitScreen />;
+  }
 
   return (
     <main className="app">
