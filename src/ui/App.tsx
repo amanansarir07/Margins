@@ -12,6 +12,7 @@ import { PatchWallScreen } from "./PatchWallScreen";
 import {
   loadDailyProgress,
   loadMissionStars,
+  saveBestScoreForScenario,
   recordDailyCompletion,
   saveBestScore,
   saveLastDesign,
@@ -33,8 +34,11 @@ export function App() {
   }, [state.design]);
 
   useEffect(() => {
-    if (state.result) saveBestScore(state.result.score);
-  }, [state.result]);
+    if (state.result) {
+      saveBestScore(state.result.score);
+      saveBestScoreForScenario(state.design.scenarioId, state.result.score);
+    }
+  }, [state.design.scenarioId, state.result]);
 
   useEffect(() => {
     if (!state.result || !scenario) return;
@@ -73,6 +77,7 @@ export function App() {
       {state.screen === "title" && (
         <TitleScreen
           missionStars={missionStars}
+          selectedScenarioId={state.design.scenarioId}
           dailyMission={dailyMission}
           dailyStreak={dailyProgress.currentStreak}
           difficulty={state.difficulty}
@@ -86,7 +91,8 @@ export function App() {
           onDifficultyChange={(difficulty) =>
             dispatch({ type: "SET_DIFFICULTY", difficulty })
           }
-          onStartSandbox={() => dispatch({ type: "START_SANDBOX" })}
+          onStartQuickMission={() => dispatch({ type: "START_SOLO" })}
+          onStartPrepMission={() => dispatch({ type: "GO_TO", screen: "workshop" })}
           onStartDaily={() =>
             dispatch({ type: "START_DAILY", mission: dailyMission })
           }

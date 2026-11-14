@@ -2,6 +2,7 @@ import type { Design } from "../engine/types";
 
 const LAST_DESIGN_KEY = "margins:last-design";
 const BEST_SCORE_KEY = "margins:best-score";
+const BEST_SCORES_KEY = "margins:best-scores";
 const MISSION_STARS_KEY = "margins:mission-stars";
 const PATCH_WALL_KEY = "margins:patch-wall";
 const AXIS_BESTS_KEY = "margins:axis-bests";
@@ -81,6 +82,35 @@ export function saveBestScore(score: number) {
     }
   } catch (error) {
     console.warn("Could not save the best mission score.", error);
+  }
+}
+
+export function loadBestScoreForScenario(scenarioId: string): number {
+  try {
+    const raw = localStorage.getItem(BEST_SCORES_KEY);
+    if (!raw) return 0;
+    const value: unknown = JSON.parse(raw);
+    if (typeof value !== "object" || value === null) return 0;
+    const score = (value as Record<string, unknown>)[scenarioId];
+    return typeof score === "number" && Number.isFinite(score) ? score : 0;
+  } catch (error) {
+    console.warn("Could not load the scenario best score.", error);
+    return 0;
+  }
+}
+
+export function saveBestScoreForScenario(scenarioId: string, score: number) {
+  try {
+    const raw = localStorage.getItem(BEST_SCORES_KEY);
+    const current: Record<string, number> = raw
+      ? JSON.parse(raw) as Record<string, number>
+      : {};
+    if (score > (current[scenarioId] ?? 0)) {
+      current[scenarioId] = score;
+      localStorage.setItem(BEST_SCORES_KEY, JSON.stringify(current));
+    }
+  } catch (error) {
+    console.warn("Could not save the scenario best score.", error);
   }
 }
 
