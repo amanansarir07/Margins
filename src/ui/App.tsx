@@ -3,6 +3,7 @@ import { gameData } from "../engine/loadData";
 import { BriefingScreen } from "./BriefingScreen";
 import { appReducer, initialState } from "./state";
 import { TitleScreen } from "./TitleScreen";
+import { WorkshopScreen } from "./WorkshopScreen";
 
 export function App() {
   const [state, dispatch] = useReducer(appReducer, initialState);
@@ -19,6 +20,14 @@ export function App() {
         <BriefingScreen
           scenario={scenario}
           onContinue={() => dispatch({ type: "GO_TO", screen: "workshop" })}
+        />
+      )}
+      {state.screen === "workshop" && scenario && (
+        <WorkshopScreen
+          design={state.design}
+          scenario={scenario}
+          onDesignChange={(design) => dispatch({ type: "SET_DESIGN", design })}
+          onContinue={() => dispatch({ type: "GO_TO", screen: "review" })}
         />
       )}
     </main>

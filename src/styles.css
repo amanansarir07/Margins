@@ -243,6 +243,185 @@ body {
   width: 100%;
 }
 
+.workshop-layout {
+  display: grid;
+  gap: 1rem;
+}
+
+.workshop-main {
+  min-width: 0;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+  overflow-x: auto;
+  padding-bottom: 0.35rem;
+}
+
+.tab {
+  background: var(--space-900);
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  color: var(--muted);
+  cursor: pointer;
+  flex: 0 0 auto;
+  font: inherit;
+  padding: 0.65rem 0.8rem;
+}
+
+.tab.active,
+.tab:focus-visible {
+  border-color: var(--accent);
+  color: var(--ink);
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.tab-panel {
+  background: rgb(13 19 38 / 86%);
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
+  min-height: 20rem;
+  padding: 1.25rem;
+}
+
+.tab-panel h2 {
+  font-size: 1.2rem;
+  margin: 0 0 1rem;
+}
+
+.choice-list {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.choice-card {
+  align-items: center;
+  background: var(--space-900);
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  cursor: pointer;
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.8rem;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.choice-card:hover,
+.choice-card.selected {
+  background: var(--space-800);
+  border-color: var(--accent);
+}
+
+.choice-card input {
+  accent-color: var(--accent-strong);
+}
+
+.choice-card-copy {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.choice-card-copy span {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.tooltip {
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--accent);
+  cursor: help;
+  flex: 0 0 auto;
+  font-size: 0.75rem;
+  height: 1.35rem;
+  line-height: 1;
+  padding: 0;
+  width: 1.35rem;
+}
+
+.tooltip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.resource-panel {
+  align-self: start;
+  position: sticky;
+  top: 1rem;
+}
+
+.resource-list {
+  display: grid;
+  gap: 0.9rem;
+  margin-top: 1.25rem;
+}
+
+.resource-heading {
+  align-items: center;
+  display: flex;
+  font-size: 0.85rem;
+  justify-content: space-between;
+  margin-bottom: 0.35rem;
+}
+
+.resource-heading > span {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.3rem;
+}
+
+.resource-heading strong {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.resource-bar {
+  background: #070b18;
+  border-radius: 999px;
+  height: 0.45rem;
+  overflow: hidden;
+}
+
+.resource-bar-fill {
+  background: var(--accent-strong);
+  border-radius: inherit;
+  height: 100%;
+  transition: background 250ms ease, width 250ms ease;
+}
+
+.resource-bar-fill.warning {
+  background: #fbbf24;
+}
+
+.resource-bar-fill.danger {
+  background: #fb7185;
+}
+
+.warning-list {
+  color: #fbbf24;
+  font-size: 0.8rem;
+  margin-top: 1rem;
+}
+
+.warning-list ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.success-text {
+  color: #86efac;
+  margin-bottom: 0;
+}
+
 @media (min-width: 720px) {
   .app {
     padding: 3rem;
@@ -254,5 +433,9 @@ body {
 
   .destination-card {
     grid-column: 1 / -1;
+  }
+
+  .workshop-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem);
   }
 }
