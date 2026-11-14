@@ -1,10 +1,21 @@
+import { useState, type DragEvent } from "react";
 import { gameData } from "../engine/loadData";
-import { useState } from "react";
-import type { Design, MissionOptions, ScenarioRecord } from "../engine/types";
-import { ResourcePanel } from "./ResourcePanel";
-import { Tooltip } from "./Tooltip";
+import { previewResources } from "../engine/engine";
+import { playSound } from "../audio/sound";
+import { vibrate } from "../audio/haptics";
+import type {
+  Design,
+  MissionOptions,
+  ScenarioRecord,
+} from "../engine/types";
+import { BalanceScale } from "./foundation/BalanceScale";
+import { Battery } from "./foundation/Battery";
+import { Button } from "./foundation/Button";
+import { FuelGauge } from "./foundation/FuelGauge";
+import { Gauge } from "./foundation/Gauge";
+import { SignalBars } from "./foundation/SignalBars";
 
-type TabId =
+type Slot =
   | "bus"
   | "power"
   | "comms"
@@ -14,54 +25,35 @@ type TabId =
   | "launch"
   | "orbit";
 
-const tabs: { id: TabId; label: string }[] = [
-  { id: "bus", label: "Spacecraft bus" },
-  { id: "power", label: "Power" },
-  { id: "comms", label: "Communications" },
-  { id: "computer", label: "Computer" },
-  { id: "attitude", label: "Attitude control" },
-  { id: "instruments", label: "Instruments" },
-  { id: "launch", label: "Launch vehicle" },
-  { id: "orbit", label: "Orbit" },
-];
+type ShelfItem = { id: string; name: string; sourceNote: string };
 
-interface WorkshopScreenProps {
-  design: Design;
-  scenario: ScenarioRecord;
-  options: MissionOptions;
-  onDesignChange: (design: Design) => void;
-  onContinue: () => void;
+const slotLabels: Record<Slot, string> = {
+  bus: "Spacecraft bus",
+  power: "Power",
+  comms: "Communications",
+  computer: "Computer",
+  attitude: "Attitude control",
+  instruments: "Instruments",
+  launch: "Launch vehicle",
+  orbit: "Orbit",
+};
+
+function slotForDesignKey(slot: Slot): keyof Design | null {
+  return {
+    bus: "spacecraftBusId",
+    power: "powerId",
+    comms: "commsId",
+    computer: "onboardComputerId",
+    attitude: "attitudeControlId",
+    instruments: null,
+    launch: "launchVehicleId",
+    orbit: "orbitId",
+  }[slot];
 }
 
-function ChoiceCard({
-  id,
-  name,
-  summary,
-  selected,
-  onSelect,
-}: {
-  id: string;
-  name: string;
-  summary: string;
-  selected: boolean;
-  onSelect: () => void;
-}) {
-  return (
-    <label className={`choice-card${selected ? " selected" : ""}`}>
-      <input
-        type="radio"
-        name="component-choice"
-        value={id}
-        checked={selected}
-        onChange={onSelect}
-      />
-      <span className="choice-card-copy">
-        <strong>{name}</strong>
-        <span>{summary}</span>
-      </span>
-      <Tooltip label={summary} />
-    </label>
-  );
+function statusFor(used: number, limit: number) {
+  const ratio = limit > 0 ? used / limit : 1;
+  return ratio > 1 ? "danger" : ratio > 0.85 ? "warning" : "healthy";
 }
 
 export function WorkshopScreen({
@@ -70,171 +62,501 @@ export function WorkshopScreen({
   options,
   onDesignChange,
   onContinue,
-}: WorkshopScreenProps) {
-  const [activeTab, setActiveTab] = useState<TabId>("bus");
+}: {
+  design: Design;
+  scenario: ScenarioRecord;
+  options: MissionOptions;
+  onDesignChange: (design: Design) => void;
+  onContinue: () => void;
+}) {
+  const [drawer, setDrawer] = useState<Slot | null>(null);
+  const [bouncedSlot, setBouncedSlot] = useState<Slot | null>(null);
+  const preview = previewResources(design, scenario, options);
 
-  const update = (patch: Partial<Design>) => onDesignChange({ ...design, ...patch });
+  const placePart = (slot: Slot, id: string) => {
+    const key = slotForDesignKey(slot);
+    if (slot === "instruments") {
+      const selected = design.instrumentIds.includes(id);
+      onDesignChange({
+        ...design,
+        instrumentIds: selected
+          ? design.instrumentIds.filter((instrumentId) => instrumentId !== id)
+          : [...design.instrumentIds, id],
+      });
+    } else if (key) {
+      onDesignChange({ ...design, [key]: id });
+    }
+    playSound("snap");
+    vibrate(8);
+    setBouncedSlot(slot);
+    window.setTimeout(() => setBouncedSlot(null), 220);
+  };
 
-  const renderTab = () => {
-    switch (activeTab) {
-      case "bus":
-        return (
-          <ChoiceList
+  const readDrop = (event: DragEvent, slot: Slot) => {
+    const value = event.dataTransfer.getData("text/plain");
+    const [itemSlot, id] = value.split(":");
+    if (itemSlot === slot && id) placePart(slot, id);
+  };
+
+  const resources = preview.resources;
+
+  return (
+    <section className="screen workbench-screen" aria-labelledby="workbench-title">
+      <header className="screen-heading workbench-heading">
+        <div>
+          <p className="eyebrow">Margins / workbench</p>
+          <h1 id="workbench-title">{scenario.name}</h1>
+        </div>
+        <span className="workbench-mode">{options.difficulty ?? "engineer"}</span>
+      </header>
+      <div className="workbench-layout">
+        <aside className="parts-shelf" aria-label="Parts shelf">
+          <h2>Parts shelf</h2>
+          <ShelfGroup
+            label="Bus"
+            slot="bus"
             items={gameData.spacecraftBus}
             selected={design.spacecraftBusId}
-            onSelect={(id) => update({ spacecraftBusId: id })}
-            summary={(item) => `${item.massKg} kg · ${item.powerW} W · $${item.costM}M`}
+            onPlace={placePart}
           />
-        );
-      case "power":
-        return (
-          <ChoiceList
-            items={gameData.power.filter((item) => item.id !== "no-power")}
+          <ShelfGroup
+            label="Power"
+            slot="power"
+            items={gameData.power.filter(
+              (item) =>
+                item.id !== "no-power" &&
+                item.destinationIds.includes(scenario.destinationId),
+            )}
             selected={design.powerId}
-            onSelect={(id) => update({ powerId: id })}
-            summary={(item) => `${item.powerW} W · ${item.massKg} kg · $${item.costM}M`}
+            onPlace={placePart}
           />
-        );
-      case "comms":
-        return (
-          <ChoiceList
+          <ShelfGroup
+            label="Comms"
+            slot="comms"
             items={gameData.comms}
             selected={design.commsId}
-            onSelect={(id) => update({ commsId: id })}
-            summary={(item) => `${item.antennaFactor}× antenna · $${item.costM}M`}
+            onPlace={placePart}
           />
-        );
-      case "computer":
-        return (
-          <ChoiceList
+          <ShelfGroup
+            label="Computer"
+            slot="computer"
             items={gameData.onboardComputer}
             selected={design.onboardComputerId}
-            onSelect={(id) => update({ onboardComputerId: id })}
-            summary={(item) => `${item.massKg} kg · ${item.powerW} W · $${item.costM}M`}
+            onPlace={placePart}
           />
-        );
-      case "attitude":
-        return (
-          <ChoiceList
+          <ShelfGroup
+            label="Attitude"
+            slot="attitude"
             items={gameData.attitudeControl}
             selected={design.attitudeControlId}
-            onSelect={(id) => update({ attitudeControlId: id })}
-            summary={(item) => `${item.scienceEfficiency}× science · $${item.costM}M`}
+            onPlace={placePart}
           />
-        );
-      case "instruments":
-        return (
-          <div className="choice-list">
-            {gameData.instruments.map((instrument) => {
-              const selected = design.instrumentIds.includes(instrument.id);
-              return (
-                <label className={`choice-card${selected ? " selected" : ""}`} key={instrument.id}>
-                  <input
-                    type="checkbox"
-                    checked={selected}
-                    onChange={() =>
-                      update({
-                        instrumentIds: selected
-                          ? design.instrumentIds.filter((id) => id !== instrument.id)
-                          : [...design.instrumentIds, instrument.id],
-                      })
-                    }
-                  />
-                  <span className="choice-card-copy">
-                    <strong>{instrument.name}</strong>
-                    <span>{instrument.purpose}</span>
-                  </span>
-                  <Tooltip label={instrument.purpose} />
-                </label>
-              );
-            })}
-          </div>
-        );
-      case "launch":
-        return (
-          <ChoiceList
+          <ShelfGroup
+            label="Instruments"
+            slot="instruments"
+            items={gameData.instruments}
+            selected={design.instrumentIds}
+            onPlace={placePart}
+            multiple
+          />
+          <ShelfGroup
+            label="Launch"
+            slot="launch"
             items={gameData.launchVehicles}
             selected={design.launchVehicleId}
-            onSelect={(id) => update({ launchVehicleId: id })}
-            summary={(item) => `$${item.costM}M · supports ${item.supportedOrbits.join(", ")}`}
+            onPlace={placePart}
           />
-        );
-      case "orbit":
-        return (
-          <ChoiceList
+          <ShelfGroup
+            label="Orbit"
+            slot="orbit"
             items={gameData.orbits.filter(
               (item) => item.destinationId === scenario.destinationId,
             )}
             selected={design.orbitId}
-            onSelect={(id) => update({ orbitId: id })}
-            summary={(item) => `${item.timeDays} days · ${item.propellantModifier}× propellant`}
+            onPlace={placePart}
           />
-        );
-    }
-  };
+        </aside>
 
-  return (
-    <section className="screen workshop-screen" aria-labelledby="workshop-title">
-      <div className="screen-heading">
-        <p className="eyebrow">Design workshop</p>
-        <h1 id="workshop-title">Build your {scenario.name} mission</h1>
-      </div>
-      <div className="workshop-layout">
-        <div className="workshop-main">
-          <div className="tabs" role="tablist" aria-label="Mission components">
-            {tabs.map((tab) => (
-              <button
-                className={`tab${activeTab === tab.id ? " active" : ""}`}
-                key={tab.id}
-                type="button"
-                role="tab"
-                aria-selected={activeTab === tab.id}
-                onClick={() => setActiveTab(tab.id)}
-              >
-                {tab.label}
-              </button>
-            ))}
+        <div className="spacecraft-stage">
+          <SpacecraftView design={design} scenario={scenario} />
+          <div className="slot-grid">
+            <SlotButton
+              label="Power"
+              value={findName(gameData.power, design.powerId)}
+              slot="power"
+              selected
+              bounced={bouncedSlot === "power"}
+              onClick={() => setDrawer("power")}
+              onDrop={(event) => readDrop(event, "power")}
+            />
+            <SlotButton
+              label="Bus"
+              value={findName(gameData.spacecraftBus, design.spacecraftBusId)}
+              slot="bus"
+              selected
+              bounced={bouncedSlot === "bus"}
+              onClick={() => setDrawer("bus")}
+              onDrop={(event) => readDrop(event, "bus")}
+            />
+            <SlotButton
+              label="Comms"
+              value={findName(gameData.comms, design.commsId)}
+              slot="comms"
+              selected
+              bounced={bouncedSlot === "comms"}
+              onClick={() => setDrawer("comms")}
+              onDrop={(event) => readDrop(event, "comms")}
+            />
+            <SlotButton
+              label="Computer"
+              value={findName(gameData.onboardComputer, design.onboardComputerId)}
+              slot="computer"
+              selected
+              bounced={bouncedSlot === "computer"}
+              onClick={() => setDrawer("computer")}
+              onDrop={(event) => readDrop(event, "computer")}
+            />
+            <SlotButton
+              label="Attitude"
+              value={findName(gameData.attitudeControl, design.attitudeControlId)}
+              slot="attitude"
+              selected
+              bounced={bouncedSlot === "attitude"}
+              onClick={() => setDrawer("attitude")}
+              onDrop={(event) => readDrop(event, "attitude")}
+            />
+            <SlotButton
+              label="Instruments"
+              value={`${design.instrumentIds.length} mounted`}
+              slot="instruments"
+              selected={design.instrumentIds.length > 0}
+              bounced={bouncedSlot === "instruments"}
+              onClick={() => setDrawer("instruments")}
+              onDrop={(event) => readDrop(event, "instruments")}
+            />
+            <SlotButton
+              label="Launch"
+              value={findName(gameData.launchVehicles, design.launchVehicleId)}
+              slot="launch"
+              selected
+              bounced={bouncedSlot === "launch"}
+              onClick={() => setDrawer("launch")}
+              onDrop={(event) => readDrop(event, "launch")}
+            />
+            <SlotButton
+              label="Orbit"
+              value={findName(gameData.orbits, design.orbitId)}
+              slot="orbit"
+              selected
+              bounced={bouncedSlot === "orbit"}
+              onClick={() => setDrawer("orbit")}
+              onDrop={(event) => readDrop(event, "orbit")}
+            />
           </div>
-          <div className="tab-panel" role="tabpanel">
-            <div className="card-title-row">
-              <h2>{tabs.find((tab) => tab.id === activeTab)?.label}</h2>
-              <Tooltip label="Choose a component; the resource panel updates immediately." />
-            </div>
-            {renderTab()}
-          </div>
-          <button className="button button-primary wide-button" type="button" onClick={onContinue}>
-            Continue to Go/No-Go review
-          </button>
         </div>
-        <ResourcePanel design={design} scenario={scenario} options={options} />
+
+        <aside className="gauge-cluster" aria-label="Live resource gauges">
+          <h2>Telemetry</h2>
+          <BalanceScale used={resources.mass.used} limit={resources.mass.limit} />
+          <Battery
+            value={Math.max(0, resources.power.limit - resources.power.used)}
+            max={resources.power.limit}
+          />
+          <FuelGauge value={resources.budget.used} max={resources.budget.limit} />
+          <SignalBars
+            label="Comms"
+            value={Math.max(0, resources.comms.limit - resources.comms.used)}
+            max={resources.comms.limit}
+          />
+          <SignalBars
+            label="Data"
+            value={Math.max(0, resources.data.limit - resources.data.used)}
+            max={resources.data.limit}
+          />
+          <Gauge
+            label="Time"
+            value={resources.time.used}
+            max={resources.time.limit}
+            unit="days"
+            status={statusFor(resources.time.used, resources.time.limit)}
+          />
+          {preview.warnings.length > 0 && (
+            <ul className="gauge-warning-list" aria-live="polite">
+              {preview.warnings.slice(0, 3).map((warning) => (
+                <li key={warning}>{warning}</li>
+              ))}
+            </ul>
+          )}
+        </aside>
       </div>
+      <Button className="lock-design-button" type="button" onClick={onContinue}>
+        RUN GO / NO-GO CHECK
+      </Button>
+      {drawer && (
+        <PartDrawer
+          slot={drawer}
+          design={design}
+          scenario={scenario}
+          onClose={() => setDrawer(null)}
+          onPlace={placePart}
+        />
+      )}
     </section>
   );
 }
 
-function ChoiceList<T extends { id: string; name: string; sourceNote: string }>({
+function findName<T extends { id: string; name: string }>(
+  items: readonly T[],
+  id: string,
+) {
+  return items.find((item) => item.id === id)?.name ?? "Not selected";
+}
+
+function ShelfGroup<T extends ShelfItem>({
+  label,
+  slot,
   items,
   selected,
-  onSelect,
-  summary,
+  onPlace,
+  multiple = false,
 }: {
+  label: string;
+  slot: Slot;
   items: readonly T[];
-  selected: string;
-  onSelect: (id: string) => void;
-  summary: (item: T) => string;
+  selected: string | string[];
+  onPlace: (slot: Slot, id: string) => void;
+  multiple?: boolean;
 }) {
   return (
-    <div className="choice-list">
-      {items.map((item) => (
-        <ChoiceCard
-          id={item.id}
-          key={item.id}
-          name={item.name}
-          summary={summary(item)}
-          selected={selected === item.id}
-          onSelect={() => onSelect(item.id)}
-        />
-      ))}
+    <div className="shelf-group">
+      <h3>{label}</h3>
+      <div className="shelf-items">
+        {items.map((item) => {
+          const isSelected = Array.isArray(selected)
+            ? selected.includes(item.id)
+            : selected === item.id;
+          return (
+            <button
+              className={`shelf-part${isSelected ? " selected" : ""}`}
+              draggable
+              key={item.id}
+              title={item.sourceNote}
+              type="button"
+              onClick={() => onPlace(slot, item.id)}
+              onDragStart={(event) =>
+                event.dataTransfer.setData("text/plain", `${slot}:${item.id}`)
+              }
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  onPlace(slot, item.id);
+                }
+              }}
+            >
+              <span className="shelf-part-shape" />
+              <span>{item.name}</span>
+              {multiple && isSelected && <small>mounted</small>}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
+}
+
+function SlotButton({
+  label,
+  value,
+  slot,
+  selected,
+  bounced,
+  onClick,
+  onDrop,
+}: {
+  label: string;
+  value: string;
+  slot: Slot;
+  selected: boolean;
+  bounced: boolean;
+  onClick: () => void;
+  onDrop: (event: DragEvent) => void;
+}) {
+  return (
+    <button
+      className={`spacecraft-slot spacecraft-slot-${slot}${selected ? " filled" : ""}${bounced ? " slot-bounce" : ""}`}
+      type="button"
+      onClick={onClick}
+      onDragOver={(event) => event.preventDefault()}
+      onDrop={onDrop}
+      title={`Swap ${label}`}
+    >
+      <strong>{label}</strong>
+      <span>{value}</span>
+    </button>
+  );
+}
+
+function SpacecraftView({
+  design,
+  scenario,
+}: {
+  design: Design;
+  scenario: ScenarioRecord;
+}) {
+  const power = gameData.power.find((item) => item.id === design.powerId);
+  const comms = gameData.comms.find((item) => item.id === design.commsId);
+  const launch = gameData.launchVehicles.find(
+    (item) => item.id === design.launchVehicleId,
+  );
+  const computer = gameData.onboardComputer.find(
+    (item) => item.id === design.onboardComputerId,
+  );
+  const attitude = gameData.attitudeControl.find(
+    (item) => item.id === design.attitudeControlId,
+  );
+  const panelScale = power?.id === "large-solar-array" ? 1.35 : 1;
+  const dishScale = comms?.antennaFactor ?? 1;
+
+  return (
+    <div className="spacecraft-view">
+      <svg
+        viewBox="0 0 760 420"
+        role="img"
+        aria-label={`Spacecraft for ${scenario.name}`}
+      >
+        {power?.kind === "solar" && (
+          <>
+            <rect
+              className="spacecraft-solar-wing"
+              height={70 * panelScale}
+              width={150 * panelScale}
+              x={30 - (panelScale - 1) * 55}
+              y={170 - (panelScale - 1) * 35}
+            />
+            <rect
+              className="spacecraft-solar-wing"
+              height={70 * panelScale}
+              width={150 * panelScale}
+              x={580}
+              y={170 - (panelScale - 1) * 35}
+            />
+          </>
+        )}
+        {power?.kind === "nuclear" && (
+          <rect className="spacecraft-nuclear" height="46" width="70" x="35" y="185" />
+        )}
+        <path className="spacecraft-body" d="M 220 145 L 540 145 L 590 210 L 540 275 L 220 275 L 170 210 Z" />
+        <rect className="spacecraft-module module-computer" height="42" width="60" x="270" y="158" />
+        <rect className="spacecraft-module module-attitude" height="42" width="60" x="350" y="220" />
+        <text className="spacecraft-label" x="300" y="184">CPU</text>
+        <text className="spacecraft-label" x="380" y="246">ACS</text>
+        <line className="spacecraft-mast" x1="380" x2="380" y1="145" y2="90" />
+        <circle
+          className="spacecraft-dish"
+          cx="380"
+          cy="75"
+          r={25 * dishScale}
+        />
+        {design.instrumentIds.map((instrumentId, index) => (
+          <g key={instrumentId}>
+            <line
+              className="spacecraft-mount"
+              x1={270 + index * 75}
+              x2={270 + index * 75}
+              y1="275"
+              y2="320"
+            />
+            <circle
+              className="spacecraft-instrument"
+              cx={270 + index * 75}
+              cy="335"
+              r="18"
+            />
+            <text
+              className="spacecraft-label"
+              x={270 + index * 75}
+              y="340"
+            >
+              {instrumentId.slice(0, 3).toUpperCase()}
+            </text>
+          </g>
+        ))}
+        <path className="spacecraft-rocket" d="M 300 365 L 460 365 L 430 405 L 330 405 Z" />
+        <text className="spacecraft-vehicle" x="380" y="389">
+          {launch?.name ?? "Launch vehicle"}
+        </text>
+      </svg>
+    </div>
+  );
+}
+
+function PartDrawer({
+  slot,
+  design,
+  scenario,
+  onClose,
+  onPlace,
+}: {
+  slot: Slot;
+  design: Design;
+  scenario: ScenarioRecord;
+  onClose: () => void;
+  onPlace: (slot: Slot, id: string) => void;
+}) {
+  const items = getItems(slot, scenario);
+  const selected = slot === "instruments"
+    ? design.instrumentIds
+    : design[slotForDesignKey(slot) as keyof Design];
+  return (
+    <aside className="part-drawer" aria-label={`${slotLabels[slot]} options`}>
+      <div className="drawer-heading">
+        <h2>Swap {slotLabels[slot]}</h2>
+        <Button type="button" onClick={onClose}>Close</Button>
+      </div>
+      {items.map((item) => {
+        const active = Array.isArray(selected)
+          ? selected.includes(item.id)
+          : selected === item.id;
+        return (
+          <button
+            className={`drawer-option${active ? " active" : ""}`}
+            key={item.id}
+            type="button"
+            title={item.sourceNote}
+            onClick={() => onPlace(slot, item.id)}
+          >
+            <strong>{item.name}</strong>
+            <span>{active ? "Mounted" : "Mount part"}</span>
+          </button>
+        );
+      })}
+    </aside>
+  );
+}
+
+function getItems(slot: Slot, scenario: ScenarioRecord): ShelfItem[] {
+  switch (slot) {
+    case "bus":
+      return gameData.spacecraftBus;
+    case "power":
+      return gameData.power.filter(
+        (item) =>
+          item.id !== "no-power" &&
+          item.destinationIds.includes(scenario.destinationId),
+      );
+    case "comms":
+      return gameData.comms;
+    case "computer":
+      return gameData.onboardComputer;
+    case "attitude":
+      return gameData.attitudeControl;
+    case "instruments":
+      return gameData.instruments;
+    case "launch":
+      return gameData.launchVehicles;
+    case "orbit":
+      return gameData.orbits.filter(
+        (item) => item.destinationId === scenario.destinationId,
+      );
+  }
 }

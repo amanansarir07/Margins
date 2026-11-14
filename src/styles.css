@@ -660,6 +660,15 @@ body {
   gap: 0.6rem;
   grid-template-columns: auto 1fr auto auto;
   padding: 0.75rem;
+  color: var(--ink-navy);
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  width: 100%;
+}
+
+.check-row.acknowledged {
+  box-shadow: inset 0 0 0 3px var(--signal-mint);
 }
 
 .check-row.pass {
@@ -758,6 +767,13 @@ body {
 .launch-action {
   margin-left: auto;
   text-align: right;
+}
+
+.launch-button {
+  font-family: "Bowlby One SC", sans-serif;
+  font-size: 1.2rem;
+  min-width: 13rem;
+  text-transform: uppercase;
 }
 
 .launch-reason {
@@ -1290,5 +1306,395 @@ body {
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
     transition-duration: 0.001ms !important;
+  }
+}
+
+.workbench-heading {
+  align-items: end;
+  display: flex;
+  justify-content: space-between;
+}
+
+.workbench-heading h1 {
+  font-family: "Bowlby One SC", sans-serif;
+  text-transform: uppercase;
+}
+
+.workbench-mode {
+  border: 3px solid var(--ink-navy);
+  padding: 0.5rem 0.75rem;
+  text-transform: uppercase;
+}
+
+.workbench-layout {
+  align-items: start;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(13rem, 17rem) minmax(0, 1fr) minmax(14rem, 18rem);
+}
+
+.parts-shelf,
+.gauge-cluster {
+  background: var(--light-surface);
+  border: 3px solid var(--ink-navy);
+  box-shadow: var(--shadow);
+  padding: 1rem;
+}
+
+.parts-shelf {
+  max-height: 76vh;
+  overflow: auto;
+}
+
+.parts-shelf h2,
+.gauge-cluster h2 {
+  font-family: "Bowlby One SC", sans-serif;
+  font-size: 1.15rem;
+  margin: 0 0 1rem;
+  text-transform: uppercase;
+}
+
+.shelf-group {
+  border-top: 3px solid var(--ink-navy);
+  padding: 0.75rem 0;
+}
+
+.shelf-group h3 {
+  font-size: 0.8rem;
+  margin: 0 0 0.5rem;
+  text-transform: uppercase;
+}
+
+.shelf-items {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.shelf-part {
+  align-items: center;
+  background: var(--lunar-grey);
+  border: 3px solid var(--ink-navy);
+  border-radius: 8px;
+  color: var(--ink-navy);
+  cursor: grab;
+  display: grid;
+  font: inherit;
+  gap: 0.5rem;
+  grid-template-columns: 1.5rem 1fr;
+  padding: 0.45rem;
+  text-align: left;
+}
+
+.shelf-part:active {
+  cursor: grabbing;
+}
+
+.shelf-part:hover,
+.shelf-part:focus-visible,
+.shelf-part.selected {
+  background: var(--launchpad-yellow);
+}
+
+.shelf-part:focus-visible,
+.spacecraft-slot:focus-visible,
+.drawer-option:focus-visible {
+  outline: 3px solid var(--deep-sky);
+  outline-offset: 2px;
+}
+
+.shelf-part small {
+  grid-column: 2;
+  text-transform: uppercase;
+}
+
+.shelf-part-shape {
+  background: var(--deep-sky);
+  border: 2px solid var(--ink-navy);
+  display: block;
+  height: 1.15rem;
+  width: 1.15rem;
+}
+
+.shelf-group:nth-of-type(3n) .shelf-part-shape {
+  background: var(--rocket-red);
+  border-radius: 50%;
+}
+
+.spacecraft-stage {
+  background: var(--lunar-grey);
+  border: 3px solid var(--ink-navy);
+  box-shadow: var(--shadow);
+  min-width: 0;
+  padding: 1rem;
+}
+
+.spacecraft-view {
+  background: var(--light-surface);
+  border: 3px solid var(--ink-navy);
+  min-height: 25rem;
+  overflow: hidden;
+}
+
+.spacecraft-view svg {
+  display: block;
+  height: min(58vw, 30rem);
+  min-height: 22rem;
+  width: 100%;
+}
+
+.spacecraft-solar-wing {
+  fill: var(--deep-sky);
+  stroke: var(--ink-navy);
+  stroke-width: 4;
+}
+
+.spacecraft-nuclear,
+.spacecraft-module {
+  fill: var(--rocket-red);
+  stroke: var(--ink-navy);
+  stroke-width: 4;
+}
+
+.spacecraft-body,
+.spacecraft-rocket {
+  fill: var(--lunar-grey);
+  stroke: var(--ink-navy);
+  stroke-width: 5;
+}
+
+.spacecraft-module {
+  fill: var(--launchpad-yellow);
+}
+
+.spacecraft-dish {
+  fill: var(--signal-mint);
+  stroke: var(--ink-navy);
+  stroke-width: 4;
+}
+
+.spacecraft-mast,
+.spacecraft-mount {
+  stroke: var(--ink-navy);
+  stroke-width: 5;
+}
+
+.spacecraft-instrument {
+  fill: var(--launchpad-yellow);
+  stroke: var(--ink-navy);
+  stroke-width: 4;
+}
+
+.spacecraft-label,
+.spacecraft-vehicle {
+  fill: var(--ink-navy);
+  font-family: "Atkinson Hyperlegible", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+.spacecraft-vehicle {
+  font-size: 12px;
+}
+
+.slot-grid {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: repeat(4, 1fr);
+  margin-top: 1rem;
+}
+
+.spacecraft-slot {
+  background: var(--light-surface);
+  border: 3px dashed var(--ink-navy);
+  border-radius: 8px;
+  color: var(--ink-navy);
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  gap: 0.15rem;
+  min-height: 4rem;
+  padding: 0.45rem;
+  text-align: left;
+}
+
+.spacecraft-slot.filled {
+  background: var(--launchpad-yellow);
+  border-style: solid;
+}
+
+.spacecraft-slot span {
+  font-size: 0.78rem;
+}
+
+.slot-bounce {
+  animation: slot-bounce 220ms ease-out;
+}
+
+@keyframes slot-bounce {
+  50% {
+    transform: translateY(-5px) scale(1.03);
+  }
+}
+
+.gauge-cluster {
+  display: grid;
+  gap: 1rem;
+  position: sticky;
+  top: 1rem;
+}
+
+.gauge-cluster .kit-instrument,
+.gauge-cluster .kit-gauge {
+  border: 3px solid var(--ink-navy);
+  padding: 0.5rem;
+}
+
+.gauge-cluster .kit-gauge {
+  background: var(--light-surface);
+}
+
+.gauge-cluster .kit-gauge svg {
+  max-width: 10rem;
+}
+
+.gauge-warning-list {
+  color: var(--rocket-red);
+  font-size: 0.8rem;
+  margin: 0;
+  padding-left: 1rem;
+}
+
+.lock-design-button {
+  display: block;
+  font-family: "Bowlby One SC", sans-serif;
+  font-size: 1.15rem;
+  margin: 1.5rem auto;
+  text-transform: uppercase;
+}
+
+.part-drawer {
+  background: var(--light-surface);
+  border: 3px solid var(--ink-navy);
+  bottom: 1rem;
+  box-shadow: 8px 8px 0 var(--ink-navy);
+  display: grid;
+  gap: 0.5rem;
+  max-height: 80vh;
+  overflow: auto;
+  padding: 1rem;
+  position: fixed;
+  right: 1rem;
+  width: min(22rem, calc(100vw - 2rem));
+  z-index: 20;
+}
+
+.drawer-heading {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.drawer-heading h2 {
+  font-family: "Bowlby One SC", sans-serif;
+  font-size: 1.1rem;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.drawer-option {
+  background: var(--lunar-grey);
+  border: 3px solid var(--ink-navy);
+  border-radius: 8px;
+  color: var(--ink-navy);
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  justify-content: space-between;
+  padding: 0.7rem;
+  text-align: left;
+}
+
+.drawer-option.active {
+  background: var(--launchpad-yellow);
+}
+
+.drawer-option span {
+  font-size: 0.8rem;
+}
+
+.gauge-shake {
+  animation: gauge-shake 360ms ease-in-out;
+}
+
+@keyframes gauge-shake {
+  20%,
+  60% {
+    transform: translateX(-4px);
+  }
+  40%,
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+@media (max-width: 1000px) {
+  .workbench-layout {
+    grid-template-columns: minmax(12rem, 15rem) minmax(0, 1fr);
+  }
+
+  .gauge-cluster {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(3, 1fr);
+    position: static;
+  }
+
+  .gauge-cluster h2,
+  .gauge-warning-list {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 680px) {
+  .mission-select-header,
+  .mission-select-footer,
+  .workbench-heading {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .solar-map {
+    min-height: 18rem;
+  }
+
+  .solar-map svg {
+    min-height: 18rem;
+  }
+
+  .mission-pin {
+    font-size: 0.75rem;
+    padding: 0.4rem;
+  }
+
+  .workbench-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .parts-shelf {
+    max-height: none;
+    order: 2;
+  }
+
+  .spacecraft-stage {
+    order: 1;
+  }
+
+  .gauge-cluster {
+    grid-template-columns: repeat(2, 1fr);
+    order: 3;
+  }
+
+  .slot-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
