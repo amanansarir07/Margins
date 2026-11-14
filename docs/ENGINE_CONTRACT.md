@@ -23,7 +23,7 @@ The evaluator uses a seeded random generator so the same design, scenario, and s
 
 ## Suggested fixes
 
-`suggestFixes(design, scenario, seed)` tries small design changes and returns the cheapest changes that would fix a failed mission. Suggestions must preserve the player's objective where possible and explain the trade-off.
+`suggestFixes(design, scenario, seed)` tries adjacent component choices, larger or smaller power systems, a different antenna, dropping or swapping one instrument, and different launch vehicles or compatible orbits. Every candidate is evaluated with the same seed. A successful design returns no suggestions. A failed design returns up to three successful candidates sorted by cost; each includes the changed design, cost delta, mass impact, power-margin impact, evaluation, and a plain-English explanation. If no candidate succeeds, it returns the single highest-scoring closest improvement.
 
 ## Team mode
 

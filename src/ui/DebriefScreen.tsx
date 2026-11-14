@@ -1,10 +1,11 @@
 import { useMemo } from "react";
-import { simulateTimeline } from "../engine/engine";
+import { simulateTimeline, suggestFixes } from "../engine/engine";
 import type {
   Design,
   EvaluationResult,
   ResourceName,
   ScenarioRecord,
+  SuggestedFix,
 } from "../engine/types";
 
 const resourceNames: ResourceName[] = [
@@ -31,6 +32,7 @@ interface DebriefScreenProps {
   result: EvaluationResult;
   seed: number;
   onRerun: () => void;
+  onApplyFix: (design: Design) => void;
 }
 
 export function DebriefScreen({
@@ -39,9 +41,14 @@ export function DebriefScreen({
   result,
   seed,
   onRerun,
+  onApplyFix,
 }: DebriefScreenProps) {
   const timeline = useMemo(
     () => simulateTimeline(design, scenario, seed),
+    [design, scenario, seed],
+  );
+  const fixes = useMemo(
+    () => suggestFixes(design, scenario, seed),
     [design, scenario, seed],
   );
 
@@ -105,10 +112,56 @@ export function DebriefScreen({
           ))}
         </ul>
       </article>
+      {!result.success && (
+        <SuggestedFixCard fixes={fixes} onApplyFix={onApplyFix} />
+      )}
       <button className="button button-primary wide-button" type="button" onClick={onRerun}>
         Rerun with changes
       </button>
     </section>
+  );
+}
+
+function SuggestedFixCard({
+  fixes,
+  onApplyFix,
+}: {
+  fixes: SuggestedFix[];
+  onApplyFix: (design: Design) => void;
+}) {
+  return (
+    <article className="panel fix-panel">
+      <p className="panel-label">Mission coach</p>
+      <h2>What would have saved you</h2>
+      {fixes.length === 0 ? (
+        <p className="muted">No small change could rescue this design.</p>
+      ) : (
+        <div className="fix-list">
+          {fixes.map((fix) => (
+            <div className="fix-item" key={fix.label}>
+              <div>
+                <strong>{fix.label}</strong>
+                <p>{fix.explanation}</p>
+                <span className="fix-impact">
+                  Cost {fix.cost >= 0 ? "+" : ""}
+                  {fix.cost.toFixed(1)} $M · Mass {fix.massImpact >= 0 ? "+" : ""}
+                  {fix.massImpact.toFixed(1)} kg · Power margin{" "}
+                  {fix.powerImpact >= 0 ? "+" : ""}
+                  {fix.powerImpact.toFixed(1)} W
+                </span>
+              </div>
+              <button
+                className="button button-muted"
+                type="button"
+                onClick={() => onApplyFix(fix.design)}
+              >
+                Apply this fix
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </article>
   );
 }
 

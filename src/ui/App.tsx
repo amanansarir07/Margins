@@ -67,6 +67,10 @@ export function App() {
           result={state.result}
           seed={state.seed}
           onRerun={() => dispatch({ type: "GO_TO", screen: "workshop" })}
+          onApplyFix={(design) => {
+            dispatch({ type: "SET_DESIGN", design });
+            dispatch({ type: "GO_TO", screen: "workshop" });
+          }}
         />
       )}
     </main>

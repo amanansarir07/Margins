@@ -16,6 +16,7 @@ import type {
   ResourceReport,
   ScenarioRecord,
   SpacecraftBusRecord,
+  SuggestedFix,
 } from "./types";
 
 type Components = {
@@ -237,6 +238,176 @@ export function previewResources(
 ): PreviewResourcesResult {
   const resources = calculateResources(calculateDesign(design, scenario), scenario);
   return { resources, warnings: makeWarnings(resources) };
+}
+
+function roundImpact(value: number): number {
+  return Math.round(value * 10) / 10;
+}
+
+function changeExplanation(
+  label: string,
+  cost: number,
+  massImpact: number,
+  powerImpact: number,
+  evaluation: EvaluationResult,
+): string {
+  const costText =
+    cost > 0 ? `adds $${cost.toFixed(1)}M` : `saves $${Math.abs(cost).toFixed(1)}M`;
+  const massText =
+    massImpact > 0
+      ? `adds ${massImpact.toFixed(1)} kg`
+      : `removes ${Math.abs(massImpact).toFixed(1)} kg`;
+  const powerText =
+    powerImpact > 0
+      ? `adds ${powerImpact.toFixed(1)} W of power margin`
+      : `uses ${Math.abs(powerImpact).toFixed(1)} W of power margin`;
+  return evaluation.success
+    ? `${label} ${costText}, ${massText}, and ${powerText}; it clears the mission checks.`
+    : `${label} ${costText}, ${massText}, and ${powerText}; it is the closest remaining design because it scores ${evaluation.score}/1000.`;
+}
+
+export function suggestFixes(
+  design: Design,
+  scenario: ScenarioRecord,
+  seed: number,
+): SuggestedFix[] {
+  const original = evaluate(design, scenario, seed);
+  if (original.success) return [];
+
+  const originalPreview = previewResources(design, scenario);
+  const candidates: { design: Design; label: string }[] = [];
+  const seen = new Set<string>([JSON.stringify(design)]);
+  const addCandidate = (candidate: Design, label: string) => {
+    const key = JSON.stringify(candidate);
+    if (seen.has(key)) return;
+    seen.add(key);
+    candidates.push({ design: candidate, label });
+  };
+
+  const addAdjacent = <T extends { id: string; name: string }>(
+    records: readonly T[],
+    selectedId: string,
+    update: (id: string) => Design,
+    componentName: string,
+  ) => {
+    const index = records.findIndex((record) => record.id === selectedId);
+    if (index < 0) return;
+    for (const neighbor of [records[index - 1], records[index + 1]]) {
+      if (neighbor) {
+        addCandidate(
+          update(neighbor.id),
+          `${componentName}: switch to ${neighbor.name}`,
+        );
+      }
+    }
+  };
+
+  addAdjacent(
+    gameData.spacecraftBus,
+    design.spacecraftBusId,
+    (id) => ({ ...design, spacecraftBusId: id }),
+    "Spacecraft bus",
+  );
+  addAdjacent(
+    gameData.power,
+    design.powerId,
+    (id) => ({ ...design, powerId: id }),
+    "Power system",
+  );
+  addAdjacent(
+    gameData.comms,
+    design.commsId,
+    (id) => ({ ...design, commsId: id }),
+    "Antenna",
+  );
+  addAdjacent(
+    gameData.onboardComputer,
+    design.onboardComputerId,
+    (id) => ({ ...design, onboardComputerId: id }),
+    "Onboard computer",
+  );
+  addAdjacent(
+    gameData.attitudeControl,
+    design.attitudeControlId,
+    (id) => ({ ...design, attitudeControlId: id }),
+    "Attitude control",
+  );
+
+  for (const instrumentId of design.instrumentIds) {
+    addCandidate(
+      {
+        ...design,
+        instrumentIds: design.instrumentIds.filter((id) => id !== instrumentId),
+      },
+      `Instruments: drop ${findById(gameData.instruments, instrumentId, "instrument").name}`,
+    );
+    for (const replacement of gameData.instruments) {
+      if (design.instrumentIds.includes(replacement.id)) continue;
+      addCandidate(
+        {
+          ...design,
+          instrumentIds: design.instrumentIds.map((id) =>
+            id === instrumentId ? replacement.id : id,
+          ),
+        },
+        `Instruments: swap to ${replacement.name}`,
+      );
+    }
+  }
+
+  for (const vehicle of gameData.launchVehicles) {
+    if (vehicle.id !== design.launchVehicleId) {
+      addCandidate(
+        { ...design, launchVehicleId: vehicle.id },
+        `Launch vehicle: switch to ${vehicle.name}`,
+      );
+    }
+  }
+  for (const orbit of gameData.orbits) {
+    if (orbit.id !== design.orbitId && orbit.destinationId === scenario.destinationId) {
+      addCandidate({ ...design, orbitId: orbit.id }, `Orbit: switch to ${orbit.name}`);
+    }
+  }
+
+  const suggestions = candidates.map(({ design: candidateDesign, label }) => {
+    const evaluation = evaluate(candidateDesign, scenario, seed);
+    const candidatePreview = previewResources(candidateDesign, scenario);
+    const cost = roundImpact(
+      candidatePreview.resources.budget.used -
+        originalPreview.resources.budget.used,
+    );
+    const massImpact = roundImpact(
+      candidatePreview.resources.mass.used - originalPreview.resources.mass.used,
+    );
+    const powerImpact = roundImpact(
+      candidatePreview.resources.power.margin -
+        originalPreview.resources.power.margin,
+    );
+    return {
+      design: candidateDesign,
+      label,
+      cost,
+      massImpact,
+      powerImpact,
+      explanation: changeExplanation(
+        label,
+        cost,
+        massImpact,
+        powerImpact,
+        evaluation,
+      ),
+      evaluation,
+    };
+  });
+
+  const successful = suggestions
+    .filter((suggestion) => suggestion.evaluation.success)
+    .sort((left, right) => left.cost - right.cost);
+  if (successful.length > 0) return successful.slice(0, 3);
+
+  return suggestions.sort(
+    (left, right) => right.evaluation.score - left.evaluation.score,
+  ).slice(0, 1);
 }
 
 function mulberry32(seed: number): () => number {

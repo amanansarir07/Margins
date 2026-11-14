@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { evaluate, previewResources, simulateTimeline } from "../src/engine/engine";
+import {
+  evaluate,
+  previewResources,
+  simulateTimeline,
+  suggestFixes,
+} from "../src/engine/engine";
 import { gameData } from "../src/engine/loadData";
 import type { Design } from "../src/engine/types";
 
@@ -72,5 +77,19 @@ describe("mission engine", () => {
       timeline.points[0]?.resources.time.used ?? 0,
     );
     expect(timeline.evaluation.grade).toMatch(/[A-F]/);
+  });
+
+  it("suggests a power fix for a power-failed design", () => {
+    const failedDesign = { ...baseDesign, powerId: "no-power" };
+    const fixes = suggestFixes(failedDesign, moon, 1);
+
+    expect(fixes.length).toBeGreaterThan(0);
+    expect(fixes[0]?.design.powerId).not.toBe("no-power");
+    expect(fixes[0]?.evaluation.success).toBe(true);
+    expect(fixes[0]?.explanation).toContain("Power system");
+  });
+
+  it("returns no fixes for a successful design", () => {
+    expect(suggestFixes(baseDesign, moon, 1)).toEqual([]);
   });
 });

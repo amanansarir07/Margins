@@ -205,6 +205,16 @@ export interface EvaluationResult {
   reasons: string[];
 }
 
+export interface SuggestedFix {
+  design: Design;
+  label: string;
+  cost: number;
+  massImpact: number;
+  powerImpact: number;
+  explanation: string;
+  evaluation: EvaluationResult;
+}
+
 export type FlightPhase = "launch" | "transit" | "arrival" | "operations";
 
 export interface TimelinePoint {

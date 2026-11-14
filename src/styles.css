@@ -728,6 +728,46 @@ body {
   color: var(--muted);
 }
 
+.fix-panel {
+  margin-top: 1rem;
+}
+
+.fix-panel h2 {
+  margin-bottom: 1rem;
+}
+
+.fix-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.fix-item {
+  align-items: start;
+  background: var(--space-900);
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  padding: 0.9rem;
+}
+
+.fix-item strong {
+  display: block;
+}
+
+.fix-item p {
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin: 0.35rem 0;
+}
+
+.fix-impact {
+  color: var(--accent);
+  font-size: 0.75rem;
+}
+
 @media (min-width: 720px) {
   .app {
     padding: 3rem;
