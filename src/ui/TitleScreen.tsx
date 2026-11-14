@@ -44,7 +44,7 @@ export function TitleScreen({
         </div>
         <div className="mission-progress">
           <strong>{totalStars} stars</strong>
-          <span>Patch wall ready</span>
+          <a href="/patch-wall">OPEN PATCH WALL</a>
         </div>
       </header>
       <div className="solar-map">

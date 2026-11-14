@@ -3,6 +3,17 @@ import type { Design } from "../engine/types";
 const LAST_DESIGN_KEY = "margins:last-design";
 const BEST_SCORE_KEY = "margins:best-score";
 const MISSION_STARS_KEY = "margins:mission-stars";
+const PATCH_WALL_KEY = "margins:patch-wall";
+
+export interface SavedMissionPatch {
+  id: string;
+  scenarioId: string;
+  missionName: string;
+  svg: string;
+  stars: number;
+  score: number;
+  createdAt: string;
+}
 
 function isDesign(value: unknown): value is Design {
   if (typeof value !== "object" || value === null) return false;
@@ -86,5 +97,40 @@ export function saveMissionStars(scenarioId: string, stars: number) {
     localStorage.setItem(MISSION_STARS_KEY, JSON.stringify(current));
   } catch (error) {
     console.warn("Could not save mission stars.", error);
+  }
+}
+
+export function loadMissionPatches(): SavedMissionPatch[] {
+  try {
+    const raw = localStorage.getItem(PATCH_WALL_KEY);
+    if (!raw) return [];
+    const value: unknown = JSON.parse(raw);
+    if (!Array.isArray(value)) return [];
+    return value.filter((patch): patch is SavedMissionPatch => {
+      if (typeof patch !== "object" || patch === null) return false;
+      const candidate = patch as Partial<SavedMissionPatch>;
+      return (
+        typeof candidate.id === "string" &&
+        typeof candidate.scenarioId === "string" &&
+        typeof candidate.missionName === "string" &&
+        typeof candidate.svg === "string" &&
+        typeof candidate.stars === "number" &&
+        typeof candidate.score === "number" &&
+        typeof candidate.createdAt === "string"
+      );
+    });
+  } catch (error) {
+    console.warn("Could not load the patch wall.", error);
+    return [];
+  }
+}
+
+export function saveMissionPatch(patch: SavedMissionPatch) {
+  try {
+    const patches = loadMissionPatches().filter((item) => item.id !== patch.id);
+    patches.unshift(patch);
+    localStorage.setItem(PATCH_WALL_KEY, JSON.stringify(patches.slice(0, 30)));
+  } catch (error) {
+    console.warn("Could not save the mission patch.", error);
   }
 }

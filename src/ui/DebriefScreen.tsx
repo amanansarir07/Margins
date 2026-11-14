@@ -1,5 +1,18 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { simulateTimeline, suggestFixes } from "../engine/engine";
+import { gameData } from "../engine/loadData";
+import { playSound } from "../audio/sound";
+import { Button } from "./foundation/Button";
+import { Stamp } from "./foundation/Stamp";
+import {
+  createMissionPatch,
+  missionName,
+  saveSvgAsImage,
+} from "./missionPatch";
+import {
+  saveMissionPatch,
+  type SavedMissionPatch,
+} from "./storage";
 import type {
   Design,
   EvaluationResult,
@@ -19,13 +32,26 @@ const resourceNames: ResourceName[] = [
 ];
 
 const resourceColors: Record<ResourceName, string> = {
-  mass: "#73d5ff",
-  power: "#fbbf24",
-  budget: "#c084fc",
-  data: "#86efac",
-  comms: "#fb7185",
-  time: "#f0abfc",
+  mass: "#2B5BD7",
+  power: "#FFC20E",
+  budget: "#E63B2E",
+  data: "#2EC4A6",
+  comms: "#14213D",
+  time: "#C9D1D9",
 };
+
+function calculateStars(result: EvaluationResult, scenario: ScenarioRecord) {
+  const margins = Object.values(result.resources);
+  return (
+    (result.success ? 1 : 0) +
+    (result.resources.budget.used < scenario.limits.budgetM ? 1 : 0) +
+    (margins.every(
+      (resource) => resource.margin / Math.max(resource.limit, 1) > 0.15,
+    )
+      ? 1
+      : 0)
+  );
+}
 
 interface DebriefScreenProps {
   design: Design;
@@ -54,19 +80,110 @@ export function DebriefScreen({
     () => suggestFixes(design, scenario, seed, options),
     [design, scenario, seed, options],
   );
+  const instrumentNames = design.instrumentIds.map(
+    (id) => gameData.instruments.find((instrument) => instrument.id === id)?.name ?? id,
+  );
+  const stars = calculateStars(result, scenario);
+  const patchSvg = useMemo(
+    () => createMissionPatch(design, scenario, result, instrumentNames, stars),
+    [design, instrumentNames, result, scenario, stars],
+  );
+  const patchTitle = missionName(design, scenario, instrumentNames);
+  const [visibleStars, setVisibleStars] = useState(0);
+  const [scoreShown, setScoreShown] = useState(0);
+  const [patchError, setPatchError] = useState("");
+
+  useEffect(() => {
+    setVisibleStars(0);
+    setScoreShown(0);
+    const starTimers = Array.from({ length: stars }, (_, index) =>
+      window.setTimeout(() => {
+        setVisibleStars(index + 1);
+        playSound("success");
+      }, 500 + index * 480),
+    );
+    const scoreStart = 500 + stars * 480;
+    const scoreStartTime = performance.now() + scoreStart;
+    let frame = 0;
+    const countScore = (now: number) => {
+      const progress = Math.max(0, Math.min(1, (now - scoreStartTime) / 1000));
+      setScoreShown(Math.round(result.score * progress));
+      if (progress < 1) frame = requestAnimationFrame(countScore);
+    };
+    const scoreTimer = window.setTimeout(
+      () => requestAnimationFrame(countScore),
+      scoreStart,
+    );
+    return () => {
+      starTimers.forEach((timer) => window.clearTimeout(timer));
+      window.clearTimeout(scoreTimer);
+      cancelAnimationFrame(frame);
+    };
+  }, [result.score, stars]);
+
+  useEffect(() => {
+    const patch: SavedMissionPatch = {
+      id: `${scenario.id}-${seed}-${result.score}`,
+      scenarioId: scenario.id,
+      missionName: patchTitle,
+      svg: patchSvg,
+      stars,
+      score: result.score,
+      createdAt: new Date().toISOString(),
+    };
+    saveMissionPatch(patch);
+  }, [patchSvg, patchTitle, result.score, scenario.id, seed, stars]);
+
+  const savePatchImage = async () => {
+    setPatchError("");
+    try {
+      await saveSvgAsImage(patchSvg, `${patchTitle.replaceAll(" ", "-").toLowerCase()}.png`);
+    } catch (error) {
+      console.error("Could not save the mission patch image.", error);
+      setPatchError("Patch image failed. Try the button again.");
+    }
+  };
 
   return (
     <section className="screen debrief-screen" aria-labelledby="debrief-title">
-      <div className="screen-heading">
-        <p className="eyebrow">Mission debrief</p>
-        <h1 id="debrief-title">
-          {result.success ? "Mission success" : "Mission failure"}
-        </h1>
-        <p className="grade-display">
-          Grade <strong>{result.grade}</strong> · {result.score}/1000
-        </p>
+      <header className="debrief-hero">
+        <div>
+          <p className="eyebrow">Margins / debrief</p>
+          <h1 id="debrief-title">
+            {result.success ? "Mission success" : "Mission failure"}
+          </h1>
+        </div>
+        <Stamp tone={result.success ? "pass" : "fail"} sound>
+          {result.success ? "MISSION PASS" : "MISSION FAIL"}
+        </Stamp>
+      </header>
+      <div className="debrief-score-row">
+        <div className="debrief-stars" aria-label={`${visibleStars} of 3 stars earned`}>
+          {[0, 1, 2].map((star) => (
+            <span className={star < visibleStars ? "star-earned" : ""} key={star}>
+              {star < visibleStars ? "★" : "☆"}
+            </span>
+          ))}
+        </div>
+        <div className="debrief-score">
+          <span>SCORE</span>
+          <strong>{scoreShown}</strong>
+          <small>/ 1000</small>
+        </div>
       </div>
       <div className="debrief-grid">
+        <article className="panel patch-panel">
+          <p className="panel-label">Mission patch</p>
+          <h2>{patchTitle}</h2>
+          <div
+            className="mission-patch-preview"
+            dangerouslySetInnerHTML={{ __html: patchSvg }}
+          />
+          <Button className="button-primary" type="button" onClick={savePatchImage}>
+            SAVE PATCH AS IMAGE
+          </Button>
+          {patchError && <p className="launch-reason">{patchError}</p>}
+        </article>
         <article className="panel">
           <p className="panel-label">Score breakdown</p>
           <div className="score-list">
@@ -84,15 +201,15 @@ export function DebriefScreen({
             />
           </div>
         </article>
-        <article className="panel">
-          <p className="panel-label">Why</p>
-          <ul className="reason-list debrief-reasons">
-            {result.reasons.map((reason) => (
-              <li key={reason}>{reason}</li>
-            ))}
-          </ul>
-        </article>
       </div>
+      <article className="panel">
+        <p className="panel-label">Why</p>
+        <ul className="reason-list debrief-reasons">
+          {result.reasons.map((reason) => (
+            <li key={reason}>{reason}</li>
+          ))}
+        </ul>
+      </article>
       <article className="panel chart-panel">
         <div className="card-title-row">
           <div>
@@ -103,24 +220,10 @@ export function DebriefScreen({
         </div>
         <ResourceChart timeline={timeline} />
       </article>
-      <article className="panel">
-        <p className="panel-label">Events</p>
-        <ul className="event-list">
-          {result.events.map((event) => (
-            <li key={event.id}>
-              <strong>{event.name}</strong>
-              <span>{event.occurred ? event.outcome : "No event occurred."}</span>
-              <small>{event.explanation}</small>
-            </li>
-          ))}
-        </ul>
-      </article>
-      {!result.success && (
-        <SuggestedFixCard fixes={fixes} onApplyFix={onApplyFix} />
-      )}
-      <button className="button button-primary wide-button" type="button" onClick={onRerun}>
-        Rerun with changes
-      </button>
+      {!result.success && <SuggestedFixCard fixes={fixes} onApplyFix={onApplyFix} />}
+      <Button className="button-primary wide-button" type="button" onClick={onRerun}>
+        RERUN WITH CHANGES
+      </Button>
     </section>
   );
 }
@@ -153,13 +256,13 @@ function SuggestedFixCard({
                   {fix.powerImpact.toFixed(1)} W
                 </span>
               </div>
-              <button
-                className="button button-muted"
+              <Button
+                className="button-muted"
                 type="button"
                 onClick={() => onApplyFix(fix.design)}
               >
-                Apply this fix
-              </button>
+                APPLY THIS FIX
+              </Button>
             </div>
           ))}
         </div>
@@ -168,7 +271,15 @@ function SuggestedFixCard({
   );
 }
 
-function ScoreRow({ label, value, max }: { label: string; value: number; max: number }) {
+function ScoreRow({
+  label,
+  value,
+  max,
+}: {
+  label: string;
+  value: number;
+  max: number;
+}) {
   return (
     <div className="score-row">
       <div className="score-row-heading">
@@ -212,7 +323,7 @@ function ResourceChart({
               x2={width - padding}
               y1={y}
               y2={y}
-              stroke="#2a385d"
+              stroke="#14213D"
               strokeDasharray="3 5"
             />
           );
@@ -223,7 +334,8 @@ function ResourceChart({
               const resource = point.resources[name];
               const ratio =
                 resource.limit > 0 ? Math.min(1, resource.used / resource.limit) : 1;
-              const x = padding + (index / (timeline.points.length - 1)) * chartWidth;
+              const x =
+                padding + (index / (timeline.points.length - 1)) * chartWidth;
               const y = padding + (1 - ratio) * chartHeight;
               return `${x},${y}`;
             })
@@ -234,19 +346,11 @@ function ResourceChart({
               fill="none"
               points={points}
               stroke={resourceColors[name]}
-              strokeWidth="2"
+              strokeWidth="3"
             />
           );
         })}
       </svg>
-      <div className="chart-legend">
-        {resourceNames.map((name) => (
-          <span key={name}>
-            <i style={{ background: resourceColors[name] }} />
-            {name}
-          </span>
-        ))}
-      </div>
     </div>
   );
 }

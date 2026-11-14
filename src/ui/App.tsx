@@ -8,6 +8,7 @@ import { ReviewScreen } from "./ReviewScreen";
 import { DebriefScreen } from "./DebriefScreen";
 import { FlightScreen } from "./FlightScreen";
 import { KitScreen } from "./KitScreen";
+import { PatchWallScreen } from "./PatchWallScreen";
 import {
   loadMissionStars,
   saveBestScore,
@@ -17,7 +18,7 @@ import {
 
 export function App() {
   const [state, dispatch] = useReducer(appReducer, initialState);
-  const [missionStars] = useState(loadMissionStars);
+  const [missionStars, setMissionStars] = useState(loadMissionStars);
   const scenario = gameData.scenarios.find(
     (item) => item.id === state.design.scenarioId,
   );
@@ -42,10 +43,17 @@ export function App() {
         ? 1
         : 0);
     saveMissionStars(scenario.id, stars);
+    setMissionStars((current) => ({
+      ...current,
+      [scenario.id]: Math.max(current[scenario.id] ?? 0, stars),
+    }));
   }, [scenario, state.result]);
 
   if (window.location.pathname === "/kit") {
     return <KitScreen />;
+  }
+  if (window.location.pathname === "/patch-wall") {
+    return <PatchWallScreen />;
   }
 
   return (
