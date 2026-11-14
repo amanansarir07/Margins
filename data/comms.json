@@ -1,0 +1,22 @@
+[
+  {
+    "id": "standard-radio",
+    "name": "Standard Radio",
+    "massKg": 12,
+    "powerW": 18,
+    "dataMbitPerDay": 100,
+    "costM": 35,
+    "source": "Game model",
+    "sourceNote": "Provisional component balance value."
+  },
+  {
+    "id": "high-gain-radio",
+    "name": "High-Gain Radio",
+    "massKg": 20,
+    "powerW": 30,
+    "dataMbitPerDay": 240,
+    "costM": 70,
+    "source": "Game model",
+    "sourceNote": "Provisional component balance value."
+  }
+]

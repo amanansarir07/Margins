@@ -1,0 +1,38 @@
+[
+  {
+    "id": "moon",
+    "name": "Moon",
+    "description": "Earth's Moon",
+    "distanceFromEarth": 384400,
+    "oneWaySignalTime": 1.28,
+    "typicalTripTime": 4,
+    "surfaceGravity": 1.62,
+    "sunlightComparedToEarth": 1,
+    "source": "Game model",
+    "sourceNote": "Provisional game-model values pending verification in FACTS_TO_VERIFY.md."
+  },
+  {
+    "id": "mars",
+    "name": "Mars",
+    "description": "The Red Planet",
+    "distanceFromEarth": 225000000,
+    "oneWaySignalTime": 12.5,
+    "typicalTripTime": 210,
+    "surfaceGravity": 3.71,
+    "sunlightComparedToEarth": 0.43,
+    "source": "Game model",
+    "sourceNote": "Provisional game-model values pending verification in FACTS_TO_VERIFY.md."
+  },
+  {
+    "id": "europa",
+    "name": "Europa",
+    "description": "An icy moon of Jupiter",
+    "distanceFromEarth": 628300000,
+    "oneWaySignalTime": 34.9,
+    "typicalTripTime": 1800,
+    "surfaceGravity": 1.32,
+    "sunlightComparedToEarth": 0.036,
+    "source": "Game model",
+    "sourceNote": "Provisional game-model values pending verification in FACTS_TO_VERIFY.md."
+  }
+]

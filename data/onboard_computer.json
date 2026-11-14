@@ -1,0 +1,23 @@
+[
+  {
+    "id": "simple",
+    "name": "Simple Computer",
+    "massKg": 5,
+    "powerW": 10,
+    "costM": 5,
+    "dataProcessingMbitPerDay": 60,
+    "source": "Game model",
+    "sourceNote": "Component values supplied in the game plan."
+  },
+  {
+    "id": "advanced",
+    "name": "Advanced Computer",
+    "massKg": 12,
+    "powerW": 25,
+    "costM": 15,
+    "dataProcessingMbitPerDay": 150,
+    "processedDataScienceMultiplier": 1.25,
+    "source": "Game model",
+    "sourceNote": "Component values supplied in the game plan; processed-data science bonus is 25%."
+  }
+]

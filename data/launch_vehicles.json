@@ -1,0 +1,28 @@
+[
+  {
+    "id": "light-lifter",
+    "name": "Light Lifter",
+    "capacityByDestination": {
+      "moon": 140,
+      "mars": 0,
+      "europa": 0
+    },
+    "supportedOrbits": ["flyby", "low"],
+    "costM": 80,
+    "source": "Game model",
+    "sourceNote": "Provisional launch compatibility and cost values."
+  },
+  {
+    "id": "heavy-lifter",
+    "name": "Heavy Lifter",
+    "capacityByDestination": {
+      "moon": 400,
+      "mars": 300,
+      "europa": 250
+    },
+    "supportedOrbits": ["flyby", "high", "low"],
+    "costM": 150,
+    "source": "Game model",
+    "sourceNote": "Provisional launch compatibility and cost values."
+  }
+]

@@ -1,0 +1,70 @@
+[
+  {
+    "id": "solar-flare",
+    "name": "Solar Flare",
+    "description": "A burst of solar activity raises mission risk.",
+    "probability": 0.2,
+    "effects": {
+      "power": -15,
+      "data": -10,
+      "reliability": -0.08
+    },
+    "outcomes": ["Shielding limits damage.", "The mission loses some power and data margin."],
+    "source": "Game model",
+    "sourceNote": "Simplified random event; not live DONKI data."
+  },
+  {
+    "id": "instrument-fault",
+    "name": "Instrument Fault",
+    "description": "An instrument needs a recovery procedure.",
+    "probability": 0.15,
+    "effects": {
+      "science": -10,
+      "time": 10,
+      "reliability": -0.1
+    },
+    "outcomes": ["Redundancy supports recovery.", "Science collection is reduced."],
+    "source": "Game model",
+    "sourceNote": "Simplified random event."
+  },
+  {
+    "id": "comms-dropout",
+    "name": "Communications Dropout",
+    "description": "A communications session is missed.",
+    "probability": 0.18,
+    "effects": {
+      "communications": -20,
+      "data": -15,
+      "reliability": -0.06
+    },
+    "outcomes": ["A strong radio link restores the session.", "Queued data waits for the next pass."],
+    "source": "Game model",
+    "sourceNote": "Simplified random event."
+  },
+  {
+    "id": "power-dip",
+    "name": "Power Dip",
+    "description": "Available power falls below its expected level.",
+    "probability": 0.2,
+    "effects": {
+      "power": -25,
+      "science": -5
+    },
+    "outcomes": ["Power margin protects the science plan.", "Some observations are skipped."],
+    "source": "Game model",
+    "sourceNote": "Simplified random event."
+  },
+  {
+    "id": "budget-cut",
+    "name": "Budget Cut",
+    "description": "Program funding is reduced.",
+    "probability": 0.1,
+    "effects": {
+      "budget": -35,
+      "reliability": -0.04
+    },
+    "outcomes": ["A low-cost design absorbs the cut.", "The mission must reduce scope."],
+    "source": "Game model",
+    "sourceNote": "Simplified random event."
+  }
+]

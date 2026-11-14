@@ -1,0 +1,22 @@
+[
+  {
+    "id": "compact-bus",
+    "name": "Compact Bus",
+    "massKg": 35,
+    "powerW": 20,
+    "costM": 45,
+    "dataCapacityMbitPerDay": 100,
+    "source": "Game model",
+    "sourceNote": "Provisional component balance value."
+  },
+  {
+    "id": "heavy-bus",
+    "name": "Heavy Bus",
+    "massKg": 60,
+    "powerW": 30,
+    "costM": 80,
+    "dataCapacityMbitPerDay": 180,
+    "source": "Game model",
+    "sourceNote": "Provisional component balance value."
+  }
+]

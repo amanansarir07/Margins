@@ -1,0 +1,22 @@
+[
+  {
+    "id": "solar-array",
+    "name": "Solar Array",
+    "massKg": 25,
+    "powerW": 180,
+    "costM": 50,
+    "destinationIds": ["moon", "mars"],
+    "source": "Game model",
+    "sourceNote": "Provisional component balance value."
+  },
+  {
+    "id": "large-solar-array",
+    "name": "Large Solar Array",
+    "massKg": 40,
+    "powerW": 300,
+    "costM": 90,
+    "destinationIds": ["moon", "mars", "europa"],
+    "source": "Game model",
+    "sourceNote": "Provisional component balance value."
+  }
+]

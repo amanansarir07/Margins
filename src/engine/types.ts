@@ -1,0 +1,139 @@
+export type Source = "NASA-based" | "Game model";
+
+export interface DataRecord {
+  id: string;
+  name: string;
+  source: Source;
+  sourceNote: string;
+}
+
+export interface DestinationRecord extends DataRecord {
+  description: string;
+  distanceFromEarth: number;
+  oneWaySignalTime: number;
+  typicalTripTime: number;
+  surfaceGravity: number;
+  sunlightComparedToEarth: number;
+}
+
+export interface ResourceLimits {
+  massKg: number;
+  powerW: number;
+  budgetM: number;
+  dataMbitPerDay: number;
+  communicationsMbitPerDay: number;
+  timeDays: number;
+}
+
+export interface ScenarioRecord extends DataRecord {
+  enabled: boolean;
+  destinationId: string;
+  objective: string;
+  requiredInstruments: string[];
+  limits: ResourceLimits;
+  scienceGoal: number;
+  maxProgramMonths: number;
+  transitTimeDays: number;
+  criticalResources: string[];
+  events: string[];
+}
+
+export interface InstrumentRecord extends DataRecord {
+  purpose: string;
+  massKg: number;
+  powerW: number;
+  dataMbitPerDay: number;
+  costM: number;
+  sciencePoints: number;
+  scienceMultiplier?: number;
+}
+
+export interface SpacecraftBusRecord extends DataRecord {
+  massKg: number;
+  powerW: number;
+  costM: number;
+  dataCapacityMbitPerDay: number;
+}
+
+export interface PowerRecord extends DataRecord {
+  massKg: number;
+  powerW: number;
+  costM: number;
+  destinationIds: string[];
+}
+
+export interface CommsRecord extends DataRecord {
+  massKg: number;
+  powerW: number;
+  dataMbitPerDay: number;
+  costM: number;
+}
+
+export interface OnboardComputerRecord extends DataRecord {
+  massKg: number;
+  powerW: number;
+  costM: number;
+  dataProcessingMbitPerDay: number;
+  processedDataScienceMultiplier?: number;
+}
+
+export interface AttitudeControlRecord extends DataRecord {
+  massKg: number;
+  powerW: number;
+  costM: number;
+  pointingAccuracy: number;
+  scienceEfficiency: number;
+}
+
+export interface LaunchVehicleRecord extends DataRecord {
+  capacityByDestination: Record<string, number>;
+  supportedOrbits: string[];
+  costM: number;
+}
+
+export interface OrbitRecord extends DataRecord {
+  destinationId: string;
+  description: string;
+  insertionMassKg: number;
+  timeDays: number;
+  costM: number;
+  propellantModifier: number;
+}
+
+export interface GameEventRecord extends DataRecord {
+  description: string;
+  probability: number;
+  effects: Record<string, number>;
+  outcomes: string[];
+}
+
+export interface DonkiEventRecord extends DataRecord {
+  eventType: string;
+  startTime: string;
+  endTime: string;
+  sourceId: string;
+  effects: Record<string, number>;
+  sourceUrl: string;
+}
+
+export interface MissionReferenceRecord extends DataRecord {
+  missionName: string;
+  agency: string;
+  destinationId: string;
+  launchDate: string;
+  massKg: number;
+  missionDurationDays: number;
+  sourceUrl: string;
+}
+
+export interface Design {
+  scenarioId: string;
+  spacecraftBusId: string;
+  powerId: string;
+  commsId: string;
+  onboardComputerId: string;
+  attitudeControlId: string;
+  instrumentIds: string[];
+  launchVehicleId: string;
+  orbitId: string;
+}

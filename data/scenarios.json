@@ -1,0 +1,71 @@
+[
+  {
+    "id": "moon-ice-mapping",
+    "name": "Moon Ice Mapping",
+    "enabled": true,
+    "destinationId": "moon",
+    "objective": "Map water ice at the lunar south pole.",
+    "requiredInstruments": ["spectrometer", "radar"],
+    "limits": {
+      "massKg": 180,
+      "powerW": 150,
+      "budgetM": 400,
+      "dataMbitPerDay": 80,
+      "communicationsMbitPerDay": 80,
+      "timeDays": 400
+    },
+    "scienceGoal": 70,
+    "maxProgramMonths": 12,
+    "transitTimeDays": 4,
+    "criticalResources": ["power", "data"],
+    "events": ["solar-flare", "instrument-fault", "comms-dropout", "power-dip", "budget-cut"],
+    "source": "Game model",
+    "sourceNote": "Moon scenario values supplied for the first playable scenario; missing plan values are provisional."
+  },
+  {
+    "id": "mars-stub",
+    "name": "Mars Stub",
+    "enabled": false,
+    "destinationId": "mars",
+    "objective": "Future Mars mission scenario.",
+    "requiredInstruments": [],
+    "limits": {
+      "massKg": 0,
+      "powerW": 0,
+      "budgetM": 0,
+      "dataMbitPerDay": 0,
+      "communicationsMbitPerDay": 0,
+      "timeDays": 0
+    },
+    "scienceGoal": 0,
+    "maxProgramMonths": 0,
+    "transitTimeDays": 0,
+    "criticalResources": [],
+    "events": [],
+    "source": "Game model",
+    "sourceNote": "Disabled stub; values will be defined when the Mars scenario is built."
+  },
+  {
+    "id": "europa-stub",
+    "name": "Europa Stub",
+    "enabled": false,
+    "destinationId": "europa",
+    "objective": "Future Europa mission scenario.",
+    "requiredInstruments": [],
+    "limits": {
+      "massKg": 0,
+      "powerW": 0,
+      "budgetM": 0,
+      "dataMbitPerDay": 0,
+      "communicationsMbitPerDay": 0,
+      "timeDays": 0
+    },
+    "scienceGoal": 0,
+    "maxProgramMonths": 0,
+    "transitTimeDays": 0,
+    "criticalResources": [],
+    "events": [],
+    "source": "Game model",
+    "sourceNote": "Disabled stub; values will be defined when the Europa scenario is built."
+  }
+]

@@ -1,0 +1,40 @@
+[
+  {
+    "id": "spectrometer",
+    "name": "Spectrometer",
+    "purpose": "Identify surface materials and possible ice signatures.",
+    "massKg": 15,
+    "powerW": 45,
+    "dataMbitPerDay": 35,
+    "costM": 55,
+    "sciencePoints": 50,
+    "scienceMultiplier": 1.5,
+    "source": "Game model",
+    "sourceNote": "Provisional science and resource values; Moon scenario bonus is 1.5x."
+  },
+  {
+    "id": "radar",
+    "name": "Radar",
+    "purpose": "Look below the surface for layered material and ice.",
+    "massKg": 25,
+    "powerW": 70,
+    "dataMbitPerDay": 45,
+    "costM": 75,
+    "sciencePoints": 55,
+    "scienceMultiplier": 1.5,
+    "source": "Game model",
+    "sourceNote": "Provisional science and resource values; Moon scenario bonus is 1.5x."
+  },
+  {
+    "id": "camera",
+    "name": "Context Camera",
+    "purpose": "Capture visual context for mapped areas.",
+    "massKg": 8,
+    "powerW": 15,
+    "dataMbitPerDay": 25,
+    "costM": 25,
+    "sciencePoints": 20,
+    "source": "Game model",
+    "sourceNote": "Provisional component balance value."
+  }
+]
