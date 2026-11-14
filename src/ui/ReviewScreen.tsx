@@ -7,6 +7,7 @@ interface ReviewScreenProps {
   design: Design;
   scenario: ScenarioRecord;
   onBack: () => void;
+  onLaunch: () => void;
 }
 
 function CheckRow({
@@ -53,7 +54,7 @@ function hardChecksPass(result: EvaluationResult) {
   );
 }
 
-export function ReviewScreen({ design, scenario, onBack }: ReviewScreenProps) {
+export function ReviewScreen({ design, scenario, onBack, onLaunch }: ReviewScreenProps) {
   const [launched, setLaunched] = useState(false);
   const result = evaluate(design, scenario, 42);
   const canLaunch = hardChecksPass(result);
@@ -149,7 +150,10 @@ export function ReviewScreen({ design, scenario, onBack }: ReviewScreenProps) {
             type="button"
             disabled={!canLaunch}
             title={canLaunch ? "Start the mission simulation." : launchReason}
-            onClick={() => setLaunched(true)}
+            onClick={() => {
+              setLaunched(true);
+              onLaunch();
+            }}
           >
             Launch mission
           </button>

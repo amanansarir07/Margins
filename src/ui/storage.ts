@@ -1,0 +1,62 @@
+import type { Design } from "../engine/types";
+
+const LAST_DESIGN_KEY = "margins:last-design";
+const BEST_SCORE_KEY = "margins:best-score";
+
+function isDesign(value: unknown): value is Design {
+  if (typeof value !== "object" || value === null) return false;
+  const design = value as Partial<Design>;
+  return (
+    typeof design.scenarioId === "string" &&
+    typeof design.spacecraftBusId === "string" &&
+    typeof design.powerId === "string" &&
+    typeof design.commsId === "string" &&
+    typeof design.onboardComputerId === "string" &&
+    typeof design.attitudeControlId === "string" &&
+    Array.isArray(design.instrumentIds) &&
+    design.instrumentIds.every((id) => typeof id === "string") &&
+    typeof design.launchVehicleId === "string" &&
+    typeof design.orbitId === "string"
+  );
+}
+
+export function loadLastDesign(): Design | null {
+  try {
+    const raw = localStorage.getItem(LAST_DESIGN_KEY);
+    if (!raw) return null;
+    const value: unknown = JSON.parse(raw);
+    return isDesign(value) ? value : null;
+  } catch (error) {
+    console.warn("Could not load the last mission design.", error);
+    return null;
+  }
+}
+
+export function saveLastDesign(design: Design) {
+  try {
+    localStorage.setItem(LAST_DESIGN_KEY, JSON.stringify(design));
+  } catch (error) {
+    console.warn("Could not save the last mission design.", error);
+  }
+}
+
+export function loadBestScore(): number {
+  try {
+    const raw = localStorage.getItem(BEST_SCORE_KEY);
+    const score = raw === null ? 0 : Number(raw);
+    return Number.isFinite(score) ? score : 0;
+  } catch (error) {
+    console.warn("Could not load the best mission score.", error);
+    return 0;
+  }
+}
+
+export function saveBestScore(score: number) {
+  try {
+    if (score > loadBestScore()) {
+      localStorage.setItem(BEST_SCORE_KEY, String(score));
+    }
+  } catch (error) {
+    console.warn("Could not save the best mission score.", error);
+  }
+}

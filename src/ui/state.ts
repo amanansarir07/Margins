@@ -1,16 +1,26 @@
-import type { Design } from "../engine/types";
+import type { Design, EvaluationResult } from "../engine/types";
+import { loadLastDesign } from "./storage";
 
-export type Screen = "title" | "briefing" | "workshop" | "review";
+export type Screen =
+  | "title"
+  | "briefing"
+  | "workshop"
+  | "review"
+  | "flight"
+  | "debrief";
 
 export interface AppState {
   screen: Screen;
   design: Design;
+  result: EvaluationResult | null;
+  seed: number;
 }
 
 export type AppAction =
   | { type: "START_SOLO" }
   | { type: "GO_TO"; screen: Exclude<Screen, "title"> }
-  | { type: "SET_DESIGN"; design: Design };
+  | { type: "SET_DESIGN"; design: Design }
+  | { type: "COMPLETE_FLIGHT"; result: EvaluationResult };
 
 export const initialDesign: Design = {
   scenarioId: "moon-ice-mapping",
@@ -24,9 +34,13 @@ export const initialDesign: Design = {
   orbitId: "flyby",
 };
 
+const savedDesign = loadLastDesign();
+
 export const initialState: AppState = {
   screen: "title",
-  design: initialDesign,
+  design: savedDesign ?? initialDesign,
+  result: null,
+  seed: 42,
 };
 
 export function appReducer(state: AppState, action: AppAction): AppState {
@@ -37,6 +51,8 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       return { ...state, screen: action.screen };
     case "SET_DESIGN":
       return { ...state, design: action.design };
+    case "COMPLETE_FLIGHT":
+      return { ...state, result: action.result, screen: "debrief" };
     default:
       return state;
   }

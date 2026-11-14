@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { evaluate, previewResources } from "../src/engine/engine";
+import { evaluate, previewResources, simulateTimeline } from "../src/engine/engine";
 import { gameData } from "../src/engine/loadData";
 import type { Design } from "../src/engine/types";
 
@@ -61,5 +61,16 @@ describe("mission engine", () => {
 
     expect(result.checks.power).toBe(false);
     expect(result.reasons.some((reason) => reason.includes("power"))).toBe(true);
+  });
+
+  it("creates a four-phase timeline with draining resource samples", () => {
+    const timeline = simulateTimeline(baseDesign, moon, 1);
+    const phases = new Set(timeline.points.map((point) => point.phase));
+
+    expect(phases).toEqual(new Set(["launch", "transit", "arrival", "operations"]));
+    expect(timeline.points.at(-1)?.resources.time.used).toBeGreaterThan(
+      timeline.points[0]?.resources.time.used ?? 0,
+    );
+    expect(timeline.evaluation.grade).toMatch(/[A-F]/);
   });
 });

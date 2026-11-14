@@ -199,7 +199,28 @@ export interface EvaluationResult {
   reliability: number;
   events: MissionEventOutcome[];
   score: number;
+  grade: string;
   scoreBreakdown: ScoreBreakdown;
   success: boolean;
   reasons: string[];
+}
+
+export type FlightPhase = "launch" | "transit" | "arrival" | "operations";
+
+export interface TimelinePoint {
+  day: number;
+  phase: FlightPhase;
+  resources: ResourceReport;
+}
+
+export interface TimelineEvent extends MissionEventOutcome {
+  day: number;
+  phase: FlightPhase;
+}
+
+export interface FlightTimeline {
+  durationDays: number;
+  points: TimelinePoint[];
+  events: TimelineEvent[];
+  evaluation: EvaluationResult;
 }

@@ -4,6 +4,8 @@ import type {
   CommsRecord,
   Design,
   EvaluationResult,
+  FlightPhase,
+  FlightTimeline,
   GameEventRecord,
   InstrumentRecord,
   LaunchVehicleRecord,
@@ -427,8 +429,74 @@ export function evaluate(
         scoreBreakdown.reliability +
         scoreBreakdown.checks,
     ),
+    grade: gradeForScore(
+        scoreBreakdown.resourceMargins +
+          scoreBreakdown.science +
+          scoreBreakdown.reliability +
+          scoreBreakdown.checks,
+    ),
     scoreBreakdown,
     success,
     reasons,
   };
+}
+
+function gradeForScore(score: number): string {
+  if (score >= 900) return "A";
+  if (score >= 750) return "B";
+  if (score >= 600) return "C";
+  if (score >= 400) return "D";
+  return "F";
+}
+
+function phaseAtDay(day: number, durationDays: number): FlightPhase {
+  const progress = durationDays > 0 ? day / durationDays : 1;
+  if (progress < 0.08) return "launch";
+  if (progress < 0.55) return "transit";
+  if (progress < 0.68) return "arrival";
+  return "operations";
+}
+
+export function simulateTimeline(
+  design: Design,
+  scenario: ScenarioRecord,
+  seed: number,
+  sampleCount = 32,
+): FlightTimeline {
+  const evaluation = evaluate(design, scenario, seed);
+  const durationDays = Math.max(evaluation.resources.time.used, 1);
+  const drainFactors = {
+    mass: 0.1,
+    power: 0.4,
+    budget: 0.85,
+    data: 0.65,
+    comms: 0.65,
+    time: 1,
+  } as const;
+  const points = Array.from({ length: Math.max(sampleCount, 2) }, (_, index) => {
+    const progress = index / (Math.max(sampleCount, 2) - 1);
+    const resources = Object.fromEntries(
+      resourceNames.map((name) => {
+        const start = evaluation.resources[name];
+        const drain = Math.max(0, start.limit - start.used) * drainFactors[name];
+        const used = start.used + drain * progress;
+        return [
+          name,
+          {
+            used,
+            limit: start.limit,
+            margin: start.limit - used,
+          },
+        ];
+      }),
+    ) as ResourceReport;
+    const day = durationDays * progress;
+    return { day, phase: phaseAtDay(day, durationDays), resources };
+  });
+  const events = evaluation.events.map((event, index) => {
+    const day = durationDays * ((index + 1) / (evaluation.events.length + 1));
+    return { ...event, day, phase: phaseAtDay(day, durationDays) };
+  });
+
+  return { durationDays, points, events, evaluation };
 }
