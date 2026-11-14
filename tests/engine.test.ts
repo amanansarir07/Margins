@@ -6,7 +6,7 @@ import {
   suggestFixes,
 } from "../src/engine/engine";
 import { gameData } from "../src/engine/loadData";
-import type { Design } from "../src/engine/types";
+import type { Design, MissionOptions } from "../src/engine/types";
 
 const moon = gameData.scenarios.find((scenario) => scenario.id === "moon-ice-mapping");
 
@@ -91,5 +91,57 @@ describe("mission engine", () => {
 
   it("returns no fixes for a successful design", () => {
     expect(suggestFixes(baseDesign, moon, 1)).toEqual([]);
+  });
+
+  it("supports Mars and keeps its orbit compatible", () => {
+    const mars = gameData.scenarios.find((scenario) => scenario.id === "mars-minerals");
+    if (!mars) throw new Error("Mars scenario is missing from test data.");
+
+    const result = evaluate(
+      {
+        ...baseDesign,
+        scenarioId: mars.id,
+        powerId: "nuclear-generator",
+        launchVehicleId: "heavy-lifter",
+        orbitId: "mars-flyby",
+      },
+      mars,
+      1,
+    );
+
+    expect(mars.enabled).toBe(true);
+    expect(result.checks.launchCompatibility.orbit).toBe(true);
+  });
+
+  it("requires nuclear power at Europa", () => {
+    const europa = gameData.scenarios.find((scenario) => scenario.id === "europa-ocean");
+    if (!europa) throw new Error("Europa scenario is missing from test data.");
+
+    const result = evaluate(
+      {
+        ...baseDesign,
+        scenarioId: europa.id,
+        launchVehicleId: "heavy-lifter",
+        orbitId: "europa-flyby",
+      },
+      europa,
+      1,
+    );
+
+    expect(result.checks.power).toBe(false);
+    expect(result.reasons).toContain("This scenario requires nuclear power.");
+  });
+
+  it("enforces Cadet component limits and removes Sandbox goals", () => {
+    const cadet: MissionOptions = { difficulty: "cadet", sandbox: false };
+    expect(evaluate(baseDesign, moon, 1, cadet).checks.componentCompatibility).toBe(
+      false,
+    );
+
+    const sandbox: MissionOptions = { difficulty: "engineer", sandbox: true };
+    expect(previewResources(baseDesign, moon, sandbox).resources.budget.limit).toBe(
+      Infinity,
+    );
+    expect(evaluate(baseDesign, moon, 1, sandbox).success).toBe(true);
   });
 });

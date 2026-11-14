@@ -1,5 +1,33 @@
 [
   {
+    "id": "dust-storm",
+    "name": "Dust Storm",
+    "description": "A Mars dust storm reduces available power and communications.",
+    "probability": 0.25,
+    "effects": {
+      "power": -25,
+      "communications": -25,
+      "reliability": -0.1
+    },
+    "outcomes": ["A storm plan keeps the mission operating.", "The storm delays mapping and downlink."],
+    "source": "Game model",
+    "sourceNote": "Simplified Mars dust-storm event."
+  },
+  {
+    "id": "radiation-burst",
+    "name": "Radiation Burst",
+    "description": "High radiation threatens electronics during the Europa mission.",
+    "probability": 0.3,
+    "effects": {
+      "power": -20,
+      "science": -10,
+      "reliability": -0.15
+    },
+    "outcomes": ["Radiation hardening protects the computer.", "The mission loses science and reliability."],
+    "source": "Game model",
+    "sourceNote": "Simplified high-radiation Europa event."
+  },
+  {
     "id": "solar-flare",
     "name": "Solar Flare",
     "description": "A burst of solar activity raises mission risk.",

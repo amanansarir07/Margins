@@ -1,6 +1,6 @@
 import { gameData } from "../engine/loadData";
 import { useState } from "react";
-import type { Design, ScenarioRecord } from "../engine/types";
+import type { Design, MissionOptions, ScenarioRecord } from "../engine/types";
 import { ResourcePanel } from "./ResourcePanel";
 import { Tooltip } from "./Tooltip";
 
@@ -28,6 +28,7 @@ const tabs: { id: TabId; label: string }[] = [
 interface WorkshopScreenProps {
   design: Design;
   scenario: ScenarioRecord;
+  options: MissionOptions;
   onDesignChange: (design: Design) => void;
   onContinue: () => void;
 }
@@ -66,6 +67,7 @@ function ChoiceCard({
 export function WorkshopScreen({
   design,
   scenario,
+  options,
   onDesignChange,
   onContinue,
 }: WorkshopScreenProps) {
@@ -160,7 +162,9 @@ export function WorkshopScreen({
       case "orbit":
         return (
           <ChoiceList
-            items={gameData.orbits}
+            items={gameData.orbits.filter(
+              (item) => item.destinationId === scenario.destinationId,
+            )}
             selected={design.orbitId}
             onSelect={(id) => update({ orbitId: id })}
             summary={(item) => `${item.timeDays} days · ${item.propellantModifier}× propellant`}
@@ -202,7 +206,7 @@ export function WorkshopScreen({
             Continue to Go/No-Go review
           </button>
         </div>
-        <ResourcePanel design={design} scenario={scenario} />
+        <ResourcePanel design={design} scenario={scenario} options={options} />
       </div>
     </section>
   );

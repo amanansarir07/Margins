@@ -6,6 +6,7 @@
     "powerW": 20,
     "costM": 45,
     "dataCapacityMbitPerDay": 100,
+    "tier": "simple",
     "source": "Game model",
     "sourceNote": "Provisional component balance value."
   },
@@ -16,6 +17,7 @@
     "powerW": 30,
     "costM": 80,
     "dataCapacityMbitPerDay": 180,
+    "tier": "advanced",
     "source": "Game model",
     "sourceNote": "Provisional component balance value."
   }

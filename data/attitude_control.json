@@ -7,6 +7,7 @@
     "costM": 6,
     "pointingAccuracy": 120,
     "scienceEfficiency": 0.8,
+    "tier": "simple",
     "source": "Game model",
     "sourceNote": "Component values supplied in the game plan."
   },
@@ -18,6 +19,7 @@
     "costM": 18,
     "pointingAccuracy": 20,
     "scienceEfficiency": 1,
+    "tier": "advanced",
     "source": "Game model",
     "sourceNote": "Component values supplied in the game plan."
   }

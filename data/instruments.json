@@ -9,6 +9,7 @@
     "costM": 55,
     "sciencePoints": 50,
     "scienceMultiplier": 1.5,
+    "tier": "simple",
     "source": "Game model",
     "sourceNote": "Provisional science and resource values; Moon scenario bonus is 1.5x."
   },
@@ -22,6 +23,7 @@
     "costM": 75,
     "sciencePoints": 55,
     "scienceMultiplier": 1.5,
+    "tier": "advanced",
     "source": "Game model",
     "sourceNote": "Provisional science and resource values; Moon scenario bonus is 1.5x."
   },
@@ -34,6 +36,7 @@
     "dataMbitPerDay": 25,
     "costM": 25,
     "sciencePoints": 20,
+    "tier": "simple",
     "source": "Game model",
     "sourceNote": "Provisional component balance value."
   }

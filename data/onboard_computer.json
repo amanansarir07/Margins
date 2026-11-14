@@ -6,6 +6,7 @@
     "powerW": 10,
     "costM": 5,
     "dataProcessingMbitPerDay": 60,
+    "tier": "simple",
     "source": "Game model",
     "sourceNote": "Component values supplied in the game plan."
   },
@@ -16,6 +17,7 @@
     "powerW": 25,
     "costM": 15,
     "dataProcessingMbitPerDay": 150,
+    "tier": "advanced",
     "processedDataScienceMultiplier": 1.25,
     "source": "Game model",
     "sourceNote": "Component values supplied in the game plan; processed-data science bonus is 25%."

@@ -1,5 +1,10 @@
 import { previewResources } from "../engine/engine";
-import type { Design, ResourceName, ScenarioRecord } from "../engine/types";
+import type {
+  Design,
+  MissionOptions,
+  ResourceName,
+  ScenarioRecord,
+} from "../engine/types";
 import { Tooltip } from "./Tooltip";
 
 const resourceLabels: Record<ResourceName, string> = {
@@ -39,11 +44,13 @@ function getBarClass(used: number, limit: number) {
 export function ResourcePanel({
   design,
   scenario,
+  options,
 }: {
   design: Design;
   scenario: ScenarioRecord;
+  options: MissionOptions;
 }) {
-  const preview = previewResources(design, scenario);
+  const preview = previewResources(design, scenario, options);
 
   return (
     <aside className="resource-panel panel" aria-labelledby="resources-title">

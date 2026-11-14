@@ -1,8 +1,12 @@
 import { gameData } from "../engine/loadData";
-import type { ScenarioRecord } from "../engine/types";
+import type { Difficulty, ScenarioRecord } from "../engine/types";
 
 interface BriefingScreenProps {
   scenario: ScenarioRecord;
+  difficulty: Difficulty;
+  sandbox: boolean;
+  onScenarioChange: (scenarioId: string) => void;
+  onDifficultyChange: (difficulty: Difficulty) => void;
   onContinue: () => void;
 }
 
@@ -32,7 +36,14 @@ function FactCard({
   );
 }
 
-export function BriefingScreen({ scenario, onContinue }: BriefingScreenProps) {
+export function BriefingScreen({
+  scenario,
+  difficulty,
+  sandbox,
+  onScenarioChange,
+  onDifficultyChange,
+  onContinue,
+}: BriefingScreenProps) {
   const destination = gameData.destinations.find(
     (item) => item.id === scenario.destinationId,
   );
@@ -51,16 +62,64 @@ export function BriefingScreen({ scenario, onContinue }: BriefingScreenProps) {
         <h1 id="briefing-title">{scenario.name}</h1>
       </div>
       <div className="briefing-grid">
+        <article className="panel">
+          <p className="panel-label">Mission setup</p>
+          <label className="field-label" htmlFor="scenario-select">
+            Destination scenario
+          </label>
+          <select
+            className="select-field"
+            id="scenario-select"
+            value={scenario.id}
+            onChange={(event) => onScenarioChange(event.target.value)}
+          >
+            {gameData.scenarios
+              .filter((item) => item.enabled)
+              .map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.name}
+                </option>
+              ))}
+          </select>
+          <label className="field-label" htmlFor="difficulty-select">
+            Difficulty
+          </label>
+          <select
+            className="select-field"
+            disabled={sandbox}
+            id="difficulty-select"
+            value={difficulty}
+            onChange={(event) =>
+              onDifficultyChange(event.target.value as Difficulty)
+            }
+          >
+            <option value="cadet">Cadet · simple parts, hints on</option>
+            <option value="engineer">Engineer · normal</option>
+            <option value="veteran">Veteran · tight margins, score ×1.35</option>
+          </select>
+          {sandbox && (
+            <p className="hint-text">
+              Sandbox is active: no budget cap and no science goal.
+            </p>
+          )}
+        </article>
         <article className="panel briefing-objective">
           <p className="panel-label">Objective</p>
           <h2>{scenario.objective}</h2>
           <p className="muted">
-            Science goal: <strong>{scenario.scienceGoal} points</strong>
+            Science goal:{" "}
+            <strong>{sandbox ? "None in Sandbox" : `${scenario.scienceGoal} points`}</strong>
           </p>
           <p className="panel-label">Requirements</p>
           <p>
-            Choose at least one:{" "}
-            <strong>{requiredNames.join(" or ") || "No instrument requirement"}</strong>
+            {sandbox ? (
+              <strong>No instrument requirement in Sandbox</strong>
+            ) : (
+              <>
+                Choose at least one:{" "}
+                <strong>{requiredNames.join(" or ") || "No instrument requirement"}</strong>
+              </>
+            )}
           </p>
         </article>
         <article className="panel">
@@ -68,7 +127,7 @@ export function BriefingScreen({ scenario, onContinue }: BriefingScreenProps) {
           <dl className="constraint-list">
             <div>
               <dt>Budget cap</dt>
-              <dd>${scenario.limits.budgetM}M</dd>
+              <dd>{sandbox ? "No cap" : `$${scenario.limits.budgetM}M`}</dd>
             </div>
             <div>
               <dt>Program time</dt>
@@ -83,6 +142,18 @@ export function BriefingScreen({ scenario, onContinue }: BriefingScreenProps) {
               </span>
             ))}
           </div>
+          {difficulty === "cadet" &&
+            scenario.difficultyHints &&
+            scenario.difficultyHints.length > 0 && (
+            <>
+              <p className="panel-label hint-heading">Mission hints</p>
+              <ul className="hint-list">
+                {scenario.difficultyHints.map((hint) => (
+                  <li key={hint}>{hint}</li>
+                ))}
+              </ul>
+            </>
+          )}
         </article>
         <article className="panel destination-card">
           <div className="card-title-row">

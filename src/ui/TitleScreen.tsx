@@ -1,8 +1,9 @@
 interface TitleScreenProps {
   onStartSolo: () => void;
+  onStartSandbox: () => void;
 }
 
-export function TitleScreen({ onStartSolo }: TitleScreenProps) {
+export function TitleScreen({ onStartSolo, onStartSandbox }: TitleScreenProps) {
   return (
     <section className="title-screen" aria-labelledby="game-title">
       <p className="eyebrow">NASA Space Apps 2026</p>
@@ -17,8 +18,8 @@ export function TitleScreen({ onStartSolo }: TitleScreenProps) {
         <button className="button button-muted" type="button" disabled>
           Team mode <span>Coming soon</span>
         </button>
-        <button className="button button-muted" type="button" disabled>
-          Sandbox <span>Coming soon</span>
+        <button className="button button-muted" type="button" onClick={onStartSandbox}>
+          Sandbox <span>Experiment freely</span>
         </button>
       </div>
     </section>

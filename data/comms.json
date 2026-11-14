@@ -7,6 +7,7 @@
     "dataMbitPerDay": 100,
     "costM": 35,
     "antennaFactor": 1,
+    "tier": "simple",
     "source": "Game model",
     "sourceNote": "Provisional component balance value."
   },
@@ -18,6 +19,7 @@
     "dataMbitPerDay": 240,
     "costM": 70,
     "antennaFactor": 1.5,
+    "tier": "advanced",
     "source": "Game model",
     "sourceNote": "Provisional component balance value."
   }

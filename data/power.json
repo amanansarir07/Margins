@@ -7,6 +7,7 @@
     "costM": 50,
     "destinationIds": ["moon", "mars"],
     "kind": "solar",
+    "tier": "simple",
     "source": "Game model",
     "sourceNote": "Provisional component balance value."
   },
@@ -18,6 +19,7 @@
     "costM": 90,
     "destinationIds": ["moon", "mars", "europa"],
     "kind": "solar",
+    "tier": "advanced",
     "source": "Game model",
     "sourceNote": "Provisional component balance value."
   },
@@ -29,6 +31,7 @@
     "costM": 110,
     "destinationIds": ["moon", "mars", "europa"],
     "kind": "nuclear",
+    "tier": "advanced",
     "source": "Game model",
     "sourceNote": "Provisional game-model component; nuclear output is independent of sunlight."
   },
@@ -40,6 +43,7 @@
     "costM": 0,
     "destinationIds": ["moon", "mars", "europa"],
     "kind": "solar",
+    "tier": "simple",
     "source": "Game model",
     "sourceNote": "Intentional empty selection used to explain a power failure."
   }

@@ -7,6 +7,7 @@ import type {
   FlightPhase,
   FlightTimeline,
   GameEventRecord,
+  Difficulty,
   InstrumentRecord,
   LaunchVehicleRecord,
   OnboardComputerRecord,
@@ -17,6 +18,7 @@ import type {
   ScenarioRecord,
   SpacecraftBusRecord,
   SuggestedFix,
+  MissionOptions,
 } from "./types";
 
 type Components = {
@@ -53,6 +55,43 @@ const resourceNames = [
   "comms",
   "time",
 ] as const;
+
+const defaultOptions: Required<MissionOptions> = {
+  difficulty: "engineer",
+  sandbox: false,
+};
+
+function resolveOptions(options?: MissionOptions): Required<MissionOptions> {
+  return { ...defaultOptions, ...options };
+}
+
+function difficultyLimit(
+  limit: number,
+  resource: keyof ResourceReport,
+  options: Required<MissionOptions>,
+): number {
+  if (options.sandbox && resource === "budget") return Number.POSITIVE_INFINITY;
+  if (options.difficulty === "cadet") return limit * 1.2;
+  if (options.difficulty === "veteran") {
+    return limit * (resource === "budget" ? 0.75 : 0.9);
+  }
+  return limit;
+}
+
+function componentCompatibility(
+  calculated: CalculatedDesign,
+  options: Required<MissionOptions>,
+): boolean {
+  if (options.difficulty !== "cadet") return true;
+  return [
+    calculated.bus,
+    calculated.power,
+    calculated.comms,
+    calculated.computer,
+    calculated.attitude,
+    ...calculated.instruments,
+  ].every((component) => component.tier !== "advanced");
+}
 
 function findById<T extends { id: string }>(
   records: readonly T[],
@@ -178,31 +217,38 @@ function calculateDesign(
 function calculateResources(
   calculated: CalculatedDesign,
   scenario: ScenarioRecord,
+  options: Required<MissionOptions>,
 ): ResourceReport {
   const resources = {
     mass: {
       used: calculated.totalMass,
-      limit: scenario.limits.massKg,
+      limit: difficultyLimit(scenario.limits.massKg, "mass", options),
     },
     power: {
       used: calculated.powerUsed,
-      limit: Math.min(calculated.powerAvailable, scenario.limits.powerW),
+      limit: Math.min(
+        calculated.powerAvailable,
+        difficultyLimit(scenario.limits.powerW, "power", options),
+      ),
     },
     budget: {
       used: calculated.budgetUsed,
-      limit: scenario.limits.budgetM,
+      limit: difficultyLimit(scenario.limits.budgetM, "budget", options),
     },
     data: {
       used: calculated.generatedData,
-      limit: scenario.limits.dataMbitPerDay,
+      limit: difficultyLimit(scenario.limits.dataMbitPerDay, "data", options),
     },
     comms: {
       used: calculated.generatedData,
-      limit: Math.min(calculated.downlink, scenario.limits.communicationsMbitPerDay),
+      limit: Math.min(
+        calculated.downlink,
+        difficultyLimit(scenario.limits.communicationsMbitPerDay, "comms", options),
+      ),
     },
     time: {
       used: calculated.timeUsed,
-      limit: calculated.timeLimit,
+      limit: difficultyLimit(calculated.timeLimit, "time", options),
     },
   };
 
@@ -235,8 +281,14 @@ function makeWarnings(resources: ResourceReport): string[] {
 export function previewResources(
   design: Design,
   scenario: ScenarioRecord,
+  options?: MissionOptions,
 ): PreviewResourcesResult {
-  const resources = calculateResources(calculateDesign(design, scenario), scenario);
+  const resolvedOptions = resolveOptions(options);
+  const resources = calculateResources(
+    calculateDesign(design, scenario),
+    scenario,
+    resolvedOptions,
+  );
   return { resources, warnings: makeWarnings(resources) };
 }
 
@@ -270,11 +322,13 @@ export function suggestFixes(
   design: Design,
   scenario: ScenarioRecord,
   seed: number,
+  options?: MissionOptions,
 ): SuggestedFix[] {
-  const original = evaluate(design, scenario, seed);
+  const resolvedOptions = resolveOptions(options);
+  const original = evaluate(design, scenario, seed, resolvedOptions);
   if (original.success) return [];
 
-  const originalPreview = previewResources(design, scenario);
+  const originalPreview = previewResources(design, scenario, resolvedOptions);
   const candidates: { design: Design; label: string }[] = [];
   const seen = new Set<string>([JSON.stringify(design)]);
   const addCandidate = (candidate: Design, label: string) => {
@@ -370,8 +424,12 @@ export function suggestFixes(
   }
 
   const suggestions = candidates.map(({ design: candidateDesign, label }) => {
-    const evaluation = evaluate(candidateDesign, scenario, seed);
-    const candidatePreview = previewResources(candidateDesign, scenario);
+    const evaluation = evaluate(candidateDesign, scenario, seed, resolvedOptions);
+    const candidatePreview = previewResources(
+      candidateDesign,
+      scenario,
+      resolvedOptions,
+    );
     const cost = roundImpact(
       candidatePreview.resources.budget.used -
         originalPreview.resources.budget.used,
@@ -451,9 +509,11 @@ export function evaluate(
   design: Design,
   scenario: ScenarioRecord,
   seed: number,
+  options?: MissionOptions,
 ): EvaluationResult {
+  const resolvedOptions = resolveOptions(options);
   const calculated = calculateDesign(design, scenario);
-  const resources = calculateResources(calculated, scenario);
+  const resources = calculateResources(calculated, scenario, resolvedOptions);
   const launchMass = calculated.launchVehicle.capacityByDestination[scenario.destinationId] ?? 0;
   const launchMassPass = calculated.totalMass <= launchMass;
   const launchOrbitPass = calculated.launchVehicle.supportedOrbits.includes(
@@ -461,7 +521,10 @@ export function evaluate(
   );
   const checks = {
     mass: resources.mass.margin >= 0,
-    power: resources.power.margin >= 0,
+    power:
+      resources.power.margin >= 0 &&
+      (!scenario.requiredPowerKind ||
+        calculated.power.kind === scenario.requiredPowerKind),
     data: resources.data.margin >= 0,
     budget: resources.budget.margin >= 0,
     time: resources.time.margin >= 0,
@@ -470,9 +533,11 @@ export function evaluate(
       mass: launchMassPass,
       orbit: launchOrbitPass,
     },
+    componentCompatibility: componentCompatibility(calculated, resolvedOptions),
   };
 
   const hasRequiredInstrument =
+    resolvedOptions.sandbox ||
     scenario.requiredInstrumentAnyOf.length === 0 ||
     scenario.requiredInstrumentAnyOf.some((id) =>
       design.instrumentIds.includes(id),
@@ -504,7 +569,11 @@ export function evaluate(
     const risk =
       criticalMarginRatio >= 0.25
         ? 0
-        : Math.min(1, event.probability + (0.25 - Math.max(criticalMarginRatio, 0)));
+        : Math.min(
+            1,
+            (event.probability + (0.25 - Math.max(criticalMarginRatio, 0))) *
+              (resolvedOptions.difficulty === "veteran" ? 1.5 : 1),
+          );
     const occurred = random() < risk;
     const result = eventOutcome(event, occurred, criticalMarginRatio);
     return {
@@ -526,14 +595,20 @@ export function evaluate(
   }
   reliability = Math.max(0, Math.min(1, reliability));
   const adjustedScience = Math.max(0, sciencePoints + eventSciencePenalty);
-  const allChecks =
-    Object.values(checks).every((check) =>
-      typeof check === "boolean" ? check : check.pass,
-    );
+  const scoredChecks = [
+    checks.mass,
+    checks.power,
+    checks.data,
+    checks.budget,
+    checks.time,
+    checks.launchCompatibility.pass,
+  ];
+  const allChecks = scoredChecks.every(Boolean);
   const success =
     allChecks &&
     hasRequiredInstrument &&
-    adjustedScience >= scenario.scienceGoal &&
+    checks.componentCompatibility &&
+    (resolvedOptions.sandbox || adjustedScience >= scenario.scienceGoal) &&
     reliability >= 0.5;
 
   const reasons = [
@@ -552,7 +627,15 @@ export function evaluate(
     ...(!hasRequiredInstrument
       ? ["The mission needs a spectrometer or radar."]
       : []),
-    ...(adjustedScience < scenario.scienceGoal
+    ...(!checks.componentCompatibility
+      ? ["Cadet difficulty only allows simple components."]
+      : []),
+    ...(!checks.power &&
+    scenario.requiredPowerKind &&
+    calculated.power.kind !== scenario.requiredPowerKind
+      ? [`This scenario requires ${scenario.requiredPowerKind} power.`]
+      : []),
+    ...(!resolvedOptions.sandbox && adjustedScience < scenario.scienceGoal
       ? [`Science returned ${adjustedScience} points; the goal is ${scenario.scienceGoal}.`]
       : []),
     ...events
@@ -568,17 +651,17 @@ export function evaluate(
   const marginScore =
     (resourceNames.reduce((total, name) => {
       const resource = resources[name];
-      return total + Math.max(0, Math.min(1, resource.margin / Math.max(resource.limit, 1)));
+      const ratio = Number.isFinite(resource.limit)
+        ? resource.margin / Math.max(resource.limit, 1)
+        : 1;
+      return total + Math.max(0, Math.min(1, ratio));
     }, 0) /
       resourceNames.length) *
     200;
   const checksScore =
-    (Object.values(checks).filter((check) =>
-      typeof check === "boolean" ? check : check.pass,
-    ).length /
-      6) *
+    (scoredChecks.filter(Boolean).length / 6) *
     600;
-  const scoreBreakdown = {
+  const baseScoreBreakdown = {
     resourceMargins: Math.round(marginScore),
     science: Math.round(
       Math.min(1, adjustedScience / Math.max(scenario.scienceGoal, 1)) * 100,
@@ -586,6 +669,18 @@ export function evaluate(
     reliability: Math.round(reliability * 100),
     checks: Math.round(checksScore),
   };
+  const difficultyScoreMultiplier =
+    resolvedOptions.difficulty === "veteran" ? 1.35 : 1;
+  const score = Math.min(
+    1000,
+    Math.round(
+      (baseScoreBreakdown.resourceMargins +
+        baseScoreBreakdown.science +
+        baseScoreBreakdown.reliability +
+        baseScoreBreakdown.checks) *
+        difficultyScoreMultiplier,
+    ),
+  );
 
   return {
     checks,
@@ -593,20 +688,11 @@ export function evaluate(
     sciencePoints: adjustedScience,
     reliability,
     events,
-    score: Math.min(
-      1000,
-      scoreBreakdown.resourceMargins +
-        scoreBreakdown.science +
-        scoreBreakdown.reliability +
-        scoreBreakdown.checks,
-    ),
+    score,
     grade: gradeForScore(
-        scoreBreakdown.resourceMargins +
-          scoreBreakdown.science +
-          scoreBreakdown.reliability +
-          scoreBreakdown.checks,
+        score,
     ),
-    scoreBreakdown,
+    scoreBreakdown: baseScoreBreakdown,
     success,
     reasons,
   };
@@ -633,8 +719,9 @@ export function simulateTimeline(
   scenario: ScenarioRecord,
   seed: number,
   sampleCount = 32,
+  options?: MissionOptions,
 ): FlightTimeline {
-  const evaluation = evaluate(design, scenario, seed);
+  const evaluation = evaluate(design, scenario, seed, options);
   const durationDays = Math.max(evaluation.resources.time.used, 1);
   const drainFactors = {
     mass: 0.1,

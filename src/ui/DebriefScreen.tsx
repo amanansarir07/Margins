@@ -3,6 +3,7 @@ import { simulateTimeline, suggestFixes } from "../engine/engine";
 import type {
   Design,
   EvaluationResult,
+  MissionOptions,
   ResourceName,
   ScenarioRecord,
   SuggestedFix,
@@ -31,6 +32,7 @@ interface DebriefScreenProps {
   scenario: ScenarioRecord;
   result: EvaluationResult;
   seed: number;
+  options: MissionOptions;
   onRerun: () => void;
   onApplyFix: (design: Design) => void;
 }
@@ -40,16 +42,17 @@ export function DebriefScreen({
   scenario,
   result,
   seed,
+  options,
   onRerun,
   onApplyFix,
 }: DebriefScreenProps) {
   const timeline = useMemo(
-    () => simulateTimeline(design, scenario, seed),
-    [design, scenario, seed],
+    () => simulateTimeline(design, scenario, seed, 32, options),
+    [design, scenario, seed, options],
   );
   const fixes = useMemo(
-    () => suggestFixes(design, scenario, seed),
-    [design, scenario, seed],
+    () => suggestFixes(design, scenario, seed, options),
+    [design, scenario, seed, options],
   );
 
   return (

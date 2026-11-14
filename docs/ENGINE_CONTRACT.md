@@ -21,6 +21,14 @@ The evaluator uses a seeded random generator so the same design, scenario, and s
 - Events are blocked when every critical-resource margin is at least 25%. Otherwise the seeded roll is adjusted by the weakest critical margin. This makes tight margins increase risk without making events purely random.
 - The score awards 600 points for six checks, 200 for resource margins, 100 for science, and 100 for reliability.
 
+## Difficulty and sandbox
+
+- **Cadet** is an onboarding mode. It permits simple-tier components, multiplies resource limits by 1.2, and exposes extra hints in the briefing.
+- **Engineer** uses the normal limits, component tiers, event risk, and scoring.
+- **Veteran** permits advanced components but tightens resource limits to 90% (and the budget to 75%), increases event risk by 1.5, and applies a 1.35 score multiplier capped at 1000.
+- **Sandbox** removes the budget cap, science goal, and instrument requirement so players can explore. It keeps mass, power, data, time, launch compatibility, and scenario-specific power requirements.
+- Mars and Europa values are provisional Game model values until the challenge plan supplies final numbers. Europa requires nuclear power; its simplified radiation events are Game model.
+
 ## Suggested fixes
 
 `suggestFixes(design, scenario, seed)` tries adjacent component choices, larger or smaller power systems, a different antenna, dropping or swapping one instrument, and different launch vehicles or compatible orbits. Every candidate is evaluated with the same seed. A successful design returns no suggestions. A failed design returns up to three successful candidates sorted by cost; each includes the changed design, cost delta, mass impact, power-margin impact, evaluation, and a plain-English explanation. If no candidate succeeds, it returns the single highest-scoring closest improvement.

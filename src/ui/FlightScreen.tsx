@@ -3,6 +3,7 @@ import { simulateTimeline } from "../engine/engine";
 import type {
   Design,
   FlightTimeline,
+  MissionOptions,
   MissionEventOutcome,
   ResourceName,
   ScenarioRecord,
@@ -40,6 +41,7 @@ interface FlightScreenProps {
   design: Design;
   scenario: ScenarioRecord;
   seed: number;
+  options: MissionOptions;
   onComplete: (timeline: FlightTimeline) => void;
 }
 
@@ -47,11 +49,12 @@ export function FlightScreen({
   design,
   scenario,
   seed,
+  options,
   onComplete,
 }: FlightScreenProps) {
   const timeline = useMemo(
-    () => simulateTimeline(design, scenario, seed),
-    [design, scenario, seed],
+    () => simulateTimeline(design, scenario, seed, 32, options),
+    [design, scenario, seed, options],
   );
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);

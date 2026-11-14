@@ -20,7 +20,17 @@
       "mars": 300,
       "europa": 250
     },
-    "supportedOrbits": ["flyby", "high", "low"],
+    "supportedOrbits": [
+      "flyby",
+      "high",
+      "low",
+      "mars-flyby",
+      "mars-high",
+      "mars-low",
+      "europa-flyby",
+      "europa-high",
+      "europa-low"
+    ],
     "costM": 150,
     "source": "Game model",
     "sourceNote": "Provisional launch compatibility and cost values."

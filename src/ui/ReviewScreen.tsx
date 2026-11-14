@@ -1,11 +1,17 @@
 import { useState } from "react";
 import { evaluate } from "../engine/engine";
-import type { Design, EvaluationResult, ScenarioRecord } from "../engine/types";
+import type {
+  Design,
+  EvaluationResult,
+  MissionOptions,
+  ScenarioRecord,
+} from "../engine/types";
 import { Tooltip } from "./Tooltip";
 
 interface ReviewScreenProps {
   design: Design;
   scenario: ScenarioRecord;
+  options: MissionOptions;
   onBack: () => void;
   onLaunch: () => void;
 }
@@ -54,9 +60,15 @@ function hardChecksPass(result: EvaluationResult) {
   );
 }
 
-export function ReviewScreen({ design, scenario, onBack, onLaunch }: ReviewScreenProps) {
+export function ReviewScreen({
+  design,
+  scenario,
+  options,
+  onBack,
+  onLaunch,
+}: ReviewScreenProps) {
   const [launched, setLaunched] = useState(false);
-  const result = evaluate(design, scenario, 42);
+  const result = evaluate(design, scenario, 42, options);
   const canLaunch = hardChecksPass(result);
   const launchReason = result.reasons[0] ?? "Resolve the red checks before launch.";
 

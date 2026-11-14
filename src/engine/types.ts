@@ -1,10 +1,13 @@
 export type Source = "NASA-based" | "Game model";
+export type Difficulty = "cadet" | "engineer" | "veteran";
+export type PowerKind = "solar" | "nuclear";
 
 export interface DataRecord {
   id: string;
   name: string;
   source: Source;
   sourceNote: string;
+  tier?: "simple" | "advanced";
 }
 
 export interface DestinationRecord extends DataRecord {
@@ -39,6 +42,9 @@ export interface ScenarioRecord extends DataRecord {
   transitTimeDays: number;
   criticalResources: string[];
   events: string[];
+  requiredPowerKind?: PowerKind;
+  radiationLevel?: "low" | "high";
+  difficultyHints?: string[];
 }
 
 export interface InstrumentRecord extends DataRecord {
@@ -63,7 +69,7 @@ export interface PowerRecord extends DataRecord {
   powerW: number;
   costM: number;
   destinationIds: string[];
-  kind: "solar" | "nuclear";
+  kind: PowerKind;
 }
 
 export interface CommsRecord extends DataRecord {
@@ -175,6 +181,7 @@ export interface EvaluationChecks {
     mass: boolean;
     orbit: boolean;
   };
+  componentCompatibility: boolean;
 }
 
 export interface MissionEventOutcome {
@@ -203,6 +210,11 @@ export interface EvaluationResult {
   scoreBreakdown: ScoreBreakdown;
   success: boolean;
   reasons: string[];
+}
+
+export interface MissionOptions {
+  difficulty?: Difficulty;
+  sandbox?: boolean;
 }
 
 export interface SuggestedFix {
