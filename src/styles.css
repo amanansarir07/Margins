@@ -802,6 +802,175 @@ body {
   width: 100%;
 }
 
+.flight-header {
+  align-items: end;
+  display: flex;
+  justify-content: space-between;
+}
+
+.flight-header h1 {
+  font-family: "Bowlby One SC", sans-serif;
+  font-size: clamp(2rem, 8vw, 4rem);
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.flight-countdown {
+  background: var(--launchpad-yellow);
+  border: 3px solid var(--ink-navy);
+  box-shadow: var(--shadow);
+  font-family: "Bowlby One SC", sans-serif;
+  font-size: 1.5rem;
+  padding: 0.75rem;
+}
+
+.telemetry-strip {
+  background: var(--light-surface);
+  border: 3px solid var(--ink-navy);
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: repeat(6, 1fr);
+  margin-top: 1rem;
+  padding: 0.65rem;
+}
+
+.telemetry-readout {
+  border-right: 3px solid var(--ink-navy);
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+  padding: 0 0.4rem;
+  position: relative;
+}
+
+.telemetry-readout:last-child {
+  border-right: 0;
+}
+
+.telemetry-readout span {
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.telemetry-readout strong {
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.telemetry-readout small {
+  font-size: 0.65rem;
+  font-weight: 400;
+}
+
+.telemetry-readout i {
+  background: var(--signal-mint);
+  display: block;
+  height: 0.35rem;
+  width: 100%;
+}
+
+.telemetry-readout i.telemetry-warning {
+  background: var(--launchpad-yellow);
+}
+
+.telemetry-readout i.telemetry-danger {
+  background: var(--rocket-red);
+}
+
+.flight-shake {
+  animation: flight-shake 500ms ease-in-out;
+}
+
+@keyframes flight-shake {
+  15%,
+  45%,
+  75% {
+    transform: translateX(-5px);
+  }
+  30%,
+  60%,
+  90% {
+    transform: translateX(5px);
+  }
+}
+
+.decision-overlay {
+  background: var(--ink-navy);
+}
+
+.decision-timer {
+  background: var(--lunar-grey);
+  border: 3px solid var(--ink-navy);
+  height: 1rem;
+  margin: 1rem 0;
+}
+
+.decision-timer span {
+  background: var(--rocket-red);
+  display: block;
+  height: 100%;
+  transition: width 1s linear;
+}
+
+.decision-choice-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.decision-choice {
+  background: var(--launchpad-yellow);
+  border: 3px solid var(--ink-navy);
+  box-shadow: var(--shadow);
+  color: var(--ink-navy);
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  gap: 0.25rem;
+  padding: 0.9rem;
+  text-align: left;
+}
+
+.decision-choice:hover,
+.decision-choice:focus-visible {
+  background: var(--signal-mint);
+  outline: 3px solid var(--deep-sky);
+  outline-offset: 2px;
+}
+
+.decision-choice span {
+  font-size: 0.85rem;
+}
+
+.decision-result {
+  border: 3px solid var(--ink-navy);
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.9rem;
+}
+
+.decision-result strong {
+  color: var(--deep-sky);
+  text-transform: uppercase;
+}
+
+.decision-result span {
+  font-weight: 700;
+}
+
+.decision-result p {
+  margin: 0.25rem 0;
+}
+
+@media (max-width: 680px) {
+  .telemetry-strip {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .telemetry-readout:nth-child(3n) {
+    border-right: 0;
+  }
+}
+
 .flight-progress {
   margin: 1rem 0;
 }

@@ -111,11 +111,25 @@ export interface OrbitRecord extends DataRecord {
   propellantModifier: number;
 }
 
+export interface EventDecisionChoice {
+  id: string;
+  label: string;
+  detail: string;
+  cost: string;
+  saved: string;
+}
+
+export interface EventDecision {
+  prompt: string;
+  choices: EventDecisionChoice[];
+}
+
 export interface GameEventRecord extends DataRecord {
   description: string;
   probability: number;
   effects: Record<string, number>;
   outcomes: string[];
+  decision?: EventDecision;
 }
 
 export interface DonkiEventRecord extends DataRecord {

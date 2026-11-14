@@ -38,6 +38,25 @@
       "reliability": -0.08
     },
     "outcomes": ["Shielding limits damage.", "The mission loses some power and data margin."],
+    "decision": {
+      "prompt": "The flare is crossing your observation window.",
+      "choices": [
+        {
+          "id": "safe-mode",
+          "label": "ENTER SAFE MODE",
+          "detail": "Protect the instruments and suspend observations.",
+          "cost": "Lose 2 days of science.",
+          "saved": "Instrument reliability."
+        },
+        {
+          "id": "keep-observing",
+          "label": "KEEP OBSERVING",
+          "detail": "Keep the science plan running through the flare.",
+          "cost": "Risk instrument damage.",
+          "saved": "2 days of science if stable."
+        }
+      ]
+    },
     "source": "Game model",
     "sourceNote": "Simplified random event; not live DONKI data."
   },

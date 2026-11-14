@@ -1,14 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { vibrate } from "../audio/haptics";
+import { playSound } from "../audio/sound";
+import { gameData } from "../engine/loadData";
 import { simulateTimeline } from "../engine/engine";
 import type {
   Design,
+  EventDecisionChoice,
   FlightTimeline,
-  MissionOptions,
   MissionEventOutcome,
+  MissionOptions,
   ResourceName,
   ScenarioRecord,
 } from "../engine/types";
-import { Tooltip } from "./Tooltip";
+import { Button } from "./foundation/Button";
 
 const resourceNames: ResourceName[] = [
   "mass",
@@ -20,21 +24,40 @@ const resourceNames: ResourceName[] = [
 ];
 
 const resourceLabels: Record<ResourceName, string> = {
-  mass: "Mass",
-  power: "Power",
-  budget: "Budget",
-  data: "Data",
-  comms: "Comms",
-  time: "Time",
+  mass: "MASS",
+  power: "POWER",
+  budget: "BUDGET",
+  data: "DATA",
+  comms: "COMMS",
+  time: "TIME",
 };
 
-const resourceColors: Record<ResourceName, string> = {
-  mass: "#73d5ff",
-  power: "#fbbf24",
-  budget: "#c084fc",
-  data: "#86efac",
-  comms: "#fb7185",
-  time: "#f0abfc",
+const resourceUnits: Record<ResourceName, string> = {
+  mass: "kg",
+  power: "W",
+  budget: "$M",
+  data: "Mbit/day",
+  comms: "Mbit/day",
+  time: "days",
+};
+
+const fallbackDecisions: Record<string, EventDecisionChoice[]> = {
+  default: [
+    {
+      id: "protect",
+      label: "PROTECT SYSTEMS",
+      detail: "Reduce operations while the event passes.",
+      cost: "Lose 1 day of science.",
+      saved: "Reliability margin.",
+    },
+    {
+      id: "continue",
+      label: "KEEP OBSERVING",
+      detail: "Continue the science plan at full rate.",
+      cost: "Use 5% more critical margin.",
+      saved: "The current observation window.",
+    },
+  ],
 };
 
 interface FlightScreenProps {
@@ -56,17 +79,42 @@ export function FlightScreen({
     () => simulateTimeline(design, scenario, seed, 32, options),
     [design, scenario, seed, options],
   );
+  const [countdown, setCountdown] = useState(5);
+  const [launched, setLaunched] = useState(false);
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [activeEvent, setActiveEvent] = useState<
     (MissionEventOutcome & { day: number }) | null
   >(null);
+  const [decisionSeconds, setDecisionSeconds] = useState(12);
+  const [decisionResult, setDecisionResult] =
+    useState<EventDecisionChoice | null>(null);
+  const [shaking, setShaking] = useState(false);
   const progressRef = useRef(0);
   const shownEvents = useRef(new Set<string>());
+  const countdownStarted = useRef(false);
   progressRef.current = progress;
 
   useEffect(() => {
-    if (isPaused) return;
+    if (countdownStarted.current) return;
+    countdownStarted.current = true;
+    playSound("launch");
+    vibrate(40);
+    const timer = window.setInterval(() => {
+      setCountdown((current) => {
+        if (current <= 1) {
+          window.clearInterval(timer);
+          setLaunched(true);
+          return 0;
+        }
+        return current - 1;
+      });
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!launched || isPaused) return;
     const durationMs = 14000;
     const startedAt = performance.now() - progressRef.current * durationMs;
     let frame = 0;
@@ -85,7 +133,13 @@ export function FlightScreen({
       if (nextEvent) {
         shownEvents.current.add(nextEvent.id);
         setActiveEvent(nextEvent);
+        setDecisionSeconds(12);
+        setDecisionResult(null);
         setIsPaused(true);
+        setShaking(true);
+        playSound("warning");
+        vibrate(25);
+        window.setTimeout(() => setShaking(false), 500);
         return;
       }
       if (nextProgress >= 1) {
@@ -97,7 +151,27 @@ export function FlightScreen({
 
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [isPaused, onComplete, timeline]);
+  }, [isPaused, launched, onComplete, timeline]);
+
+  const eventRecord = activeEvent
+    ? gameData.eventsGame.find((event) => event.id === activeEvent.id)
+    : undefined;
+  const decisionChoices =
+    eventRecord?.decision?.choices ?? fallbackDecisions.default;
+
+  useEffect(() => {
+    if (!activeEvent || decisionResult) return;
+    const interval = window.setInterval(() => {
+      setDecisionSeconds((current) => Math.max(0, current - 1));
+    }, 1000);
+    const timeout = window.setTimeout(() => {
+      setDecisionResult(decisionChoices[0] ?? null);
+    }, 12000);
+    return () => {
+      window.clearInterval(interval);
+      window.clearTimeout(timeout);
+    };
+  }, [activeEvent, decisionChoices, decisionResult]);
 
   const currentPoint =
     timeline.points[
@@ -107,53 +181,105 @@ export function FlightScreen({
       )
     ] ?? timeline.points[0];
 
+  const chooseDecision = (choice: EventDecisionChoice) => {
+    setDecisionResult(choice);
+    playSound("click");
+    vibrate(15);
+  };
+
+  const continueFlight = () => {
+    setActiveEvent(null);
+    setDecisionResult(null);
+    setIsPaused(false);
+  };
+
   return (
-    <section className="screen flight-screen" aria-labelledby="flight-title">
-      <div className="screen-heading">
-        <p className="eyebrow">Flight simulation</p>
-        <h1 id="flight-title">{currentPoint?.phase ?? "launch"}</h1>
-      </div>
+    <section
+      className={`screen flight-screen${shaking ? " flight-shake" : ""}`}
+      aria-labelledby="flight-title"
+    >
+      <header className="flight-header">
+        <div>
+          <p className="eyebrow">Margins / flight</p>
+          <h1 id="flight-title">
+            {countdown > 0 ? "LAUNCH COUNTDOWN" : currentPoint?.phase ?? "launch"}
+          </h1>
+        </div>
+        <div className="flight-countdown" aria-live="assertive">
+          {countdown > 0 ? `T-${countdown}` : "FLIGHT"}
+        </div>
+      </header>
       <div className="flight-layout">
         <div className="flight-main">
-          <FlightCanvas timeline={timeline} progress={progress} />
+          <FlightCanvas
+            destination={scenario.destinationId}
+            timeline={timeline}
+            progress={progress}
+            launched={launched}
+          />
+          <TelemetryStrip point={currentPoint} />
           <div className="flight-progress">
             <div className="flight-progress-heading">
-              <span>Mission day {Math.round(timeline.durationDays * progress)}</span>
+              <span>MISSION DAY {Math.round(timeline.durationDays * progress)}</span>
               <strong>{Math.round(progress * 100)}%</strong>
             </div>
             <div className="resource-bar">
-              <span className="resource-bar-fill" style={{ width: `${progress * 100}%` }} />
+              <span
+                className="resource-bar-fill"
+                style={{ width: `${progress * 100}%` }}
+              />
             </div>
           </div>
-          <button
-            className="button button-muted"
+          <Button
+            className="button-muted"
             type="button"
             onClick={() => onComplete(timeline)}
           >
-            Skip to debrief
-          </button>
+            SKIP TO DEBRIEF
+          </Button>
         </div>
-        <FlightResourceDashboard point={currentPoint} />
       </div>
       {activeEvent && (
-        <div className="event-overlay" role="dialog" aria-modal="true" aria-labelledby="event-title">
+        <div
+          className="event-overlay decision-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="event-title"
+        >
           <div className="event-card panel">
-            <p className="panel-label">Mission event · day {Math.round(activeEvent.day)}</p>
-            <h2 id="event-title">{activeEvent.name}</h2>
-            <p>
-              <strong>{activeEvent.outcome}</strong>
+            <p className="panel-label">
+              EVENT / DAY {Math.round(activeEvent.day)} / {decisionSeconds}s
             </p>
-            <p className="muted">{activeEvent.explanation}</p>
-            <button
-              className="button button-primary"
-              type="button"
-              onClick={() => {
-                setActiveEvent(null);
-                setIsPaused(false);
-              }}
-            >
-              Continue flight
-            </button>
+            <div className="decision-timer">
+              <span style={{ width: `${(decisionSeconds / 12) * 100}%` }} />
+            </div>
+            <h2 id="event-title">{activeEvent.name}</h2>
+            <p>{eventRecord?.decision?.prompt ?? activeEvent.explanation}</p>
+            {!decisionResult ? (
+              <div className="decision-choice-list">
+                {decisionChoices.map((choice) => (
+                  <button
+                    className="decision-choice"
+                    key={choice.id}
+                    type="button"
+                    onClick={() => chooseDecision(choice)}
+                  >
+                    <strong>{choice.label}</strong>
+                    <span>{choice.detail}</span>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="decision-result" aria-live="polite">
+                <strong>Decision recorded.</strong>
+                <span>Cost: {decisionResult.cost}</span>
+                <span>Saved: {decisionResult.saved}</span>
+                <p>{decisionResult.detail}</p>
+                <Button type="button" onClick={continueFlight}>
+                  CONTINUE FLIGHT
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -162,11 +288,15 @@ export function FlightScreen({
 }
 
 function FlightCanvas({
+  destination,
   timeline,
   progress,
+  launched,
 }: {
+  destination: string;
   timeline: FlightTimeline;
   progress: number;
+  launched: boolean;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const stars = useMemo(
@@ -190,105 +320,100 @@ function FlightCanvas({
     const context = canvas.getContext("2d");
     if (!context) return;
     context.scale(ratio, ratio);
-    context.fillStyle = "#050917";
+    context.fillStyle = "#14213D";
     context.fillRect(0, 0, width, height);
 
     for (const star of stars) {
-      context.fillStyle = `rgb(220 235 255 / ${0.35 + star.size / 4})`;
+      context.fillStyle = `rgba(201, 209, 217, ${0.35 + star.size / 4})`;
       context.fillRect(star.x * width, star.y * height, star.size, star.size);
     }
 
-    const moon = { x: width * 0.84, y: height * 0.34 };
-    context.strokeStyle = "#395887";
-    context.setLineDash([5, 6]);
+    const destinationPoint = { x: width * 0.84, y: height * 0.34 };
+    const start = { x: width * 0.08, y: height * 0.72 };
+    const control = { x: width * 0.42, y: height * 0.1 };
+    context.strokeStyle = "#2EC4A6";
+    context.lineWidth = 3;
+    context.setLineDash([8, 8]);
     context.beginPath();
-    context.moveTo(width * 0.08, height * 0.72);
-    context.quadraticCurveTo(width * 0.42, height * 0.1, moon.x, moon.y);
+    context.moveTo(start.x, start.y);
+    context.quadraticCurveTo(control.x, control.y, destinationPoint.x, destinationPoint.y);
     context.stroke();
     context.setLineDash([]);
 
-    context.fillStyle = "#c6d3e8";
+    context.fillStyle = "#FFC20E";
     context.beginPath();
-    context.arc(moon.x, moon.y, Math.min(width, height) * 0.12, 0, Math.PI * 2);
+    context.arc(destinationPoint.x, destinationPoint.y, Math.min(width, height) * 0.12, 0, Math.PI * 2);
     context.fill();
-    context.fillStyle = "#9cacc6";
-    context.beginPath();
-    context.arc(moon.x - 12, moon.y - 6, 8, 0, Math.PI * 2);
-    context.arc(moon.x + 14, moon.y + 11, 5, 0, Math.PI * 2);
-    context.fill();
+    context.strokeStyle = "#14213D";
+    context.stroke();
+    context.fillStyle = "#14213D";
+    context.font = "700 14px 'Atkinson Hyperlegible'";
+    context.fillText("EARTH", start.x - 20, start.y + 28);
+    context.fillText(destination.toUpperCase(), destinationPoint.x - 32, destinationPoint.y + 35);
 
-    const start = { x: width * 0.08, y: height * 0.72 };
-    const control = { x: width * 0.42, y: height * 0.1 };
+    if (!launched) return;
     const spacecraft = {
       x:
         (1 - progress) ** 2 * start.x +
         2 * (1 - progress) * progress * control.x +
-        progress ** 2 * moon.x,
+        progress ** 2 * destinationPoint.x,
       y:
         (1 - progress) ** 2 * start.y +
         2 * (1 - progress) * progress * control.y +
-        progress ** 2 * moon.y,
+        progress ** 2 * destinationPoint.y,
     };
-    context.fillStyle = "#73d5ff";
+    context.fillStyle = "#E63B2E";
     context.beginPath();
-    context.arc(spacecraft.x, spacecraft.y, 5, 0, Math.PI * 2);
+    context.moveTo(spacecraft.x - 12, spacecraft.y + 5);
+    context.lineTo(spacecraft.x, spacecraft.y + (progress < 0.12 ? 24 : 12));
+    context.lineTo(spacecraft.x + 12, spacecraft.y + 5);
+    context.closePath();
     context.fill();
-    context.fillStyle = "#f4f7ff";
-    context.font = "12px system-ui";
-    context.fillText("Earth", start.x - 4, start.y + 22);
-    context.fillText("Moon", moon.x - 17, moon.y + 30);
-  }, [progress, stars]);
+    context.fillStyle = "#FFC20E";
+    context.beginPath();
+    context.arc(spacecraft.x, spacecraft.y, 7, 0, Math.PI * 2);
+    context.fill();
+  }, [destination, launched, progress, stars, timeline]);
 
   return (
     <canvas
       className="flight-canvas"
       ref={canvasRef}
       role="img"
-      aria-label={`Animated spacecraft flight to the Moon, currently ${timeline.points[0]?.phase ?? "launch"}`}
+      aria-label={`Animated spacecraft flight to ${destination}, currently ${timeline.points[0]?.phase ?? "launch"}`}
     />
   );
 }
 
-function FlightResourceDashboard({
+function TelemetryStrip({
   point,
 }: {
   point: FlightTimeline["points"][number] | undefined;
 }) {
   return (
-    <aside className="panel flight-dashboard">
-      <div className="card-title-row">
-        <div>
-          <p className="panel-label">Live telemetry</p>
-          <h2>Resources draining</h2>
-        </div>
-        <Tooltip label="These readings come from the engine timeline for the current mission day." />
-      </div>
-      <div className="resource-list">
-        {point &&
-          resourceNames.map((name) => {
-            const resource = point.resources[name];
-            const width = Math.min(
-              100,
-              resource.limit > 0 ? (resource.used / resource.limit) * 100 : 100,
-            );
-            return (
-              <div className="resource-row" key={name}>
-                <div className="resource-heading">
-                  <span>{resourceLabels[name]}</span>
-                  <strong>
-                    {resource.used.toFixed(1)} / {resource.limit.toFixed(1)}
-                  </strong>
-                </div>
-                <div className="resource-bar">
-                  <span
-                    className="resource-bar-fill"
-                    style={{ background: resourceColors[name], width: `${width}%` }}
-                  />
-                </div>
-              </div>
-            );
-          })}
-      </div>
-    </aside>
+    <div className="telemetry-strip" aria-label="Live telemetry">
+      {point &&
+        resourceNames.map((name) => {
+          const resource = point.resources[name];
+          return (
+            <div className="telemetry-readout" key={name}>
+              <span>{resourceLabels[name]}</span>
+              <strong>
+                {resource.used.toFixed(1)}
+                <small> {resourceUnits[name]}</small>
+              </strong>
+              <i
+                className={
+                  resource.margin < 0
+                    ? "telemetry-danger"
+                    : resource.margin / Math.max(resource.limit, 1) < 0.15
+                      ? "telemetry-warning"
+                      : ""
+                }
+              />
+            </div>
+          );
+        })}
+    </div>
   );
 }

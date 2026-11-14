@@ -79,6 +79,15 @@ describe("mission engine", () => {
     expect(timeline.evaluation.grade).toMatch(/[A-F]/);
   });
 
+  it("keeps event timing deterministic for the same seed", () => {
+    const first = simulateTimeline(baseDesign, moon, 9876);
+    const second = simulateTimeline(baseDesign, moon, 9876);
+
+    expect(first.events).toEqual(second.events);
+    expect(gameData.eventsGame.find((event) => event.id === "solar-flare")?.decision?.choices)
+      .toHaveLength(2);
+  });
+
   it("suggests a power fix for a power-failed design", () => {
     const failedDesign = { ...baseDesign, powerId: "no-power" };
     const fixes = suggestFixes(failedDesign, moon, 1);
