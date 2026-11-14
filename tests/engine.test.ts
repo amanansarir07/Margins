@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   evaluate,
+  getThreatBriefing,
+  assessThreats,
   previewResources,
   simulateTimeline,
   suggestFixes,
@@ -86,6 +88,37 @@ describe("mission engine", () => {
     expect(first.events).toEqual(second.events);
     expect(gameData.eventsGame.find((event) => event.id === "solar-flare")?.decision?.choices)
       .toHaveLength(2);
+  });
+
+  it("uses the visible threat briefing as the flight event list", () => {
+    const briefing = getThreatBriefing(moon, 9876);
+    const timeline = simulateTimeline(baseDesign, moon, 9876);
+
+    expect(timeline.events.map((event) => event.id)).toEqual(
+      briefing.map((hazard) => hazard.id),
+    );
+    expect(timeline.events.every((event) => event.occurred)).toBe(true);
+  });
+
+  it("keeps hazard decisions deterministic", () => {
+    const hazard = getThreatBriefing(moon, 9876)[0];
+    if (!hazard) throw new Error("Threat briefing is empty.");
+    const decisions = { [hazard.id]: "safe-mode" };
+
+    expect(
+      evaluate(baseDesign, moon, 9876, { decisions }),
+    ).toEqual(evaluate(baseDesign, moon, 9876, { decisions }));
+  });
+
+  it("shows mitigation status before flight", () => {
+    const design = {
+      ...baseDesign,
+      mitigationIds: ["battery-margin"],
+    };
+    const threats = assessThreats(design, moon, 9876);
+
+    expect(threats.every((threat) => ["survives", "marginal", "fails"].includes(threat.status)))
+      .toBe(true);
   });
 
   it("suggests a power fix for a power-failed design", () => {

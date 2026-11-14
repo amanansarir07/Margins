@@ -1,0 +1,48 @@
+[
+  {
+    "id": "radiation-monitor",
+    "name": "Radiation Monitor",
+    "massKg": 3,
+    "powerW": 4,
+    "costM": 12,
+    "effect": "Adds 30 days of warning before radiation hazards.",
+    "warningLeadDays": 30,
+    "tier": "simple",
+    "source": "Game model",
+    "sourceNote": "Game model. Earlier radiation warning."
+  },
+  {
+    "id": "radiation-hardened-computer",
+    "name": "Radiation-Hardened Computer",
+    "massKg": 8,
+    "powerW": 5,
+    "costM": 25,
+    "effect": "Radiation hazards do not reset this computer.",
+    "tier": "advanced",
+    "source": "Game model",
+    "sourceNote": "Game model. Radiation protection trade-off."
+  },
+  {
+    "id": "battery-margin",
+    "name": "Battery Margin",
+    "massKg": 6,
+    "powerW": 2,
+    "costM": 15,
+    "effect": "Adds 35 W of stored power margin.",
+    "powerMarginW": 35,
+    "tier": "simple",
+    "source": "Game model",
+    "sourceNote": "Game model. Stored power margin."
+  },
+  {
+    "id": "redundant-computer",
+    "name": "Redundant Computer",
+    "massKg": 7,
+    "powerW": 8,
+    "costM": 20,
+    "effect": "Instrument faults lose less science.",
+    "tier": "advanced",
+    "source": "Game model",
+    "sourceNote": "Game model. Backup computer trade-off."
+  }
+]

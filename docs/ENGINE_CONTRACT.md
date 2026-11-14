@@ -8,7 +8,11 @@
 
 `evaluate(design, scenario, seed)` runs a repeatable mission simulation. It returns pass/fail checks for mass, power, data, budget, time, and launch-vehicle compatibility. Compatibility checks both spacecraft mass and the selected orbit. It also returns margins, science points, reliability, events with their outcomes, a score out of 1000 with a breakdown, and plain-English reasons for success or failure.
 
-The evaluator uses a seeded random generator so the same design, scenario, and seed produce the same result.
+`getThreatBriefing(scenario, seed)` uses the scenario event list and a seeded generator to choose the hazards for that mission. It returns each hazard's type, month window, severity, consequence, resource, and warning lead time before the player builds. `evaluate` uses exactly that same list; it never creates a hidden event later.
+
+`assessThreats(design, scenario, seed)` adds a `survives`, `marginal`, or `fails` status and one resource-based reason for every briefing hazard. The same design, scenario, and seed always produce the same briefing and statuses.
+
+The evaluator uses deterministic seeded selection only. A decision is supplied as `MissionOptions.decisions`, keyed by hazard id. The same design, seed, and decision map always produce the same result.
 
 ## Simplified engine rules
 
@@ -18,7 +22,9 @@ The evaluator uses a seeded random generator so the same design, scenario, and s
 - Time used is transit time plus orbit time. The time limit is the smaller of the scenario time limit and 30 days per allowed program month plus transit.
 - Science is the sum of instrument value multiplied by its scenario multiplier, pointing efficiency, and returned-data fraction. The advanced computer's processed-data multiplier is applied afterward.
 - A design must include at least one instrument from `requiredInstrumentAnyOf` when that list is non-empty. A mission succeeds when all resource and launch checks pass, the science goal is met, and reliability remains at least 0.5.
-- Events are blocked when every critical-resource margin is at least 25%. Otherwise the seeded roll is adjusted by the weakest critical margin. This makes tight margins increase risk without making events purely random.
+- Hazards are selected once for the scenario and seed, then shown in the Threat Briefing. Margins determine whether each selected hazard is survived, marginal, or failed. There are no hidden hazard rolls.
+- Radiation monitors add warning lead time. Radiation-hardened computers protect against radiation bursts. Battery margin adds stored power margin. Redundant computers reduce instrument-fault losses. Each mitigation adds mass, power, and/or cost.
+- Solar-flare decisions are deterministic: safe mode protects instruments but loses two science days; keeping observations has no added loss when the hazard is survived and costs reliability when the design is weak.
 - The score awards 600 points for six checks, 200 for resource margins, 100 for science, and 100 for reliability.
 
 ## Difficulty and sandbox

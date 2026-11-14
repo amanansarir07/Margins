@@ -39,7 +39,7 @@
       "communicationsMbitPerDay": 85,
       "timeDays": 1200
     },
-    "scienceGoal": 95,
+    "scienceGoal": 98,
     "maxProgramMonths": 36,
     "transitTimeDays": 210,
     "criticalResources": ["power", "comms"],

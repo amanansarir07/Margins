@@ -35,13 +35,17 @@ Mandatory components are excluded from dominance flags because scenarios require
 - Mars science goal: 85 -> 95 points.
 - Europa science goal: 105 -> 115 points.
 - Moon mass limit: 200 -> 160 kg to preserve the overweight regression boundary.
+- Mars science goal: 95 -> 100 points after visible hazards increased success rate.
+- Europa science goal: 115 -> 120 points after visible hazards concentrated one archetype.
+- Mars science goal: 100 -> 98 points; radar: 65 -> 60 points to restore component diversity.
+- Europa science goal: 120 -> 115 points after radar diversity tuning.
 - No engine rule changes.
 
 ## moon-ice-mapping
 
-- Success rate: 22.47%
-- Top 5% archetypes: 8
-- Largest top archetype: 44.9%
+- Success rate: 19.53%
+- Top 5% archetypes: 7
+- Largest top archetype: 47.2%
 - Dominated components: none
 - Dominant components: none
 - Mandatory components excluded from flags: none
@@ -50,8 +54,8 @@ Mandatory components are excluded from dominance flags because scenarios require
 | Metric | p0 | p25 | p50 | p75 | p90 | p95 | p100 |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | cost | 259.09 | 389.39 | 430.06 | 467.96 | 498.36 | 517.79 | 576.00 |
-| science | 32.00 | 75.00 | 105.00 | 144.00 | 173.00 | 208.00 | 266.00 |
-| score | 304.00 | 650.00 | 769.00 | 862.00 | 881.00 | 887.00 | 901.00 |
+| science | 32.00 | 72.00 | 104.00 | 144.00 | 165.00 | 205.00 | 256.00 |
+| score | 307.00 | 654.00 | 770.00 | 862.00 | 880.00 | 886.00 | 901.00 |
 | minMargin | -0.32 | -0.09 | 0.00 | 0.08 | 0.15 | 0.19 | 0.37 |
 
 ### Top 5% component usage
@@ -59,54 +63,54 @@ Mandatory components are excluded from dominance flags because scenarios require
 | Component | Share |
 | --- | ---: |
 | **spacecraftBusId** | |
-| compact-bus | 77.1% |
-| heavy-bus | 22.9% |
+| compact-bus | 76.6% |
+| heavy-bus | 23.4% |
 | **powerId** | |
-| solar-array | 69.2% |
-| large-solar-array | 19.9% |
-| nuclear-generator | 10.9% |
+| solar-array | 67.1% |
+| large-solar-array | 20.1% |
+| nuclear-generator | 12.8% |
 | **commsId** | |
-| standard-radio | 67.7% |
-| high-gain-radio | 32.3% |
+| standard-radio | 68.4% |
+| high-gain-radio | 31.6% |
 | **onboardComputerId** | |
-| simple | 51.7% |
-| advanced | 48.3% |
+| advanced | 56.6% |
+| simple | 43.4% |
 | **attitudeControlId** | |
-| basic | 60.8% |
-| precise | 39.2% |
+| basic | 54.2% |
+| precise | 45.8% |
 | **instrumentIds** | |
-| spectrometer | 70.5% |
-| radar | 29.5% |
+| spectrometer | 79.6% |
+| radar | 20.4% |
 | **launchVehicleId** | |
-| heavy-lifter | 57.0% |
-| light-lifter | 43.0% |
+| heavy-lifter | 56.6% |
+| light-lifter | 43.4% |
 | **orbitId** | |
-| flyby | 63.9% |
-| high | 24.9% |
-| low | 11.2% |
+| flyby | 64.8% |
+| high | 24.2% |
+| low | 11.0% |
 
 ### Cheapest 5% successful component usage
 
 | Component | Share |
 | --- | ---: |
 | **spacecraftBusId** | |
-| compact-bus | 62.2% |
-| heavy-bus | 37.8% |
+| compact-bus | 67.3% |
+| heavy-bus | 32.7% |
 | **powerId** | |
 | solar-array | 100.0% |
 | **commsId** | |
-| standard-radio | 71.6% |
-| high-gain-radio | 28.4% |
+| standard-radio | 69.4% |
+| high-gain-radio | 30.6% |
 | **onboardComputerId** | |
-| simple | 57.8% |
-| advanced | 42.2% |
+| advanced | 53.1% |
+| simple | 46.9% |
 | **attitudeControlId** | |
-| basic | 74.7% |
-| precise | 25.3% |
+| basic | 70.9% |
+| precise | 29.1% |
 | **instrumentIds** | |
-| radar | 60.9% |
-| spectrometer | 39.1% |
-| camera | 15.6% |
+| radar | 51.5% |
+| spectrometer | 48.5% |
+| camera | 25.0% |
 | **launchVehicleId** | |
 | light-lifter | 100.0% |
 | **orbitId** | |
@@ -114,9 +118,9 @@ Mandatory components are excluded from dominance flags because scenarios require
 
 ## mars-minerals
 
-- Success rate: 14.64%
-- Top 5% archetypes: 11
-- Largest top archetype: 22.8%
+- Success rate: 11.12%
+- Top 5% archetypes: 13
+- Largest top archetype: 23.5%
 - Dominated components: none
 - Dominant components: none
 - Mandatory components excluded from flags: none
@@ -125,8 +129,8 @@ Mandatory components are excluded from dominance flags because scenarios require
 | Metric | p0 | p25 | p50 | p75 | p90 | p95 | p100 |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | cost | 275.73 | 409.51 | 451.28 | 489.14 | 520.87 | 540.42 | 600.01 |
-| science | 17.00 | 75.00 | 97.00 | 123.00 | 165.00 | 203.00 | 266.00 |
-| score | 297.00 | 723.00 | 754.00 | 847.00 | 863.00 | 870.00 | 888.00 |
+| science | 27.00 | 72.00 | 94.00 | 127.00 | 164.00 | 201.00 | 256.00 |
+| score | 307.00 | 732.00 | 757.00 | 849.00 | 862.00 | 868.00 | 885.00 |
 | minMargin | -1.53 | -0.55 | -0.09 | 0.05 | 0.14 | 0.20 | 0.35 |
 
 ### Top 5% component usage
@@ -134,54 +138,54 @@ Mandatory components are excluded from dominance flags because scenarios require
 | Component | Share |
 | --- | ---: |
 | **spacecraftBusId** | |
-| compact-bus | 60.2% |
-| heavy-bus | 39.8% |
+| compact-bus | 65.4% |
+| heavy-bus | 34.6% |
 | **powerId** | |
-| large-solar-array | 60.0% |
-| nuclear-generator | 40.0% |
+| large-solar-array | 61.7% |
+| nuclear-generator | 38.3% |
 | **commsId** | |
-| high-gain-radio | 70.7% |
-| standard-radio | 29.3% |
+| high-gain-radio | 67.9% |
+| standard-radio | 32.1% |
 | **onboardComputerId** | |
-| advanced | 61.4% |
-| simple | 38.6% |
+| advanced | 70.1% |
+| simple | 29.9% |
 | **attitudeControlId** | |
-| precise | 61.4% |
-| basic | 38.6% |
+| precise | 71.2% |
+| basic | 28.8% |
 | **instrumentIds** | |
-| radar | 70.3% |
-| spectrometer | 29.7% |
-| camera | 3.2% |
+| radar | 61.8% |
+| spectrometer | 38.2% |
+| camera | 5.0% |
 | **launchVehicleId** | |
-| light-lifter | 58.1% |
-| heavy-lifter | 41.9% |
+| light-lifter | 61.7% |
+| heavy-lifter | 38.3% |
 | **orbitId** | |
-| mars-flyby | 61.4% |
-| mars-high | 21.6% |
-| mars-low | 17.0% |
+| mars-flyby | 71.6% |
+| mars-high | 16.7% |
+| mars-low | 11.7% |
 
 ### Cheapest 5% successful component usage
 
 | Component | Share |
 | --- | ---: |
 | **spacecraftBusId** | |
-| heavy-bus | 58.5% |
-| compact-bus | 41.5% |
+| heavy-bus | 57.1% |
+| compact-bus | 42.9% |
 | **powerId** | |
-| large-solar-array | 83.0% |
-| nuclear-generator | 17.0% |
+| large-solar-array | 100.0% |
 | **commsId** | |
-| standard-radio | 57.1% |
-| high-gain-radio | 42.9% |
+| standard-radio | 58.9% |
+| high-gain-radio | 41.1% |
 | **onboardComputerId** | |
-| advanced | 57.1% |
-| simple | 42.9% |
+| advanced | 71.4% |
+| simple | 28.6% |
 | **attitudeControlId** | |
-| basic | 53.7% |
-| precise | 46.3% |
+| precise | 50.0% |
+| basic | 50.0% |
 | **instrumentIds** | |
-| radar | 100.0% |
-| camera | 19.0% |
+| radar | 90.2% |
+| camera | 65.2% |
+| spectrometer | 9.8% |
 | **launchVehicleId** | |
 | light-lifter | 100.0% |
 | **orbitId** | |
@@ -189,9 +193,9 @@ Mandatory components are excluded from dominance flags because scenarios require
 
 ## europa-ocean
 
-- Success rate: 7.46%
+- Success rate: 6.66%
 - Top 5% archetypes: 8
-- Largest top archetype: 48.3%
+- Largest top archetype: 38.2%
 - Dominated components: none
 - Dominant components: none
 - Mandatory components excluded from flags: powerId:nuclear-generator
@@ -200,8 +204,8 @@ Mandatory components are excluded from dominance flags because scenarios require
 | Metric | p0 | p25 | p50 | p75 | p90 | p95 | p100 |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | cost | 342.76 | 468.68 | 509.71 | 546.77 | 578.84 | 598.10 | 658.01 |
-| science | 7.00 | 65.00 | 95.00 | 126.00 | 162.00 | 198.00 | 266.00 |
-| score | 464.00 | 689.00 | 726.00 | 833.00 | 846.00 | 854.00 | 875.00 |
+| science | 17.00 | 65.00 | 92.00 | 122.00 | 155.00 | 195.00 | 256.00 |
+| score | 476.00 | 701.00 | 730.00 | 837.00 | 847.00 | 852.00 | 873.00 |
 | minMargin | -12.61 | -7.82 | -0.64 | 0.14 | 0.29 | 0.29 | 0.30 |
 
 ### Top 5% component usage
@@ -209,53 +213,53 @@ Mandatory components are excluded from dominance flags because scenarios require
 | Component | Share |
 | --- | ---: |
 | **spacecraftBusId** | |
-| compact-bus | 63.7% |
-| heavy-bus | 36.3% |
+| compact-bus | 68.0% |
+| heavy-bus | 32.0% |
 | **powerId** | |
 | nuclear-generator | 100.0% |
 | **commsId** | |
-| standard-radio | 59.8% |
-| high-gain-radio | 40.2% |
+| standard-radio | 60.5% |
+| high-gain-radio | 39.5% |
 | **onboardComputerId** | |
-| advanced | 62.5% |
-| simple | 37.5% |
+| advanced | 72.2% |
+| simple | 27.8% |
 | **attitudeControlId** | |
-| precise | 67.7% |
-| basic | 32.3% |
+| precise | 76.4% |
+| basic | 23.6% |
 | **instrumentIds** | |
-| radar | 78.0% |
-| spectrometer | 22.0% |
-| camera | 10.4% |
+| radar | 59.4% |
+| spectrometer | 40.6% |
+| camera | 22.4% |
 | **launchVehicleId** | |
-| heavy-lifter | 63.0% |
-| light-lifter | 37.0% |
+| heavy-lifter | 59.1% |
+| light-lifter | 40.9% |
 | **orbitId** | |
-| europa-flyby | 47.4% |
-| europa-high | 34.1% |
-| europa-low | 18.5% |
+| europa-flyby | 58.2% |
+| europa-high | 29.4% |
+| europa-low | 12.4% |
 
 ### Cheapest 5% successful component usage
 
 | Component | Share |
 | --- | ---: |
 | **spacecraftBusId** | |
-| heavy-bus | 53.3% |
-| compact-bus | 46.7% |
+| heavy-bus | 77.6% |
+| compact-bus | 22.4% |
 | **powerId** | |
 | nuclear-generator | 100.0% |
 | **commsId** | |
-| standard-radio | 70.7% |
-| high-gain-radio | 29.3% |
+| standard-radio | 59.7% |
+| high-gain-radio | 40.3% |
 | **onboardComputerId** | |
-| advanced | 74.7% |
-| simple | 25.3% |
+| advanced | 56.7% |
+| simple | 43.3% |
 | **attitudeControlId** | |
-| precise | 74.7% |
-| basic | 25.3% |
+| precise | 52.2% |
+| basic | 47.8% |
 | **instrumentIds** | |
-| radar | 97.3% |
-| camera | 50.7% |
-| spectrometer | 2.7% |
+| camera | 100.0% |
+| radar | 74.6% |
+| spectrometer | 25.4% |
 | **launchVehicleId** | |
 | light-lifter | 100.0% |
 | **orbitId** | |

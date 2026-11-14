@@ -10,6 +10,34 @@ export interface DataRecord {
   tier?: "simple" | "advanced";
 }
 
+export interface MitigationRecord extends DataRecord {
+  massKg: number;
+  powerW: number;
+  costM: number;
+  effect: string;
+  warningLeadDays?: number;
+  powerMarginW?: number;
+}
+
+export type HazardStatus = "survives" | "marginal" | "fails";
+
+export interface ThreatHazard {
+  id: string;
+  type: string;
+  monthStart: number;
+  monthEnd: number;
+  severity: "low" | "medium" | "high";
+  consequence: string;
+  resource: ResourceName;
+  warningLeadDays: number;
+  decision?: EventDecision;
+}
+
+export interface ThreatAssessment extends ThreatHazard {
+  status: HazardStatus;
+  reason: string;
+}
+
 export interface DestinationRecord extends DataRecord {
   description: string;
   distanceFromEarth: number;
@@ -127,6 +155,12 @@ export interface EventDecision {
 export interface GameEventRecord extends DataRecord {
   description: string;
   probability: number;
+  hazardType: string;
+  monthWindow: { start: number; end: number };
+  severity: "low" | "medium" | "high";
+  consequence: string;
+  resource: ResourceName;
+  warningLeadDays: number;
   effects: Record<string, number>;
   outcomes: string[];
   decision?: EventDecision;
@@ -161,6 +195,7 @@ export interface Design {
   instrumentIds: string[];
   launchVehicleId: string;
   orbitId: string;
+  mitigationIds?: string[];
 }
 
 export type ResourceName =
@@ -204,6 +239,12 @@ export interface MissionEventOutcome {
   occurred: boolean;
   outcome: string;
   explanation: string;
+  month: number;
+  severity: "low" | "medium" | "high";
+  status: HazardStatus;
+  resource: ResourceName;
+  warningLeadDays: number;
+  decisionId?: string;
 }
 
 export interface ScoreBreakdown {
@@ -229,6 +270,7 @@ export interface EvaluationResult {
 export interface MissionOptions {
   difficulty?: Difficulty;
   sandbox?: boolean;
+  decisions?: Record<string, string>;
 }
 
 export interface SuggestedFix {

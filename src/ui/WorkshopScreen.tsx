@@ -1,12 +1,13 @@
 import { useState, type DragEvent } from "react";
 import { gameData } from "../engine/loadData";
-import { previewResources } from "../engine/engine";
+import { assessThreats, previewResources } from "../engine/engine";
 import { playSound } from "../audio/sound";
 import { vibrate } from "../audio/haptics";
 import type {
   Design,
   MissionOptions,
   ScenarioRecord,
+  ThreatAssessment,
 } from "../engine/types";
 import { BalanceScale } from "./foundation/BalanceScale";
 import { Battery } from "./foundation/Battery";
@@ -23,7 +24,8 @@ type Slot =
   | "attitude"
   | "instruments"
   | "launch"
-  | "orbit";
+  | "orbit"
+  | "mitigations";
 
 type ShelfItem = { id: string; name: string; sourceNote: string };
 const WORKBENCH_TUTORIAL_KEY = "margins:workbench-callouts-seen";
@@ -45,6 +47,7 @@ const slotLabels: Record<Slot, string> = {
   instruments: "Instruments",
   launch: "Launch vehicle",
   orbit: "Orbit",
+  mitigations: "Threat defenses",
 };
 
 function slotForDesignKey(slot: Slot): keyof Design | null {
@@ -57,6 +60,7 @@ function slotForDesignKey(slot: Slot): keyof Design | null {
     instruments: null,
     launch: "launchVehicleId",
     orbit: "orbitId",
+    mitigations: null,
   }[slot];
 }
 
@@ -69,12 +73,14 @@ export function WorkshopScreen({
   design,
   scenario,
   options,
+  seed,
   onDesignChange,
   onContinue,
 }: {
   design: Design;
   scenario: ScenarioRecord;
   options: MissionOptions;
+  seed: number;
   onDesignChange: (design: Design) => void;
   onContinue: () => void;
 }) {
@@ -101,6 +107,14 @@ export function WorkshopScreen({
         instrumentIds: selected
           ? design.instrumentIds.filter((instrumentId) => instrumentId !== id)
           : [...design.instrumentIds, id],
+      });
+    } else if (slot === "mitigations") {
+      const selected = design.mitigationIds ?? [];
+      onDesignChange({
+        ...design,
+        mitigationIds: selected.includes(id)
+          ? selected.filter((mitigationId) => mitigationId !== id)
+          : [...selected, id],
       });
     } else if (key) {
       onDesignChange({ ...design, [key]: id });
@@ -175,6 +189,14 @@ export function WorkshopScreen({
             slot="instruments"
             items={gameData.instruments}
             selected={design.instrumentIds}
+            onPlace={placePart}
+            multiple
+          />
+          <ShelfGroup
+            label="Threat defenses"
+            slot="mitigations"
+            items={gameData.mitigations}
+            selected={design.mitigationIds ?? []}
             onPlace={placePart}
             multiple
           />
@@ -272,6 +294,12 @@ export function WorkshopScreen({
               onDrop={(event) => readDrop(event, "orbit")}
             />
           </div>
+          <ThreatBriefing
+            scenario={scenario}
+            design={design}
+            seed={seed}
+            options={options}
+          />
         </div>
 
         <aside className="gauge-cluster" aria-label="Live resource gauges">
@@ -333,6 +361,48 @@ export function WorkshopScreen({
         />
       )}
     </section>
+  );
+}
+
+function ThreatBriefing({
+  scenario,
+  design,
+  seed,
+  options,
+}: {
+  scenario: ScenarioRecord;
+  design: Design;
+  seed: number;
+  options: MissionOptions;
+}) {
+  const threats = assessThreats(design, scenario, seed, options);
+  return (
+    <section className="threat-briefing panel" aria-labelledby="threat-title">
+      <div className="panel-label">KNOWN HAZARDS / SEED {seed}</div>
+      <h2 id="threat-title">Threat briefing</h2>
+      <div className="threat-months" aria-label="Mission month timeline">
+        <span>MONTH 1</span><span>MONTH {scenario.maxProgramMonths}</span>
+      </div>
+      <div className="threat-list">
+        {threats.map((threat) => (
+          <ThreatRow key={threat.id} threat={threat} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ThreatRow({ threat }: { threat: ThreatAssessment }) {
+  return (
+    <article className={`threat-row threat-${threat.status}`}>
+      <div>
+        <strong>{threat.type.toUpperCase()}</strong>
+        <span>MONTH {threat.monthStart}-{threat.monthEnd}</span>
+      </div>
+      <b>{threat.status.toUpperCase()}</b>
+      <p>{threat.reason}</p>
+      <small>{threat.resource.toUpperCase()} / {threat.consequence}</small>
+    </article>
   );
 }
 
@@ -589,5 +659,7 @@ function getItems(slot: Slot, scenario: ScenarioRecord): ShelfItem[] {
       return gameData.orbits.filter(
         (item) => item.destinationId === scenario.destinationId,
       );
+    case "mitigations":
+      return gameData.mitigations;
   }
 }

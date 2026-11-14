@@ -19,6 +19,11 @@ import type {
   SpacecraftBusRecord,
   SuggestedFix,
   MissionOptions,
+  HazardStatus,
+  ThreatAssessment,
+  ThreatHazard,
+  MitigationRecord,
+  ResourceName,
 } from "./types";
 
 type Components = {
@@ -31,6 +36,7 @@ type Components = {
   launchVehicle: LaunchVehicleRecord;
   orbit: OrbitRecord;
   destination: (typeof gameData.destinations)[number];
+  mitigations: MitigationRecord[];
 };
 
 type CalculatedDesign = Components & {
@@ -59,6 +65,7 @@ const resourceNames = [
 const defaultOptions: Required<MissionOptions> = {
   difficulty: "engineer",
   sandbox: false,
+  decisions: {},
 };
 
 function resolveOptions(options?: MissionOptions): Required<MissionOptions> {
@@ -143,6 +150,9 @@ function getComponents(design: Design, scenario: ScenarioRecord): Components {
     ),
     orbit,
     destination,
+    mitigations: (design.mitigationIds ?? []).map((id) =>
+      findById(gameData.mitigations, id, "mitigation"),
+    ),
   };
 }
 
@@ -158,17 +168,26 @@ function calculateDesign(
     components.computer.massKg +
     components.attitude.massKg +
     components.instruments.reduce((total, instrument) => total + instrument.massKg, 0);
+  const mitigationMass = components.mitigations.reduce(
+    (total, mitigation) => total + mitigation.massKg,
+    0,
+  );
   const propellantMass =
     dryMass *
     components.destination.propellantFactor *
     components.orbit.propellantModifier;
-  const totalMass = dryMass + propellantMass;
+  const totalMass = dryMass + mitigationMass + propellantMass;
   const powerUsed =
     components.bus.powerW +
     components.comms.powerW +
     components.computer.powerW +
     components.attitude.powerW +
-    components.instruments.reduce((total, instrument) => total + instrument.powerW, 0);
+    components.instruments.reduce((total, instrument) => total + instrument.powerW, 0) +
+    components.mitigations.reduce((total, mitigation) => total + mitigation.powerW, 0);
+  const batteryMargin = components.mitigations.reduce(
+    (total, mitigation) => total + (mitigation.powerMarginW ?? 0),
+    0,
+  );
   const powerAvailable =
     components.power.kind === "solar"
       ? components.power.powerW * components.destination.sunlightComparedToEarth
@@ -188,6 +207,7 @@ function calculateDesign(
     components.computer.costM +
     components.attitude.costM +
     components.instruments.reduce((total, instrument) => total + instrument.costM, 0) +
+    components.mitigations.reduce((total, mitigation) => total + mitigation.costM, 0) +
     components.launchVehicle.costM +
     components.orbit.costM +
     propellantMass * 0.1;
@@ -203,7 +223,7 @@ function calculateDesign(
     propellantMass,
     totalMass,
     powerUsed,
-    powerAvailable,
+    powerAvailable: powerAvailable + batteryMargin,
     generatedData,
     downlink,
     budgetUsed,
@@ -479,30 +499,103 @@ function mulberry32(seed: number): () => number {
   };
 }
 
-function eventOutcome(
-  event: GameEventRecord,
-  occurred: boolean,
-  marginRatio: number,
-): { outcome: string; explanation: string } {
-  if (!occurred) {
-    return {
-      outcome: "No event.",
-      explanation:
-        marginRatio >= 0.25
-          ? "Critical margins absorbed the event."
-          : "Seeded roll skipped this event.",
-    };
-  }
+export function getThreatBriefing(
+  scenario: ScenarioRecord,
+  seed: number,
+): ThreatHazard[] {
+  const random = mulberry32(seed);
+  const hazards = scenario.events.flatMap((eventId) => {
+    const event = findById(gameData.eventsGame, eventId, "event");
+    return random() < event.probability
+      ? [{
+          id: event.id,
+          type: event.hazardType,
+          monthStart: event.monthWindow.start,
+          monthEnd: event.monthWindow.end,
+          severity: event.severity,
+          consequence: event.consequence,
+          resource: event.resource,
+          warningLeadDays: event.warningLeadDays,
+          ...(event.decision ? { decision: event.decision } : {}),
+        }]
+      : [];
+  });
+  if (hazards.length > 0) return hazards;
+  const fallback = findById(
+    gameData.eventsGame,
+    scenario.events[0] ?? "",
+    "event",
+  );
+  return [{
+    id: fallback.id,
+    type: fallback.hazardType,
+    monthStart: fallback.monthWindow.start,
+    monthEnd: fallback.monthWindow.end,
+    severity: fallback.severity,
+    consequence: fallback.consequence,
+    resource: fallback.resource,
+    warningLeadDays: fallback.warningLeadDays,
+    ...(fallback.decision ? { decision: fallback.decision } : {}),
+  }];
+}
 
-  const outcome =
-    marginRatio >= 0.1 ? event.outcomes[0] ?? event.description : event.outcomes[1] ?? event.description;
+function hazardThreshold(severity: ThreatHazard["severity"]): number {
+  return severity === "high" ? 0.25 : severity === "medium" ? 0.15 : 0.05;
+}
+
+function assessHazard(
+  hazard: ThreatHazard,
+  calculated: CalculatedDesign,
+  resources: ResourceReport,
+): ThreatAssessment {
+  const resource = resources[hazard.resource];
+  const ratio = resource.limit > 0 ? resource.margin / resource.limit : -1;
+  const radiationProtected = calculated.mitigations.some(
+    (mitigation) => mitigation.id === "radiation-hardened-computer",
+  );
+  const batteryProtected =
+    calculated.mitigations.some((mitigation) => mitigation.id === "battery-margin") &&
+    hazard.resource === "power";
+  const redundant = calculated.mitigations.some(
+    (mitigation) => mitigation.id === "redundant-computer",
+  );
+  if (
+    (hazard.type === "radiation-burst" && radiationProtected) ||
+    (hazard.type === "instrument-fault" && redundant)
+  ) {
+    return { ...hazard, status: "survives", reason: "Mitigation protects this system." };
+  }
+  const effectiveRatio = batteryProtected ? ratio + 0.2 : ratio;
+  const threshold = hazardThreshold(hazard.severity);
+  const status: HazardStatus =
+    effectiveRatio >= threshold
+      ? "survives"
+      : effectiveRatio >= threshold - 0.1
+        ? "marginal"
+        : "fails";
   return {
-    outcome,
-    explanation:
-      marginRatio >= 0.1
-        ? "Critical margin absorbed the event."
-        : "Tight margin made this event costly.",
+    ...hazard,
+    status,
+    reason:
+      status === "survives"
+        ? `${hazard.resource} margin absorbs this hazard.`
+        : status === "marginal"
+          ? `${hazard.resource} margin is close to the hazard threshold.`
+          : `${hazard.resource} margin is below the hazard threshold.`,
   };
+}
+
+export function assessThreats(
+  design: Design,
+  scenario: ScenarioRecord,
+  seed: number,
+  options?: MissionOptions,
+): ThreatAssessment[] {
+  const resolvedOptions = resolveOptions(options);
+  const calculated = calculateDesign(design, scenario);
+  return getThreatBriefing(scenario, seed).map((hazard) =>
+    assessHazard(hazard, calculated, calculateResources(calculated, scenario, resolvedOptions)),
+  );
 }
 
 export function evaluate(
@@ -556,41 +649,52 @@ export function evaluate(
       scienceMultiplier,
   );
 
-  const random = mulberry32(seed);
-  const criticalRatios = scenario.criticalResources.map((name) => {
-    const resource = resources[name as keyof ResourceReport];
-    return resource.limit <= 0 ? 0 : resource.margin / resource.limit;
-  });
-  const criticalMarginRatio = criticalRatios.length
-    ? Math.min(...criticalRatios)
-    : Math.min(...resourceNames.map((name) => resources[name].margin / Math.max(resources[name].limit, 1)));
-  const events = scenario.events.map((eventId) => {
-    const event = findById(gameData.eventsGame, eventId, "event");
-    const risk =
-      criticalMarginRatio >= 0.25
-        ? 0
-        : Math.min(
-            1,
-            (event.probability + (0.25 - Math.max(criticalMarginRatio, 0))) *
-              (resolvedOptions.difficulty === "veteran" ? 1.5 : 1),
-          );
-    const occurred = random() < risk;
-    const result = eventOutcome(event, occurred, criticalMarginRatio);
+  const threats = assessThreats(design, scenario, seed, resolvedOptions);
+  const events = threats.map((threat) => {
+    const event = findById(gameData.eventsGame, threat.id, "event");
+    const decisionId = resolvedOptions.decisions[threat.id];
+    const safeMode = decisionId === "safe-mode";
+    const keepObserving = decisionId === "keep-observing";
+    const statusOutcome =
+      threat.status === "survives"
+        ? event.outcomes[0] ?? event.description
+        : event.outcomes[1] ?? event.description;
+    const decisionOutcome = safeMode
+      ? "Safe mode protects instruments but loses 2 science days."
+      : keepObserving
+        ? threat.status === "survives"
+          ? "Observations continue with no added loss."
+          : "Observations continue; the weak margin costs reliability."
+        : statusOutcome;
     return {
       id: event.id,
       name: event.name,
-      occurred,
-      ...result,
+      occurred: true,
+      outcome: decisionOutcome,
+      explanation: safeMode
+        ? "The chosen safe mode trades science time for protection."
+        : threat.reason,
+      month: Math.round((threat.monthStart + threat.monthEnd) / 2),
+      severity: threat.severity,
+      status: threat.status,
+      resource: threat.resource,
+      warningLeadDays: threat.warningLeadDays +
+        (design.mitigationIds?.includes("radiation-monitor") ? 30 : 0),
+      ...(decisionId ? { decisionId } : {}),
     };
   });
 
   let reliability = 1;
   let eventSciencePenalty = 0;
   for (const event of events) {
-    if (event.occurred) {
-      const source = findById(gameData.eventsGame, event.id, "event");
-      reliability += source.effects.reliability ?? 0;
-      eventSciencePenalty += source.effects.science ?? 0;
+    const source = findById(gameData.eventsGame, event.id, "event");
+    const statusFactor =
+      event.status === "fails" ? 1 : event.status === "marginal" ? 0.5 : 0;
+    reliability += (source.effects.reliability ?? 0) * statusFactor;
+    eventSciencePenalty += (source.effects.science ?? 0) * statusFactor;
+    if (event.decisionId === "safe-mode") eventSciencePenalty -= 2;
+    if (event.decisionId === "keep-observing" && event.status !== "survives") {
+      reliability -= 0.1;
     }
   }
   reliability = Math.max(0, Math.min(1, reliability));
@@ -752,7 +856,10 @@ export function simulateTimeline(
     return { day, phase: phaseAtDay(day, durationDays), resources };
   });
   const events = evaluation.events.map((event, index) => {
-    const day = durationDays * ((index + 1) / (evaluation.events.length + 1));
+    const day = Math.min(
+      durationDays,
+      Math.max(1, event.month * 30),
+    );
     return { ...event, day, phase: phaseAtDay(day, durationDays) };
   });
 

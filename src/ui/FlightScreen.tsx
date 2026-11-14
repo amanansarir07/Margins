@@ -75,10 +75,6 @@ export function FlightScreen({
   options,
   onComplete,
 }: FlightScreenProps) {
-  const timeline = useMemo(
-    () => simulateTimeline(design, scenario, seed, 32, options),
-    [design, scenario, seed, options],
-  );
   const [countdown, setCountdown] = useState(5);
   const [launched, setLaunched] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -90,10 +86,19 @@ export function FlightScreen({
   const [decisionResult, setDecisionResult] =
     useState<EventDecisionChoice | null>(null);
   const [shaking, setShaking] = useState(false);
+  const [decisions, setDecisions] = useState<Record<string, string>>({});
   const progressRef = useRef(0);
   const shownEvents = useRef(new Set<string>());
   const countdownStarted = useRef(false);
   progressRef.current = progress;
+  const flightOptions = useMemo(
+    () => ({ ...options, decisions }),
+    [options, decisions],
+  );
+  const timeline = useMemo(
+    () => simulateTimeline(design, scenario, seed, 32, flightOptions),
+    [design, scenario, seed, flightOptions],
+  );
 
   useEffect(() => {
     if (countdownStarted.current) return;
@@ -182,6 +187,9 @@ export function FlightScreen({
     ] ?? timeline.points[0];
 
   const chooseDecision = (choice: EventDecisionChoice) => {
+    if (activeEvent) {
+      setDecisions((current) => ({ ...current, [activeEvent.id]: choice.id }));
+    }
     setDecisionResult(choice);
     playSound("click");
     vibrate(15);
@@ -254,7 +262,13 @@ export function FlightScreen({
               <span style={{ width: `${(decisionSeconds / 12) * 100}%` }} />
             </div>
             <h2 id="event-title">{activeEvent.name}</h2>
-            <p>{eventRecord?.decision?.prompt ?? activeEvent.explanation}</p>
+            <p>
+              {eventRecord?.decision?.prompt ?? activeEvent.explanation}
+              {" "}
+              Warning lead: {activeEvent.warningLeadDays} days.
+              {" "}
+              Resource: {activeEvent.resource}.
+            </p>
             {!decisionResult ? (
               <div className="decision-choice-list">
                 {decisionChoices.map((choice) => (

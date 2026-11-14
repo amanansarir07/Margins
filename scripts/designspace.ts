@@ -38,6 +38,10 @@ const TUNING_LOG = [
   "Mars science goal: 85 -> 95 points.",
   "Europa science goal: 105 -> 115 points.",
   "Moon mass limit: 200 -> 160 kg to preserve the overweight regression boundary.",
+  "Mars science goal: 95 -> 100 points after visible hazards increased success rate.",
+  "Europa science goal: 115 -> 120 points after visible hazards concentrated one archetype.",
+  "Mars science goal: 100 -> 98 points; radar: 65 -> 60 points to restore component diversity.",
+  "Europa science goal: 120 -> 115 points after radar diversity tuning.",
   "No engine rule changes.",
 ];
 

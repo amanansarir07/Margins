@@ -97,8 +97,23 @@ All files are JSON arrays or objects with the fields below. Field names are stab
 
 - `id`, `name`, `description`
 - `probability`: number, ratio
+- `hazardType`, `severity`, `consequence`, `resource`
+- `monthWindow`: object with `start` and `end`, months
+- `warningLeadDays`: number, days
 - `effects`: object with resource changes
 - `outcomes`: array of outcome descriptions
+- Optional `decision` has `prompt` and `choices`; each choice has `id`, `label`, `detail`, `cost`, and `saved`
+
+Probability only selects visible hazards for a seeded briefing. It does not create hidden flight events.
+
+## mitigations.json
+
+- `id`, `name`, `effect`
+- `massKg`: number, kg
+- `powerW`: number, W
+- `costM`: number, $M
+- Optional `warningLeadDays`: number, days
+- Optional `powerMarginW`: number, W
 
 ## events_donki.json
 

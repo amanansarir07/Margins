@@ -11,6 +11,7 @@ import orbitsJson from "../../data/orbits.json";
 import eventsGameJson from "../../data/events_game.json";
 import eventsDonkiJson from "../../data/events_donki.json";
 import missionReferencesJson from "../../data/mission_references.json";
+import mitigationsJson from "../../data/mitigations.json";
 import type {
   AttitudeControlRecord,
   CommsRecord,
@@ -20,6 +21,7 @@ import type {
   InstrumentRecord,
   LaunchVehicleRecord,
   MissionReferenceRecord,
+  MitigationRecord,
   OnboardComputerRecord,
   OrbitRecord,
   PowerRecord,
@@ -96,5 +98,9 @@ export const gameData = {
   missionReferences: validateRecords<MissionReferenceRecord>(
     "mission_references.json",
     missionReferencesJson,
+  ),
+  mitigations: validateRecords<MitigationRecord>(
+    "mitigations.json",
+    mitigationsJson,
   ),
 } as const;

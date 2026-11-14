@@ -78,6 +78,7 @@ export function App() {
       {state.screen === "briefing" && scenario && (
         <BriefingScreen
           scenario={scenario}
+          seed={state.seed}
           sandbox={state.sandbox}
           onContinue={() => dispatch({ type: "GO_TO", screen: "workshop" })}
         />

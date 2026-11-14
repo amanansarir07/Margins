@@ -1789,6 +1789,61 @@ body {
   grid-template-columns: minmax(13rem, 17rem) minmax(0, 1fr) minmax(14rem, 18rem);
 }
 
+.threat-briefing {
+  margin-top: 1rem;
+  padding: 1rem;
+}
+
+.threat-briefing h2 {
+  margin: 0.25rem 0 0.75rem;
+  text-transform: uppercase;
+}
+
+.threat-months {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.threat-list {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.threat-row {
+  border: 3px solid var(--ink-navy);
+  padding: 0.6rem;
+}
+
+.threat-row > div,
+.threat-row > small {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.threat-row p {
+  margin: 0.35rem 0;
+}
+
+.threat-row small {
+  font-size: 0.75rem;
+}
+
+.threat-survives {
+  background: color-mix(in srgb, var(--signal-mint) 35%, white);
+}
+
+.threat-marginal {
+  background: color-mix(in srgb, var(--launch-yellow) 45%, white);
+}
+
+.threat-fails {
+  background: color-mix(in srgb, var(--rocket-red) 25%, white);
+}
+
 .parts-shelf,
 .gauge-cluster {
   background: var(--light-surface);
