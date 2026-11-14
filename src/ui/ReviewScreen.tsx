@@ -112,6 +112,46 @@ export function ReviewScreen({
           </div>
           <ul className="check-list">
             <CheckRow
+              label="Spacecraft mass"
+              pass={result.checks.mass}
+              margin={result.resources.mass.margin / Math.max(result.resources.mass.limit, 1)}
+              help="Spacecraft mass must stay under the mission limit."
+              acknowledged={Boolean(acknowledged["Spacecraft mass"])}
+              onAcknowledge={() => acknowledge("Spacecraft mass", result.checks.mass)}
+            />
+            <CheckRow
+              label="Power"
+              pass={result.checks.power}
+              margin={result.resources.power.margin / Math.max(result.resources.power.limit, 1)}
+              help="Generated power must cover every load."
+              acknowledged={Boolean(acknowledged.Power)}
+              onAcknowledge={() => acknowledge("Power", result.checks.power)}
+            />
+            <CheckRow
+              label="Data"
+              pass={result.checks.data}
+              margin={result.resources.data.margin / Math.max(result.resources.data.limit, 1)}
+              help="Downlink must carry generated science data."
+              acknowledged={Boolean(acknowledged.Data)}
+              onAcknowledge={() => acknowledge("Data", result.checks.data)}
+            />
+            <CheckRow
+              label="Budget"
+              pass={result.checks.budget}
+              margin={result.resources.budget.margin / Math.max(result.resources.budget.limit, 1)}
+              help="Total cost must stay under the mission cap."
+              acknowledged={Boolean(acknowledged.Budget)}
+              onAcknowledge={() => acknowledge("Budget", result.checks.budget)}
+            />
+            <CheckRow
+              label="Time"
+              pass={result.checks.time}
+              margin={result.resources.time.margin / Math.max(result.resources.time.limit, 1)}
+              help="Program time must stay inside the mission window."
+              acknowledged={Boolean(acknowledged.Time)}
+              onAcknowledge={() => acknowledge("Time", result.checks.time)}
+            />
+            <CheckRow
               label="Launch mass"
               pass={result.checks.launchCompatibility.mass}
               help="Vehicle must carry the full spacecraft."

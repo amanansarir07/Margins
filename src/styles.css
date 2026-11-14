@@ -1331,7 +1331,7 @@ body {
   max-width: 22rem;
   padding: 1rem;
   position: fixed;
-  pointer-events: none;
+  pointer-events: auto;
   right: 1rem;
   z-index: 4;
 }

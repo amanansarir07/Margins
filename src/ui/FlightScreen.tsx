@@ -89,7 +89,6 @@ export function FlightScreen({
   const [decisions, setDecisions] = useState<Record<string, string>>({});
   const progressRef = useRef(0);
   const shownEvents = useRef(new Set<string>());
-  const countdownStarted = useRef(false);
   progressRef.current = progress;
   const flightOptions = useMemo(
     () => ({ ...options, decisions }),
@@ -101,8 +100,6 @@ export function FlightScreen({
   );
 
   useEffect(() => {
-    if (countdownStarted.current) return;
-    countdownStarted.current = true;
     playSound("launch");
     vibrate(40);
     const timer = window.setInterval(() => {
