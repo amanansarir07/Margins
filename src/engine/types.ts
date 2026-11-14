@@ -14,6 +14,8 @@ export interface DestinationRecord extends DataRecord {
   typicalTripTime: number;
   surfaceGravity: number;
   sunlightComparedToEarth: number;
+  propellantFactor: number;
+  downlinkDistanceFactor: number;
 }
 
 export interface ResourceLimits {
@@ -30,6 +32,7 @@ export interface ScenarioRecord extends DataRecord {
   destinationId: string;
   objective: string;
   requiredInstruments: string[];
+  requiredInstrumentAnyOf: string[];
   limits: ResourceLimits;
   scienceGoal: number;
   maxProgramMonths: number;
@@ -60,6 +63,7 @@ export interface PowerRecord extends DataRecord {
   powerW: number;
   costM: number;
   destinationIds: string[];
+  kind: "solar" | "nuclear";
 }
 
 export interface CommsRecord extends DataRecord {
@@ -67,6 +71,7 @@ export interface CommsRecord extends DataRecord {
   powerW: number;
   dataMbitPerDay: number;
   costM: number;
+  antennaFactor: number;
 }
 
 export interface OnboardComputerRecord extends DataRecord {
@@ -136,4 +141,65 @@ export interface Design {
   instrumentIds: string[];
   launchVehicleId: string;
   orbitId: string;
+}
+
+export type ResourceName =
+  | "mass"
+  | "power"
+  | "budget"
+  | "data"
+  | "comms"
+  | "time";
+
+export interface ResourceSummary {
+  used: number;
+  limit: number;
+  margin: number;
+}
+
+export type ResourceReport = Record<ResourceName, ResourceSummary>;
+
+export interface PreviewResourcesResult {
+  resources: ResourceReport;
+  warnings: string[];
+}
+
+export interface EvaluationChecks {
+  mass: boolean;
+  power: boolean;
+  data: boolean;
+  budget: boolean;
+  time: boolean;
+  launchCompatibility: {
+    pass: boolean;
+    mass: boolean;
+    orbit: boolean;
+  };
+}
+
+export interface MissionEventOutcome {
+  id: string;
+  name: string;
+  occurred: boolean;
+  outcome: string;
+  explanation: string;
+}
+
+export interface ScoreBreakdown {
+  resourceMargins: number;
+  science: number;
+  reliability: number;
+  checks: number;
+}
+
+export interface EvaluationResult {
+  checks: EvaluationChecks;
+  resources: ResourceReport;
+  sciencePoints: number;
+  reliability: number;
+  events: MissionEventOutcome[];
+  score: number;
+  scoreBreakdown: ScoreBreakdown;
+  success: boolean;
+  reasons: string[];
 }

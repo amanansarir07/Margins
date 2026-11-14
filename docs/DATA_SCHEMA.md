@@ -17,11 +17,14 @@ All files are JSON arrays or objects with the fields below. Field names are stab
 - `typicalTripTime`: number, days
 - `surfaceGravity`: number, m/s²
 - `sunlightComparedToEarth`: number, ratio
+- `propellantFactor`: number, game-model multiplier
+- `downlinkDistanceFactor`: number, game-model multiplier
 
 ## scenarios.json
 
 - `id`, `destinationId`, `objective`
 - `requiredInstruments`: array of instrument IDs
+- `requiredInstrumentAnyOf`: array of instrument IDs
 - `limits`: object with `massKg` (kg), `powerW` (W), `budgetM` ($M), `dataMbitPerDay` (Mbit/day), `communicationsMbitPerDay` (Mbit/day), `timeDays` (days)
 - `events`: array of event IDs
 
@@ -49,6 +52,7 @@ All files are JSON arrays or objects with the fields below. Field names are stab
 - `powerW`: number, W
 - `costM`: number, $M
 - `destinationIds`: array of destination IDs
+- `kind`: `"solar"` or `"nuclear"`
 
 ## comms.json
 
@@ -57,6 +61,7 @@ All files are JSON arrays or objects with the fields below. Field names are stab
 - `powerW`: number, W
 - `dataMbitPerDay`: number, Mbit/day
 - `costM`: number, $M
+- `antennaFactor`: number, game-model multiplier
 
 ## onboard_computer.json
 

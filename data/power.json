@@ -6,6 +6,7 @@
     "powerW": 180,
     "costM": 50,
     "destinationIds": ["moon", "mars"],
+    "kind": "solar",
     "source": "Game model",
     "sourceNote": "Provisional component balance value."
   },
@@ -16,7 +17,30 @@
     "powerW": 300,
     "costM": 90,
     "destinationIds": ["moon", "mars", "europa"],
+    "kind": "solar",
     "source": "Game model",
     "sourceNote": "Provisional component balance value."
+  },
+  {
+    "id": "nuclear-generator",
+    "name": "Nuclear Generator",
+    "massKg": 30,
+    "powerW": 160,
+    "costM": 110,
+    "destinationIds": ["moon", "mars", "europa"],
+    "kind": "nuclear",
+    "source": "Game model",
+    "sourceNote": "Provisional game-model component; nuclear output is independent of sunlight."
+  },
+  {
+    "id": "no-power",
+    "name": "No Power System",
+    "massKg": 0,
+    "powerW": 0,
+    "costM": 0,
+    "destinationIds": ["moon", "mars", "europa"],
+    "kind": "solar",
+    "source": "Game model",
+    "sourceNote": "Intentional empty selection used to explain a power failure."
   }
 ]

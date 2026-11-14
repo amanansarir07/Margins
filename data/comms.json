@@ -6,6 +6,7 @@
     "powerW": 18,
     "dataMbitPerDay": 100,
     "costM": 35,
+    "antennaFactor": 1,
     "source": "Game model",
     "sourceNote": "Provisional component balance value."
   },
@@ -16,6 +17,7 @@
     "powerW": 30,
     "dataMbitPerDay": 240,
     "costM": 70,
+    "antennaFactor": 1.5,
     "source": "Game model",
     "sourceNote": "Provisional component balance value."
   }
