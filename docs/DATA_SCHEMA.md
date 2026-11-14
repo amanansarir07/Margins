@@ -115,6 +115,22 @@ Probability only selects visible hazards for a seeded briefing. It does not crea
 - Optional `warningLeadDays`: number, days
 - Optional `powerMarginW`: number, W
 
+## contracts.json
+
+- `id`, `name`, `scenarioId`, `description`
+- `kind`: `mass-under`, `zero-data-loss`, `power-not`, `budget-under`, or `time-under`
+- Optional `threshold`: number in the unit used by the contract
+- Optional `powerKind`: `solar` or `nuclear`
+- `bonusStars`: number
+
+## twists.json
+
+- `id`, `name`, `description`
+- `scenarioIds`: array of scenario IDs
+- Optional `budgetMultiplier`, `communicationsMultiplier`
+- Optional `hazardWindowExtraMonths`: number, months
+- Optional `heavyLauncherGrounded`: boolean
+
 ## events_donki.json
 
 - `id`, `eventType`, `startTime`, `endTime`

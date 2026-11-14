@@ -62,20 +62,25 @@ const resourceNames = [
   "time",
 ] as const;
 
-const defaultOptions: Required<MissionOptions> = {
+type ResolvedMissionOptions = Omit<
+  Required<MissionOptions>,
+  "twistId" | "contractId"
+> & Pick<MissionOptions, "twistId" | "contractId">;
+
+const defaultOptions: ResolvedMissionOptions = {
   difficulty: "engineer",
   sandbox: false,
   decisions: {},
 };
 
-function resolveOptions(options?: MissionOptions): Required<MissionOptions> {
+function resolveOptions(options?: MissionOptions): ResolvedMissionOptions {
   return { ...defaultOptions, ...options };
 }
 
 function difficultyLimit(
   limit: number,
   resource: keyof ResourceReport,
-  options: Required<MissionOptions>,
+  options: ResolvedMissionOptions,
 ): number {
   if (options.sandbox && resource === "budget") return Number.POSITIVE_INFINITY;
   if (options.difficulty === "cadet") return limit * 1.2;
@@ -87,7 +92,7 @@ function difficultyLimit(
 
 function componentCompatibility(
   calculated: CalculatedDesign,
-  options: Required<MissionOptions>,
+  options: ResolvedMissionOptions,
 ): boolean {
   if (options.difficulty !== "cadet") return true;
   return [
@@ -156,9 +161,16 @@ function getComponents(design: Design, scenario: ScenarioRecord): Components {
   };
 }
 
+function twistForOptions(options: ResolvedMissionOptions) {
+  return options.twistId
+    ? findById(gameData.twists, options.twistId, "twist")
+    : undefined;
+}
+
 function calculateDesign(
   design: Design,
   scenario: ScenarioRecord,
+  twist?: (typeof gameData.twists)[number],
 ): CalculatedDesign {
   const components = getComponents(design, scenario);
   const dryMass =
@@ -199,7 +211,8 @@ function calculateDesign(
   const downlink =
     200 *
     components.comms.antennaFactor *
-    components.destination.downlinkDistanceFactor;
+    components.destination.downlinkDistanceFactor *
+    (twist?.communicationsMultiplier ?? 1);
   const budgetUsed =
     components.bus.costM +
     components.power.costM +
@@ -237,8 +250,9 @@ function calculateDesign(
 function calculateResources(
   calculated: CalculatedDesign,
   scenario: ScenarioRecord,
-  options: Required<MissionOptions>,
+  options: ResolvedMissionOptions,
 ): ResourceReport {
+  const twist = twistForOptions(options);
   const resources = {
     mass: {
       used: calculated.totalMass,
@@ -253,7 +267,9 @@ function calculateResources(
     },
     budget: {
       used: calculated.budgetUsed,
-      limit: difficultyLimit(scenario.limits.budgetM, "budget", options),
+      limit:
+        difficultyLimit(scenario.limits.budgetM, "budget", options) *
+        (twist?.budgetMultiplier ?? 1),
     },
     data: {
       used: calculated.generatedData,
@@ -305,7 +321,7 @@ export function previewResources(
 ): PreviewResourcesResult {
   const resolvedOptions = resolveOptions(options);
   const resources = calculateResources(
-    calculateDesign(design, scenario),
+    calculateDesign(design, scenario, twistForOptions(resolvedOptions)),
     scenario,
     resolvedOptions,
   );
@@ -502,6 +518,7 @@ function mulberry32(seed: number): () => number {
 export function getThreatBriefing(
   scenario: ScenarioRecord,
   seed: number,
+  twist?: (typeof gameData.twists)[number],
 ): ThreatHazard[] {
   const random = mulberry32(seed);
   const hazards = scenario.events.flatMap((eventId) => {
@@ -511,7 +528,7 @@ export function getThreatBriefing(
           id: event.id,
           type: event.hazardType,
           monthStart: event.monthWindow.start,
-          monthEnd: event.monthWindow.end,
+          monthEnd: event.monthWindow.end + (twist?.hazardWindowExtraMonths ?? 0),
           severity: event.severity,
           consequence: event.consequence,
           resource: event.resource,
@@ -530,7 +547,7 @@ export function getThreatBriefing(
     id: fallback.id,
     type: fallback.hazardType,
     monthStart: fallback.monthWindow.start,
-    monthEnd: fallback.monthWindow.end,
+    monthEnd: fallback.monthWindow.end + (twist?.hazardWindowExtraMonths ?? 0),
     severity: fallback.severity,
     consequence: fallback.consequence,
     resource: fallback.resource,
@@ -592,8 +609,9 @@ export function assessThreats(
   options?: MissionOptions,
 ): ThreatAssessment[] {
   const resolvedOptions = resolveOptions(options);
-  const calculated = calculateDesign(design, scenario);
-  return getThreatBriefing(scenario, seed).map((hazard) =>
+  const twist = twistForOptions(resolvedOptions);
+  const calculated = calculateDesign(design, scenario, twist);
+  return getThreatBriefing(scenario, seed, twist).map((hazard) =>
     assessHazard(hazard, calculated, calculateResources(calculated, scenario, resolvedOptions)),
   );
 }
@@ -605,12 +623,16 @@ export function evaluate(
   options?: MissionOptions,
 ): EvaluationResult {
   const resolvedOptions = resolveOptions(options);
-  const calculated = calculateDesign(design, scenario);
+  const twist = twistForOptions(resolvedOptions);
+  const calculated = calculateDesign(design, scenario, twist);
   const resources = calculateResources(calculated, scenario, resolvedOptions);
   const launchMass = calculated.launchVehicle.capacityByDestination[scenario.destinationId] ?? 0;
   const launchMassPass = calculated.totalMass <= launchMass;
   const launchOrbitPass = calculated.launchVehicle.supportedOrbits.includes(
     calculated.orbit.id,
+  );
+  const launcherPass = !(
+    twist?.heavyLauncherGrounded && calculated.launchVehicle.id === "heavy-lifter"
   );
   const checks = {
     mass: resources.mass.margin >= 0,
@@ -622,7 +644,7 @@ export function evaluate(
     budget: resources.budget.margin >= 0,
     time: resources.time.margin >= 0,
     launchCompatibility: {
-      pass: launchMassPass && launchOrbitPass,
+      pass: launchMassPass && launchOrbitPass && launcherPass,
       mass: launchMassPass,
       orbit: launchOrbitPass,
     },
@@ -699,6 +721,12 @@ export function evaluate(
   }
   reliability = Math.max(0, Math.min(1, reliability));
   const adjustedScience = Math.max(0, sciencePoints + eventSciencePenalty);
+  const contractRecord = resolvedOptions.contractId
+    ? findById(gameData.contracts, resolvedOptions.contractId, "contract")
+    : undefined;
+  const contract = contractRecord
+    ? evaluateContract(contractRecord, calculated, resources)
+    : undefined;
   const scoredChecks = [
     checks.mass,
     checks.power,
@@ -728,6 +756,7 @@ export function evaluate(
     ...(!checks.launchCompatibility.orbit
       ? [`Launch vehicle lacks ${calculated.orbit.name} support.`]
       : []),
+    ...(!launcherPass ? ["Heavy Lifter is grounded for this twist."] : []),
     ...(!hasRequiredInstrument
       ? ["Add a spectrometer or radar."]
       : []),
@@ -751,6 +780,7 @@ export function evaluate(
       `All checks pass. Science returned ${adjustedScience}.`,
     );
   }
+  if (contract && !contract.passed) reasons.push(`Contract failed: ${contract.reason}`);
 
   const marginScore =
     (resourceNames.reduce((total, name) => {
@@ -799,6 +829,33 @@ export function evaluate(
     scoreBreakdown: baseScoreBreakdown,
     success,
     reasons,
+    ...(contract ? { contract } : {}),
+  };
+}
+
+function evaluateContract(
+  contract: (typeof gameData.contracts)[number],
+  calculated: CalculatedDesign,
+  resources: ResourceReport,
+) {
+  const passed =
+    contract.kind === "mass-under"
+      ? calculated.totalMass < (contract.threshold ?? 0)
+      : contract.kind === "budget-under"
+        ? resources.budget.used < (contract.threshold ?? 0)
+        : contract.kind === "time-under"
+          ? calculated.timeUsed < (contract.threshold ?? 0)
+          : contract.kind === "power-not"
+            ? calculated.power.kind !== contract.powerKind
+            : contract.kind === "zero-data-loss"
+              ? calculated.dataReturnedFraction >= 1
+              : false;
+  return {
+    id: contract.id,
+    name: contract.name,
+    passed,
+    reason: passed ? contract.description : contract.description,
+    bonusStars: passed ? contract.bonusStars : 0,
   };
 }
 

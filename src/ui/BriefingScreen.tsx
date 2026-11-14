@@ -1,15 +1,17 @@
 import { gameData } from "../engine/loadData";
-import type { ScenarioRecord } from "../engine/types";
+import type { MissionOptions, ScenarioRecord } from "../engine/types";
 
 interface BriefingScreenProps {
   scenario: ScenarioRecord;
   sandbox: boolean;
+  options: MissionOptions;
   onContinue: () => void;
 }
 
 export function BriefingScreen({
   scenario,
   sandbox,
+  options,
   onContinue,
 }: BriefingScreenProps) {
   const requiredNames = scenario.requiredInstrumentAnyOf
@@ -56,6 +58,20 @@ export function BriefingScreen({
           </div>
           {scenario.difficultyHints?.[0] && (
             <div className="decision-value">{scenario.difficultyHints[0]}</div>
+          )}
+          {options.twistId && (
+            <div className="daily-briefing">
+              <p className="panel-label">Daily twist</p>
+              <strong>{gameData.twists.find((twist) => twist.id === options.twistId)?.name}</strong>
+              <span>{gameData.twists.find((twist) => twist.id === options.twistId)?.description}</span>
+            </div>
+          )}
+          {options.contractId && (
+            <div className="daily-briefing">
+              <p className="panel-label">Contract · +1 star</p>
+              <strong>{gameData.contracts.find((contract) => contract.id === options.contractId)?.name}</strong>
+              <span>{gameData.contracts.find((contract) => contract.id === options.contractId)?.description}</span>
+            </div>
           )}
         </article>
       </div>

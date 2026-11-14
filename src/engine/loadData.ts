@@ -12,6 +12,8 @@ import eventsGameJson from "../../data/events_game.json";
 import eventsDonkiJson from "../../data/events_donki.json";
 import missionReferencesJson from "../../data/mission_references.json";
 import mitigationsJson from "../../data/mitigations.json";
+import contractsJson from "../../data/contracts.json";
+import twistsJson from "../../data/twists.json";
 import type {
   AttitudeControlRecord,
   CommsRecord,
@@ -22,6 +24,8 @@ import type {
   LaunchVehicleRecord,
   MissionReferenceRecord,
   MitigationRecord,
+  ContractRecord,
+  TwistRecord,
   OnboardComputerRecord,
   OrbitRecord,
   PowerRecord,
@@ -103,4 +107,6 @@ export const gameData = {
     "mitigations.json",
     mitigationsJson,
   ),
+  contracts: validateRecords<ContractRecord>("contracts.json", contractsJson),
+  twists: validateRecords<TwistRecord>("twists.json", twistsJson),
 } as const;

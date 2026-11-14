@@ -74,7 +74,7 @@ export function createMissionPatch(
   <text x="320" y="80" text-anchor="middle" font-family="Bowlby One SC" font-size="30" fill="${palette.ink}">${escapeXml(scenario.destinationId.toUpperCase())}</text>
   <text x="320" y="292" text-anchor="middle" font-family="Bowlby One SC" font-size="25" fill="${palette.ink}">${escapeXml(name.toUpperCase())}</text>
   ${instruments}
-  <text x="320" y="365" text-anchor="middle" font-family="Atkinson Hyperlegible" font-size="20" font-weight="700" fill="${palette.ink}">${"★".repeat(stars)}${"☆".repeat(3 - stars)}</text>
+  <text x="320" y="365" text-anchor="middle" font-family="Atkinson Hyperlegible" font-size="20" font-weight="700" fill="${palette.ink}">${"★".repeat(stars)}${"☆".repeat(Math.max(0, 3 - stars))}</text>
   <text x="320" y="394" text-anchor="middle" font-family="Atkinson Hyperlegible" font-size="10" font-weight="700" fill="${palette.ink}">${componentLine}</text>
   </svg>`;
 }
@@ -96,6 +96,51 @@ export async function saveSvgAsImage(svg: string, filename: string) {
       canvas.toBlob((value) => {
         if (value) resolve(value);
         else reject(new Error("Patch image could not be encoded."));
+      }, "image/png");
+    });
+    const downloadUrl = URL.createObjectURL(png);
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(downloadUrl);
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+export async function saveShareCardAsImage(
+  svg: string,
+  score: number,
+  stars: number,
+  code: string,
+  filename: string,
+) {
+  const blob = new Blob([svg], { type: "image/svg+xml" });
+  const url = URL.createObjectURL(blob);
+  try {
+    const image = new Image();
+    image.src = url;
+    await image.decode();
+    const canvas = document.createElement("canvas");
+    canvas.width = 1200;
+    canvas.height = 800;
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("Share card canvas is unavailable.");
+    context.fillStyle = "#C9D1D9";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(image, 40, 40, 560, 368);
+    context.fillStyle = "#14213D";
+    context.font = "700 54px Atkinson Hyperlegible";
+    context.fillText(`${score}/1000`, 680, 180);
+    context.font = "700 36px Atkinson Hyperlegible";
+    context.fillText(`${"★".repeat(stars)}  ${stars} stars`, 680, 250);
+    context.font = "700 28px Atkinson Hyperlegible";
+    context.fillText(code, 680, 330);
+    const png = await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob((value) => {
+        if (value) resolve(value);
+        else reject(new Error("Share card could not be encoded."));
       }, "image/png");
     });
     const downloadUrl = URL.createObjectURL(png);

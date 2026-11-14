@@ -1,5 +1,6 @@
 import type { Design, Difficulty, EvaluationResult } from "../engine/types";
 import { loadLastDesign } from "./storage";
+import type { DailyMission } from "./daily";
 
 export type Screen =
   | "title"
@@ -16,11 +17,13 @@ export interface AppState {
   seed: number;
   difficulty: Difficulty;
   sandbox: boolean;
+  dailyMission: DailyMission | null;
 }
 
 export type AppAction =
   | { type: "START_SOLO" }
   | { type: "START_SANDBOX" }
+  | { type: "START_DAILY"; mission: DailyMission }
   | { type: "GO_TO"; screen: Exclude<Screen, "title"> }
   | { type: "SET_DESIGN"; design: Design }
   | { type: "SET_DIFFICULTY"; difficulty: Difficulty }
@@ -48,14 +51,24 @@ export const initialState: AppState = {
   seed: 42,
   difficulty: "engineer",
   sandbox: false,
+  dailyMission: null,
 };
 
 export function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
     case "START_SOLO":
-      return { ...state, screen: "briefing", sandbox: false };
+      return { ...state, screen: "briefing", sandbox: false, dailyMission: null };
     case "START_SANDBOX":
       return { ...state, screen: "briefing", sandbox: true };
+    case "START_DAILY":
+      return {
+        ...state,
+        screen: "briefing",
+        sandbox: false,
+        dailyMission: action.mission,
+        seed: action.mission.seed,
+        design: { ...state.design, scenarioId: action.mission.scenarioId },
+      };
     case "GO_TO":
       return { ...state, screen: action.screen };
     case "SET_DESIGN":

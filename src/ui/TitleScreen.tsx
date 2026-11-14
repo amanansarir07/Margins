@@ -2,6 +2,7 @@ import { gameData } from "../engine/loadData";
 import { playSound } from "../audio/sound";
 import { vibrate } from "../audio/haptics";
 import type { Difficulty } from "../engine/types";
+import type { DailyMission } from "./daily";
 
 interface TitleScreenProps {
   missionStars: Record<string, number>;
@@ -9,6 +10,9 @@ interface TitleScreenProps {
   onSelectScenario: (scenarioId: string) => void;
   onDifficultyChange: (difficulty: Difficulty) => void;
   onStartSandbox: () => void;
+  dailyMission: DailyMission;
+  dailyStreak: number;
+  onStartDaily: () => void;
 }
 
 const pinPositions: Record<string, { x: number; y: number }> = {
@@ -33,6 +37,9 @@ export function TitleScreen({
   onSelectScenario,
   onDifficultyChange,
   onStartSandbox,
+  dailyMission,
+  dailyStreak,
+  onStartDaily,
 }: TitleScreenProps) {
   const moonStars = starsForDestination("moon", missionStars);
   const totalStars = Object.values(missionStars).reduce(
@@ -94,8 +101,9 @@ export function TitleScreen({
               <span className="mission-pin-dot" />
               <strong>{destination.name}</strong>
               <span>
-                {"★".repeat(stars)}
-                {"☆".repeat(3 - stars)}
+                {"★".repeat(Math.min(3, stars))}
+                {"☆".repeat(Math.max(0, 3 - stars))}
+                {stars > 3 ? ` +${stars - 3}` : ""}
               </span>
               <small>{unlocked ? "UNLOCKED" : "LOCKED"}</small>
             </button>
@@ -103,6 +111,9 @@ export function TitleScreen({
         })}
       </div>
       <footer className="mission-select-footer">
+        <button className="button button-primary" type="button" onClick={onStartDaily}>
+          DAILY MISSION · {dailyStreak} DAY STREAK
+        </button>
         <div className="difficulty-picker" aria-label="Difficulty">
           {(["cadet", "engineer", "veteran"] as Difficulty[]).map((level) => (
             <button
@@ -119,6 +130,7 @@ export function TitleScreen({
           OPEN SANDBOX
         </button>
       </footer>
+      <p className="daily-code">TODAY: {dailyMission.code}</p>
     </section>
   );
 }

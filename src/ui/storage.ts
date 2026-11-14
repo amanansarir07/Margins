@@ -5,9 +5,16 @@ const BEST_SCORE_KEY = "margins:best-score";
 const MISSION_STARS_KEY = "margins:mission-stars";
 const PATCH_WALL_KEY = "margins:patch-wall";
 const AXIS_BESTS_KEY = "margins:axis-bests";
+const DAILY_PROGRESS_KEY = "margins:daily-progress";
 
 export type AxisName = "science" | "cost" | "margin" | "resilience" | "schedule";
 export type AxisBests = Partial<Record<AxisName, number>>;
+
+export interface DailyProgress {
+  currentStreak: number;
+  lastCompletedDate?: string;
+  completedDates: string[];
+}
 
 export interface SavedMissionPatch {
   id: string;
@@ -168,5 +175,52 @@ export function saveAxisBests(values: AxisBests): AxisBests {
   } catch (error) {
     console.warn("Could not save axis records.", error);
     return loadAxisBests();
+  }
+}
+
+export function loadDailyProgress(): DailyProgress {
+  try {
+    const raw = localStorage.getItem(DAILY_PROGRESS_KEY);
+    if (!raw) return { currentStreak: 0, completedDates: [] };
+    const value: unknown = JSON.parse(raw);
+    if (typeof value !== "object" || value === null) {
+      return { currentStreak: 0, completedDates: [] };
+    }
+    const candidate = value as Partial<DailyProgress>;
+    return {
+      currentStreak:
+        typeof candidate.currentStreak === "number" ? candidate.currentStreak : 0,
+      lastCompletedDate:
+        typeof candidate.lastCompletedDate === "string"
+          ? candidate.lastCompletedDate
+          : undefined,
+      completedDates: Array.isArray(candidate.completedDates)
+        ? candidate.completedDates.filter((date): date is string => typeof date === "string")
+        : [],
+    };
+  } catch (error) {
+    console.warn("Could not load daily progress.", error);
+    return { currentStreak: 0, completedDates: [] };
+  }
+}
+
+export function recordDailyCompletion(date: string): DailyProgress {
+  try {
+    const current = loadDailyProgress();
+    if (current.completedDates.includes(date)) return current;
+    const previous = new Date(`${date}T00:00:00Z`);
+    previous.setUTCDate(previous.getUTCDate() - 1);
+    const yesterday = previous.toISOString().slice(0, 10);
+    const next = {
+      currentStreak:
+        current.lastCompletedDate === yesterday ? current.currentStreak + 1 : 1,
+      lastCompletedDate: date,
+      completedDates: [date, ...current.completedDates].slice(0, 60),
+    };
+    localStorage.setItem(DAILY_PROGRESS_KEY, JSON.stringify(next));
+    return next;
+  } catch (error) {
+    console.warn("Could not save daily progress.", error);
+    return loadDailyProgress();
   }
 }

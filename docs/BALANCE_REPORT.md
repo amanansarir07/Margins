@@ -53,6 +53,14 @@ Mandatory components are excluded from dominance flags because scenarios require
 
 | Metric | p0 | p25 | p50 | p75 | p90 | p95 | p100 |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+
+### Contract hit rates among successful designs
+
+| Contract | Hit rate |
+| --- | ---: |
+| moon-light-mass | 14.7% |
+| moon-lean-budget | 12.2% |
+| moon-very-lean-budget | 8.8% |
 | cost | 259.09 | 389.39 | 430.06 | 467.96 | 498.36 | 517.79 | 576.00 |
 | science | 32.00 | 72.00 | 104.00 | 144.00 | 165.00 | 205.00 | 256.00 |
 | score | 307.00 | 654.00 | 770.00 | 862.00 | 880.00 | 886.00 | 901.00 |
@@ -130,6 +138,14 @@ Mandatory components are excluded from dominance flags because scenarios require
 
 | Metric | p0 | p25 | p50 | p75 | p90 | p95 | p100 |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+
+### Contract hit rates among successful designs
+
+| Contract | Hit rate |
+| --- | ---: |
+| mars-light-budget | 19.0% |
+| mars-light-mass | 4.6% |
+| mars-very-lean-budget | 9.9% |
 | cost | 275.73 | 409.51 | 451.28 | 489.14 | 520.87 | 540.42 | 600.01 |
 | science | 27.00 | 72.00 | 94.00 | 127.00 | 164.00 | 201.00 | 256.00 |
 | score | 307.00 | 732.00 | 757.00 | 849.00 | 862.00 | 868.00 | 885.00 |
@@ -207,6 +223,14 @@ Mandatory components are excluded from dominance flags because scenarios require
 
 | Metric | p0 | p25 | p50 | p75 | p90 | p95 | p100 |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+
+### Contract hit rates among successful designs
+
+| Contract | Hit rate |
+| --- | ---: |
+| europa-light-budget | 19.8% |
+| europa-light-mass | 5.6% |
+| europa-very-lean-budget | 19.8% |
 | cost | 342.76 | 468.68 | 509.71 | 546.77 | 578.84 | 598.10 | 658.01 |
 | science | 17.00 | 65.00 | 92.00 | 122.00 | 155.00 | 195.00 | 256.00 |
 | score | 476.00 | 701.00 | 730.00 | 837.00 | 847.00 | 852.00 | 873.00 |

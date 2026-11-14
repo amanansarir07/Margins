@@ -1,6 +1,12 @@
 export type Source = "NASA-based" | "Game model";
 export type Difficulty = "cadet" | "engineer" | "veteran";
 export type PowerKind = "solar" | "nuclear";
+export type ContractKind =
+  | "mass-under"
+  | "zero-data-loss"
+  | "power-not"
+  | "budget-under"
+  | "time-under";
 
 export interface DataRecord {
   id: string;
@@ -166,6 +172,24 @@ export interface GameEventRecord extends DataRecord {
   decision?: EventDecision;
 }
 
+export interface ContractRecord extends DataRecord {
+  scenarioId: string;
+  description: string;
+  kind: ContractKind;
+  threshold?: number;
+  powerKind?: PowerKind;
+  bonusStars: number;
+}
+
+export interface TwistRecord extends DataRecord {
+  scenarioIds: string[];
+  description: string;
+  budgetMultiplier?: number;
+  communicationsMultiplier?: number;
+  hazardWindowExtraMonths?: number;
+  heavyLauncherGrounded?: boolean;
+}
+
 export interface DonkiEventRecord extends DataRecord {
   eventType: string;
   startTime: string;
@@ -265,12 +289,21 @@ export interface EvaluationResult {
   scoreBreakdown: ScoreBreakdown;
   success: boolean;
   reasons: string[];
+  contract?: {
+    id: string;
+    name: string;
+    passed: boolean;
+    reason: string;
+    bonusStars: number;
+  };
 }
 
 export interface MissionOptions {
   difficulty?: Difficulty;
   sandbox?: boolean;
   decisions?: Record<string, string>;
+  twistId?: string;
+  contractId?: string;
 }
 
 export interface SuggestedFix {

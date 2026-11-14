@@ -3,8 +3,8 @@ import { gameData } from "../engine/loadData";
 import { loadMissionPatches, loadMissionStars } from "./storage";
 
 function rankForStars(stars: number) {
-  if (stars >= 18) return "Flight Director";
-  if (stars >= 9) return "Engineer";
+  if (stars >= 10) return "Flight Director";
+  if (stars >= 6) return "Engineer";
   return "Cadet";
 }
 

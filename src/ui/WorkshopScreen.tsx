@@ -380,6 +380,12 @@ function ThreatBriefing({
     <section className="threat-briefing panel" aria-labelledby="threat-title">
       <div className="panel-label">KNOWN HAZARDS / SEED {seed}</div>
       <h2 id="threat-title">Threat briefing</h2>
+      {options.twistId && (
+        <p className="threat-twist">
+          <strong>TWIST:</strong>{" "}
+          {gameData.twists.find((twist) => twist.id === options.twistId)?.description}
+        </p>
+      )}
       <div className="threat-months" aria-label="Mission month timeline">
         <span>MONTH 1</span><span>MONTH {scenario.maxProgramMonths}</span>
       </div>

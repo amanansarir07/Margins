@@ -1884,6 +1884,29 @@ body {
   text-transform: uppercase;
 }
 
+.threat-twist,
+.daily-briefing {
+  border: 3px solid var(--ink-navy);
+  margin: 0.6rem 0;
+  padding: 0.6rem;
+}
+
+.daily-briefing {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.daily-code {
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin: 0.75rem 0 0;
+  text-align: center;
+}
+
+.share-card-panel {
+  margin-top: 1rem;
+}
+
 .threat-months {
   display: flex;
   justify-content: space-between;

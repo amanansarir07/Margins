@@ -8,6 +8,7 @@ import {
   createMissionPatch,
   missionName,
   saveSvgAsImage,
+  saveShareCardAsImage,
 } from "./missionPatch";
 import {
   saveMissionPatch,
@@ -69,6 +70,7 @@ interface DebriefScreenProps {
   options: MissionOptions;
   onRerun: () => void;
   onApplyFix: (design: Design) => void;
+  dailyCode?: string;
 }
 
 export function DebriefScreen({
@@ -79,6 +81,7 @@ export function DebriefScreen({
   options,
   onRerun,
   onApplyFix,
+  dailyCode,
 }: DebriefScreenProps) {
   const timeline = useMemo(
     () => simulateTimeline(design, scenario, seed, 32, options),
@@ -169,6 +172,23 @@ export function DebriefScreen({
     }
   };
 
+  const saveShareImage = async () => {
+    setPatchError("");
+    if (!dailyCode) return;
+    try {
+      await saveShareCardAsImage(
+        patchSvg,
+        result.score,
+        stars,
+        dailyCode,
+        `${dailyCode.toLowerCase()}.png`,
+      );
+    } catch (error) {
+      console.error("Could not save the daily share card.", error);
+      setPatchError("Share image failed. Try the button again.");
+    }
+  };
+
   return (
     <section className="screen debrief-screen" aria-labelledby="debrief-title">
       <header className="debrief-hero">
@@ -183,8 +203,8 @@ export function DebriefScreen({
         </Stamp>
       </header>
       <div className="debrief-score-row">
-        <div className="debrief-stars" aria-label={`${visibleStars} of 3 stars earned`}>
-          {[0, 1, 2].map((star) => (
+        <div className="debrief-stars" aria-label={`${visibleStars} stars earned`}>
+          {Array.from({ length: Math.max(3, stars) }, (_, star) => (
             <span className={star < visibleStars ? "star-earned" : ""} key={star}>
               {star < visibleStars ? "★" : "☆"}
             </span>
@@ -220,6 +240,16 @@ export function DebriefScreen({
           </Button>
           {patchError && <p className="launch-reason">{patchError}</p>}
         </article>
+        {dailyCode && (
+          <article className="panel share-card-panel">
+            <p className="panel-label">Daily share card</p>
+            <h2>{dailyCode}</h2>
+            <p>Score {result.score}/1000 · {stars} stars</p>
+            <Button className="button-primary" type="button" onClick={saveShareImage}>
+              SAVE IMAGE
+            </Button>
+          </article>
+        )}
         <article className="panel">
           <p className="panel-label">Score breakdown</p>
           <div className="score-inline">

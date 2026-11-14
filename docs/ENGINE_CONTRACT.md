@@ -46,3 +46,9 @@ Pass-and-play team mode supports 2 to 4 players. Players take the roles planner,
 ## Launch windows
 
 The launch-window model uses astronomy-engine. Any simplified launch-window behavior is labeled "Game model" in the UI and data.
+
+## Replay modifiers and contracts
+
+Daily missions use the UTC date as a deterministic seed. They select one enabled scenario, one twist, and one scenario contract. The share code is derived from the same date and seed, so it is repeatable without a backend.
+
+Twists are passed through `MissionOptions`. Budget, communications, launcher, and hazard-window modifiers affect both the briefing and evaluation. Contracts are evaluated after resource calculation and can add one bonus star when their stated condition passes.

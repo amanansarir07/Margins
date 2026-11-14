@@ -42,6 +42,7 @@ const TUNING_LOG = [
   "Europa science goal: 115 -> 120 points after visible hazards concentrated one archetype.",
   "Mars science goal: 100 -> 98 points; radar: 65 -> 60 points to restore component diversity.",
   "Europa science goal: 120 -> 115 points after radar diversity tuning.",
+  "Contracts tuned against successful samples: all hit rates 4.6% to 19.8%.",
   "No engine rule changes.",
 ];
 
@@ -255,6 +256,21 @@ function analyze(scenario: ScenarioRecord, designs: EvaluatedDesign[]) {
     launchVehicleId: usageShare(cheapest, "launchVehicleId"),
     orbitId: usageShare(cheapest, "orbitId"),
   };
+  const contractRates = Object.fromEntries(
+    gameData.contracts
+      .filter((contract) => contract.scenarioId === scenario.id)
+      .map((contract) => {
+        const passed = successful.filter(
+          (item) =>
+            evaluate(item.design, scenario, 1, { contractId: contract.id }).contract
+              ?.passed,
+        ).length;
+        return [
+          contract.id,
+          Math.round((passed / Math.max(successful.length, 1)) * 1000) / 1000,
+        ];
+      }),
+  );
   const mandatory = new Set<string>();
   if (scenario.requiredPowerKind) {
     for (const power of gameData.power) {
@@ -304,6 +320,7 @@ function analyze(scenario: ScenarioRecord, designs: EvaluatedDesign[]) {
       count: cheapest.length,
       componentUsage: cheapestComponentUsage,
     },
+    contractRates,
     flags: {
       dominatedComponents: dominated,
       dominantComponents: dominant,
@@ -351,6 +368,10 @@ function writeReport(reports: ReturnType<typeof analyze>[]) {
       "| Metric | p0 | p25 | p50 | p75 | p90 | p95 | p100 |",
       "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
     );
+    lines.push("", "### Contract hit rates among successful designs", "", "| Contract | Hit rate |", "| --- | ---: |");
+    for (const [contractId, rate] of Object.entries(report.contractRates)) {
+      lines.push(`| ${contractId} | ${(rate * 100).toFixed(1)}% |`);
+    }
     for (const [metric, table] of Object.entries(report.percentiles)) {
       lines.push(
         `| ${metric} | ${table.p0.toFixed(2)} | ${table.p25.toFixed(2)} | ${table.p50.toFixed(2)} | ${table.p75.toFixed(2)} | ${table.p90.toFixed(2)} | ${table.p95.toFixed(2)} | ${table.p100.toFixed(2)} |`,

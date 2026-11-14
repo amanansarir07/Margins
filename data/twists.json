@@ -1,0 +1,38 @@
+[
+  {
+    "id": "budget-cut-20",
+    "name": "Budget Cut 20%",
+    "description": "The available budget is 80% of normal.",
+    "scenarioIds": ["moon-ice-mapping", "mars-minerals", "europa-ocean"],
+    "budgetMultiplier": 0.8,
+    "source": "Game model",
+    "sourceNote": "Game model. Replay modifier."
+  },
+  {
+    "id": "heavy-solar-season",
+    "name": "Heavy Solar Season",
+    "description": "Hazard windows last 2 extra months.",
+    "scenarioIds": ["moon-ice-mapping", "mars-minerals", "europa-ocean"],
+    "hazardWindowExtraMonths": 2,
+    "source": "Game model",
+    "sourceNote": "Game model. Replay modifier."
+  },
+  {
+    "id": "heavy-launcher-grounded",
+    "name": "Heavy Launcher Grounded",
+    "description": "Heavy Lifter cannot launch this mission.",
+    "scenarioIds": ["moon-ice-mapping", "mars-minerals", "europa-ocean"],
+    "heavyLauncherGrounded": true,
+    "source": "Game model",
+    "sourceNote": "Game model. Replay modifier."
+  },
+  {
+    "id": "comms-degraded",
+    "name": "Comms Degraded",
+    "description": "Downlink capacity is 50% of normal.",
+    "scenarioIds": ["moon-ice-mapping", "mars-minerals", "europa-ocean"],
+    "communicationsMultiplier": 0.5,
+    "source": "Game model",
+    "sourceNote": "Game model. Replay modifier."
+  }
+]

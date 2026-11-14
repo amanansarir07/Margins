@@ -10,15 +10,20 @@ import { FlightScreen } from "./FlightScreen";
 import { KitScreen } from "./KitScreen";
 import { PatchWallScreen } from "./PatchWallScreen";
 import {
+  loadDailyProgress,
   loadMissionStars,
+  recordDailyCompletion,
   saveBestScore,
   saveLastDesign,
   saveMissionStars,
 } from "./storage";
+import { getDailyMission } from "./daily";
 
 export function App() {
   const [state, dispatch] = useReducer(appReducer, initialState);
   const [missionStars, setMissionStars] = useState(loadMissionStars);
+  const [dailyProgress, setDailyProgress] = useState(loadDailyProgress);
+  const dailyMission = getDailyMission();
   const scenario = gameData.scenarios.find(
     (item) => item.id === state.design.scenarioId,
   );
@@ -41,13 +46,20 @@ export function App() {
         (resource) => resource.margin / Math.max(resource.limit, 1) > 0.15,
       )
         ? 1
-        : 0);
+        : 0) +
+      (state.result.contract?.bonusStars ?? 0);
     saveMissionStars(scenario.id, stars);
     setMissionStars((current) => ({
       ...current,
       [scenario.id]: Math.max(current[scenario.id] ?? 0, stars),
     }));
   }, [scenario, state.result]);
+
+  useEffect(() => {
+    if (!state.dailyMission || !state.result) return;
+    const progress = recordDailyCompletion(state.dailyMission.date);
+    setDailyProgress(progress);
+  }, [state.dailyMission, state.result]);
 
   if (window.location.pathname === "/kit") {
     return <KitScreen />;
@@ -61,6 +73,8 @@ export function App() {
       {state.screen === "title" && (
         <TitleScreen
           missionStars={missionStars}
+          dailyMission={dailyMission}
+          dailyStreak={dailyProgress.currentStreak}
           difficulty={state.difficulty}
           onSelectScenario={(scenarioId) => {
             dispatch({
@@ -73,12 +87,21 @@ export function App() {
             dispatch({ type: "SET_DIFFICULTY", difficulty })
           }
           onStartSandbox={() => dispatch({ type: "START_SANDBOX" })}
+          onStartDaily={() =>
+            dispatch({ type: "START_DAILY", mission: dailyMission })
+          }
         />
       )}
       {state.screen === "briefing" && scenario && (
         <BriefingScreen
           scenario={scenario}
           seed={state.seed}
+          options={{
+            difficulty: state.difficulty,
+            sandbox: state.sandbox,
+            twistId: state.dailyMission?.twistId,
+            contractId: state.dailyMission?.contractId,
+          }}
           sandbox={state.sandbox}
           onContinue={() => dispatch({ type: "GO_TO", screen: "workshop" })}
         />
@@ -87,7 +110,13 @@ export function App() {
         <WorkshopScreen
           design={state.design}
           scenario={scenario}
-          options={{ difficulty: state.difficulty, sandbox: state.sandbox }}
+          options={{
+            difficulty: state.difficulty,
+            sandbox: state.sandbox,
+            twistId: state.dailyMission?.twistId,
+            contractId: state.dailyMission?.contractId,
+          }}
+          seed={state.seed}
           onDesignChange={(design) => dispatch({ type: "SET_DESIGN", design })}
           onContinue={() => dispatch({ type: "GO_TO", screen: "review" })}
         />
@@ -96,7 +125,12 @@ export function App() {
         <ReviewScreen
           design={state.design}
           scenario={scenario}
-          options={{ difficulty: state.difficulty, sandbox: state.sandbox }}
+          options={{
+            difficulty: state.difficulty,
+            sandbox: state.sandbox,
+            twistId: state.dailyMission?.twistId,
+            contractId: state.dailyMission?.contractId,
+          }}
           onBack={() => dispatch({ type: "GO_TO", screen: "workshop" })}
           onLaunch={() => dispatch({ type: "GO_TO", screen: "flight" })}
         />
@@ -106,7 +140,12 @@ export function App() {
           design={state.design}
           scenario={scenario}
           seed={state.seed}
-          options={{ difficulty: state.difficulty, sandbox: state.sandbox }}
+          options={{
+            difficulty: state.difficulty,
+            sandbox: state.sandbox,
+            twistId: state.dailyMission?.twistId,
+            contractId: state.dailyMission?.contractId,
+          }}
           onComplete={(timeline) =>
             dispatch({ type: "COMPLETE_FLIGHT", result: timeline.evaluation })
           }
@@ -118,7 +157,13 @@ export function App() {
           scenario={scenario}
           result={state.result}
           seed={state.seed}
-          options={{ difficulty: state.difficulty, sandbox: state.sandbox }}
+          dailyCode={state.dailyMission?.code}
+          options={{
+            difficulty: state.difficulty,
+            sandbox: state.sandbox,
+            twistId: state.dailyMission?.twistId,
+            contractId: state.dailyMission?.contractId,
+          }}
           onRerun={() => dispatch({ type: "GO_TO", screen: "workshop" })}
           onApplyFix={(design) => {
             dispatch({ type: "SET_DESIGN", design });
