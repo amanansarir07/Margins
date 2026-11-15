@@ -1,0 +1,256 @@
+import type { Design } from "../engine/types";
+
+const LAST_DESIGN_KEY = "margins:last-design";
+const BEST_SCORE_KEY = "margins:best-score";
+const BEST_SCORES_KEY = "margins:best-scores";
+const MISSION_STARS_KEY = "margins:mission-stars";
+const PATCH_WALL_KEY = "margins:patch-wall";
+const AXIS_BESTS_KEY = "margins:axis-bests";
+const DAILY_PROGRESS_KEY = "margins:daily-progress";
+
+export type AxisName = "science" | "cost" | "margin" | "resilience" | "schedule";
+export type AxisBests = Partial<Record<AxisName, number>>;
+
+export interface DailyProgress {
+  currentStreak: number;
+  lastCompletedDate?: string;
+  completedDates: string[];
+}
+
+export interface SavedMissionPatch {
+  id: string;
+  scenarioId: string;
+  missionName: string;
+  svg: string;
+  stars: number;
+  score: number;
+  createdAt: string;
+}
+
+function isDesign(value: unknown): value is Design {
+  if (typeof value !== "object" || value === null) return false;
+  const design = value as Partial<Design>;
+  return (
+    typeof design.scenarioId === "string" &&
+    typeof design.spacecraftBusId === "string" &&
+    typeof design.powerId === "string" &&
+    typeof design.commsId === "string" &&
+    typeof design.onboardComputerId === "string" &&
+    typeof design.attitudeControlId === "string" &&
+    Array.isArray(design.instrumentIds) &&
+    design.instrumentIds.every((id) => typeof id === "string") &&
+    typeof design.launchVehicleId === "string" &&
+    typeof design.orbitId === "string"
+  );
+}
+
+export function loadLastDesign(): Design | null {
+  try {
+    const raw = localStorage.getItem(LAST_DESIGN_KEY);
+    if (!raw) return null;
+    const value: unknown = JSON.parse(raw);
+    return isDesign(value) ? value : null;
+  } catch (error) {
+    console.warn("Could not load the last mission design.", error);
+    return null;
+  }
+}
+
+export function saveLastDesign(design: Design) {
+  try {
+    localStorage.setItem(LAST_DESIGN_KEY, JSON.stringify(design));
+  } catch (error) {
+    console.warn("Could not save the last mission design.", error);
+  }
+}
+
+export function loadBestScore(): number {
+  try {
+    const raw = localStorage.getItem(BEST_SCORE_KEY);
+    const score = raw === null ? 0 : Number(raw);
+    return Number.isFinite(score) ? score : 0;
+  } catch (error) {
+    console.warn("Could not load the best mission score.", error);
+    return 0;
+  }
+}
+
+export function saveBestScore(score: number) {
+  try {
+    if (score > loadBestScore()) {
+      localStorage.setItem(BEST_SCORE_KEY, String(score));
+    }
+  } catch (error) {
+    console.warn("Could not save the best mission score.", error);
+  }
+}
+
+export function loadBestScoreForScenario(scenarioId: string): number {
+  try {
+    const raw = localStorage.getItem(BEST_SCORES_KEY);
+    if (!raw) return 0;
+    const value: unknown = JSON.parse(raw);
+    if (typeof value !== "object" || value === null) return 0;
+    const score = (value as Record<string, unknown>)[scenarioId];
+    return typeof score === "number" && Number.isFinite(score) ? score : 0;
+  } catch (error) {
+    console.warn("Could not load the scenario best score.", error);
+    return 0;
+  }
+}
+
+export function saveBestScoreForScenario(scenarioId: string, score: number) {
+  try {
+    const raw = localStorage.getItem(BEST_SCORES_KEY);
+    const current: Record<string, number> = raw
+      ? JSON.parse(raw) as Record<string, number>
+      : {};
+    if (score > (current[scenarioId] ?? 0)) {
+      current[scenarioId] = score;
+      localStorage.setItem(BEST_SCORES_KEY, JSON.stringify(current));
+    }
+  } catch (error) {
+    console.warn("Could not save the scenario best score.", error);
+  }
+}
+
+export function loadMissionStars(): Record<string, number> {
+  try {
+    const raw = localStorage.getItem(MISSION_STARS_KEY);
+    if (!raw) return {};
+    const value: unknown = JSON.parse(raw);
+    if (typeof value !== "object" || value === null) return {};
+    return Object.fromEntries(
+      Object.entries(value).filter(
+        ([key, stars]) => typeof key === "string" && typeof stars === "number",
+      ),
+    );
+  } catch (error) {
+    console.warn("Could not load mission stars.", error);
+    return {};
+  }
+}
+
+export function saveMissionStars(scenarioId: string, stars: number) {
+  try {
+    const current = loadMissionStars();
+    current[scenarioId] = Math.max(current[scenarioId] ?? 0, stars);
+    localStorage.setItem(MISSION_STARS_KEY, JSON.stringify(current));
+  } catch (error) {
+    console.warn("Could not save mission stars.", error);
+  }
+}
+
+export function loadMissionPatches(): SavedMissionPatch[] {
+  try {
+    const raw = localStorage.getItem(PATCH_WALL_KEY);
+    if (!raw) return [];
+    const value: unknown = JSON.parse(raw);
+    if (!Array.isArray(value)) return [];
+    return value.filter((patch): patch is SavedMissionPatch => {
+      if (typeof patch !== "object" || patch === null) return false;
+      const candidate = patch as Partial<SavedMissionPatch>;
+      return (
+        typeof candidate.id === "string" &&
+        typeof candidate.scenarioId === "string" &&
+        typeof candidate.missionName === "string" &&
+        typeof candidate.svg === "string" &&
+        typeof candidate.stars === "number" &&
+        typeof candidate.score === "number" &&
+        typeof candidate.createdAt === "string"
+      );
+    });
+  } catch (error) {
+    console.warn("Could not load the patch wall.", error);
+    return [];
+  }
+}
+
+export function saveMissionPatch(patch: SavedMissionPatch) {
+  try {
+    const patches = loadMissionPatches().filter((item) => item.id !== patch.id);
+    patches.unshift(patch);
+    localStorage.setItem(PATCH_WALL_KEY, JSON.stringify(patches.slice(0, 30)));
+  } catch (error) {
+    console.warn("Could not save the patch wall.", error);
+  }
+}
+
+export function loadAxisBests(): AxisBests {
+  try {
+    const raw = localStorage.getItem(AXIS_BESTS_KEY);
+    if (!raw) return {};
+    const value: unknown = JSON.parse(raw);
+    if (typeof value !== "object" || value === null) return {};
+    return Object.fromEntries(
+      Object.entries(value).filter(
+        ([key, axis]) =>
+          ["science", "cost", "margin", "resilience", "schedule"].includes(key) &&
+          typeof axis === "number" &&
+          Number.isFinite(axis),
+      ),
+    ) as AxisBests;
+  } catch (error) {
+    console.warn("Could not load axis records.", error);
+    return {};
+  }
+}
+
+export function saveAxisBests(values: AxisBests): AxisBests {
+  try {
+    const current = loadAxisBests();
+    const next = { ...current, ...values };
+    localStorage.setItem(AXIS_BESTS_KEY, JSON.stringify(next));
+    return next;
+  } catch (error) {
+    console.warn("Could not save axis records.", error);
+    return loadAxisBests();
+  }
+}
+
+export function loadDailyProgress(): DailyProgress {
+  try {
+    const raw = localStorage.getItem(DAILY_PROGRESS_KEY);
+    if (!raw) return { currentStreak: 0, completedDates: [] };
+    const value: unknown = JSON.parse(raw);
+    if (typeof value !== "object" || value === null) {
+      return { currentStreak: 0, completedDates: [] };
+    }
+    const candidate = value as Partial<DailyProgress>;
+    return {
+      currentStreak:
+        typeof candidate.currentStreak === "number" ? candidate.currentStreak : 0,
+      lastCompletedDate:
+        typeof candidate.lastCompletedDate === "string"
+          ? candidate.lastCompletedDate
+          : undefined,
+      completedDates: Array.isArray(candidate.completedDates)
+        ? candidate.completedDates.filter((date): date is string => typeof date === "string")
+        : [],
+    };
+  } catch (error) {
+    console.warn("Could not load daily progress.", error);
+    return { currentStreak: 0, completedDates: [] };
+  }
+}
+
+export function recordDailyCompletion(date: string): DailyProgress {
+  try {
+    const current = loadDailyProgress();
+    if (current.completedDates.includes(date)) return current;
+    const previous = new Date(`${date}T00:00:00Z`);
+    previous.setUTCDate(previous.getUTCDate() - 1);
+    const yesterday = previous.toISOString().slice(0, 10);
+    const next = {
+      currentStreak:
+        current.lastCompletedDate === yesterday ? current.currentStreak + 1 : 1,
+      lastCompletedDate: date,
+      completedDates: [date, ...current.completedDates].slice(0, 60),
+    };
+    localStorage.setItem(DAILY_PROGRESS_KEY, JSON.stringify(next));
+    return next;
+  } catch (error) {
+    console.warn("Could not save daily progress.", error);
+    return loadDailyProgress();
+  }
+}

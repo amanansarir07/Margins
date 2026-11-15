@@ -1,0 +1,25 @@
+[
+  {
+    "id": "simple",
+    "name": "Simple Computer",
+    "massKg": 5,
+    "powerW": 10,
+    "costM": 5,
+    "dataProcessingMbitPerDay": 60,
+    "tier": "simple",
+    "source": "Game model",
+    "sourceNote": "Game model. Component balance values."
+  },
+  {
+    "id": "advanced",
+    "name": "Advanced Computer",
+    "massKg": 12,
+    "powerW": 25,
+    "costM": 15,
+    "dataProcessingMbitPerDay": 150,
+    "tier": "advanced",
+    "processedDataScienceMultiplier": 1.25,
+    "source": "Game model",
+    "sourceNote": "Game model. Processed data adds 25% science."
+  }
+]

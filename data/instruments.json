@@ -1,0 +1,43 @@
+[
+  {
+    "id": "spectrometer",
+    "name": "Spectrometer",
+    "purpose": "Identify surface materials and ice.",
+    "massKg": 15,
+    "powerW": 45,
+    "dataMbitPerDay": 35,
+    "costM": 55,
+    "sciencePoints": 50,
+    "scienceMultiplier": 1.5,
+    "tier": "simple",
+    "source": "Game model",
+    "sourceNote": "Game model. Moon science multiplier is 1.5x."
+  },
+  {
+    "id": "radar",
+    "name": "Radar",
+    "purpose": "Detect layers below the surface.",
+    "massKg": 18,
+    "powerW": 45,
+    "dataMbitPerDay": 45,
+    "costM": 45,
+    "sciencePoints": 60,
+    "scienceMultiplier": 1.5,
+    "tier": "advanced",
+    "source": "Game model",
+    "sourceNote": "Game model. Moon science multiplier is 1.5x."
+  },
+  {
+    "id": "camera",
+    "name": "Context Camera",
+    "purpose": "Capture mapped-area context.",
+    "massKg": 6,
+    "powerW": 12,
+    "dataMbitPerDay": 25,
+    "costM": 20,
+    "sciencePoints": 40,
+    "tier": "simple",
+    "source": "Game model",
+    "sourceNote": "Game model. Balance value."
+  }
+]

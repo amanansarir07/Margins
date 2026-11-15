@@ -1,0 +1,350 @@
+export type Source = "NASA-based" | "Game model";
+export type Difficulty = "cadet" | "engineer" | "veteran";
+export type PowerKind = "solar" | "nuclear";
+export type ContractKind =
+  | "mass-under"
+  | "zero-data-loss"
+  | "power-not"
+  | "budget-under"
+  | "time-under";
+
+export interface DataRecord {
+  id: string;
+  name: string;
+  source: Source;
+  sourceNote: string;
+  tier?: "simple" | "advanced";
+}
+
+export interface MitigationRecord extends DataRecord {
+  massKg: number;
+  powerW: number;
+  costM: number;
+  effect: string;
+  warningLeadDays?: number;
+  powerMarginW?: number;
+}
+
+export type HazardStatus = "survives" | "marginal" | "fails";
+
+export interface ThreatHazard {
+  id: string;
+  type: string;
+  monthStart: number;
+  monthEnd: number;
+  severity: "low" | "medium" | "high";
+  consequence: string;
+  resource: ResourceName;
+  warningLeadDays: number;
+  decision?: EventDecision;
+}
+
+export interface ThreatAssessment extends ThreatHazard {
+  status: HazardStatus;
+  reason: string;
+}
+
+export interface DestinationRecord extends DataRecord {
+  description: string;
+  distanceFromEarth: number;
+  oneWaySignalTime: number;
+  typicalTripTime: number;
+  surfaceGravity: number;
+  sunlightComparedToEarth: number;
+  propellantFactor: number;
+  downlinkDistanceFactor: number;
+}
+
+export interface ResourceLimits {
+  massKg: number;
+  powerW: number;
+  budgetM: number;
+  dataMbitPerDay: number;
+  communicationsMbitPerDay: number;
+  timeDays: number;
+}
+
+export interface ScenarioRecord extends DataRecord {
+  enabled: boolean;
+  destinationId: string;
+  objective: string;
+  requiredInstruments: string[];
+  requiredInstrumentAnyOf: string[];
+  limits: ResourceLimits;
+  scienceGoal: number;
+  maxProgramMonths: number;
+  transitTimeDays: number;
+  criticalResources: string[];
+  events: string[];
+  requiredPowerKind?: PowerKind;
+  radiationLevel?: "low" | "high";
+  difficultyHints?: string[];
+}
+
+export interface ObjectiveRecord extends DataRecord {
+  scenarioId: string;
+  description: string;
+  requiredInstruments: string[];
+  requiredInstrumentAnyOf: string[];
+  scienceGoal: number;
+  criticalResources: string[];
+  eventIds: string[];
+  budgetMultiplier?: number;
+  timeMultiplier?: number;
+}
+
+export interface InstrumentRecord extends DataRecord {
+  purpose: string;
+  massKg: number;
+  powerW: number;
+  dataMbitPerDay: number;
+  costM: number;
+  sciencePoints: number;
+  scienceMultiplier?: number;
+}
+
+export interface SpacecraftBusRecord extends DataRecord {
+  massKg: number;
+  powerW: number;
+  costM: number;
+  dataCapacityMbitPerDay: number;
+}
+
+export interface PowerRecord extends DataRecord {
+  massKg: number;
+  powerW: number;
+  costM: number;
+  destinationIds: string[];
+  kind: PowerKind;
+}
+
+export interface CommsRecord extends DataRecord {
+  massKg: number;
+  powerW: number;
+  dataMbitPerDay: number;
+  costM: number;
+  antennaFactor: number;
+}
+
+export interface OnboardComputerRecord extends DataRecord {
+  massKg: number;
+  powerW: number;
+  costM: number;
+  dataProcessingMbitPerDay: number;
+  processedDataScienceMultiplier?: number;
+}
+
+export interface AttitudeControlRecord extends DataRecord {
+  massKg: number;
+  powerW: number;
+  costM: number;
+  pointingAccuracy: number;
+  scienceEfficiency: number;
+}
+
+export interface LaunchVehicleRecord extends DataRecord {
+  capacityByDestination: Record<string, number>;
+  supportedOrbits: string[];
+  costM: number;
+}
+
+export interface OrbitRecord extends DataRecord {
+  destinationId: string;
+  description: string;
+  insertionMassKg: number;
+  timeDays: number;
+  costM: number;
+  propellantModifier: number;
+}
+
+export interface EventDecisionChoice {
+  id: string;
+  label: string;
+  detail: string;
+  cost: string;
+  saved: string;
+}
+
+export interface EventDecision {
+  prompt: string;
+  choices: EventDecisionChoice[];
+}
+
+export interface GameEventRecord extends DataRecord {
+  description: string;
+  probability: number;
+  hazardType: string;
+  monthWindow: { start: number; end: number };
+  severity: "low" | "medium" | "high";
+  consequence: string;
+  resource: ResourceName;
+  warningLeadDays: number;
+  effects: Record<string, number>;
+  outcomes: string[];
+  decision?: EventDecision;
+}
+
+export interface ContractRecord extends DataRecord {
+  scenarioId: string;
+  description: string;
+  kind: ContractKind;
+  threshold?: number;
+  powerKind?: PowerKind;
+  bonusStars: number;
+}
+
+export interface TwistRecord extends DataRecord {
+  scenarioIds: string[];
+  description: string;
+  budgetMultiplier?: number;
+  communicationsMultiplier?: number;
+  hazardWindowExtraMonths?: number;
+  heavyLauncherGrounded?: boolean;
+}
+
+export interface DonkiEventRecord extends DataRecord {
+  eventType: string;
+  startTime: string;
+  endTime: string;
+  sourceId: string;
+  effects: Record<string, number>;
+  sourceUrl: string;
+}
+
+export interface MissionReferenceRecord extends DataRecord {
+  missionName: string;
+  agency: string;
+  destinationId: string;
+  launchDate: string;
+  massKg: number;
+  missionDurationDays: number;
+  sourceUrl: string;
+}
+
+export interface Design {
+  scenarioId: string;
+  spacecraftBusId: string;
+  powerId: string;
+  commsId: string;
+  onboardComputerId: string;
+  attitudeControlId: string;
+  instrumentIds: string[];
+  launchVehicleId: string;
+  orbitId: string;
+  mitigationIds?: string[];
+}
+
+export type ResourceName =
+  | "mass"
+  | "power"
+  | "budget"
+  | "data"
+  | "comms"
+  | "time";
+
+export interface ResourceSummary {
+  used: number;
+  limit: number;
+  margin: number;
+}
+
+export type ResourceReport = Record<ResourceName, ResourceSummary>;
+
+export interface PreviewResourcesResult {
+  resources: ResourceReport;
+  warnings: string[];
+}
+
+export interface EvaluationChecks {
+  mass: boolean;
+  power: boolean;
+  data: boolean;
+  budget: boolean;
+  time: boolean;
+  launchCompatibility: {
+    pass: boolean;
+    mass: boolean;
+    orbit: boolean;
+  };
+  componentCompatibility: boolean;
+}
+
+export interface MissionEventOutcome {
+  id: string;
+  name: string;
+  occurred: boolean;
+  outcome: string;
+  explanation: string;
+  month: number;
+  severity: "low" | "medium" | "high";
+  status: HazardStatus;
+  resource: ResourceName;
+  warningLeadDays: number;
+  decisionId?: string;
+}
+
+export interface ScoreBreakdown {
+  resourceMargins: number;
+  science: number;
+  reliability: number;
+  checks: number;
+}
+
+export interface EvaluationResult {
+  checks: EvaluationChecks;
+  resources: ResourceReport;
+  sciencePoints: number;
+  reliability: number;
+  events: MissionEventOutcome[];
+  score: number;
+  grade: string;
+  scoreBreakdown: ScoreBreakdown;
+  success: boolean;
+  reasons: string[];
+  contract?: {
+    id: string;
+    name: string;
+    passed: boolean;
+    reason: string;
+    bonusStars: number;
+  };
+}
+
+export interface MissionOptions {
+  difficulty?: Difficulty;
+  sandbox?: boolean;
+  decisions?: Record<string, string>;
+  twistId?: string;
+  contractId?: string;
+  objectiveId?: string;
+}
+
+export interface SuggestedFix {
+  design: Design;
+  label: string;
+  cost: number;
+  massImpact: number;
+  powerImpact: number;
+  explanation: string;
+  evaluation: EvaluationResult;
+}
+
+export type FlightPhase = "launch" | "transit" | "arrival" | "operations";
+
+export interface TimelinePoint {
+  day: number;
+  phase: FlightPhase;
+  resources: ResourceReport;
+}
+
+export interface TimelineEvent extends MissionEventOutcome {
+  day: number;
+  phase: FlightPhase;
+}
+
+export interface FlightTimeline {
+  durationDays: number;
+  points: TimelinePoint[];
+  events: TimelineEvent[];
+  evaluation: EvaluationResult;
+}

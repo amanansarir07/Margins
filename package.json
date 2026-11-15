@@ -1,0 +1,25 @@
+{
+  "name": "koshi-mission-project",
+  "version": "1.0.0",
+  "description": "NASA Space Apps 2026 challenge: Space Mission Design Game.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "test": "vitest run",
+    "balance": "vitest run scripts/balance.ts --reporter=verbose --silent=false"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "astronomy-engine": "^2.1.19",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.0"
+  }
+}

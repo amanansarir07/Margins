@@ -1,0 +1,159 @@
+[
+  {
+    "id": "dust-storm",
+    "name": "Dust Storm",
+    "description": "Dust storm cuts power and communications.",
+    "probability": 0.25,
+    "hazardType": "dust-storm",
+    "monthWindow": { "start": 8, "end": 11 },
+    "severity": "high",
+    "consequence": "Power and communications can fall during operations.",
+    "resource": "power",
+    "warningLeadDays": 10,
+    "effects": {
+      "power": -25,
+      "communications": -25,
+      "reliability": -0.1
+    },
+    "outcomes": ["Margins absorb the storm.", "Storm delays mapping and downlink."],
+    "source": "Game model",
+    "sourceNote": "Game model. Mars dust-storm event."
+  },
+  {
+    "id": "radiation-burst",
+    "name": "Radiation Burst",
+    "description": "Radiation threatens Europa electronics.",
+    "probability": 0.3,
+    "hazardType": "radiation-burst",
+    "monthWindow": { "start": 14, "end": 28 },
+    "severity": "high",
+    "consequence": "Electronics can reset and science can stop.",
+    "resource": "power",
+    "warningLeadDays": 5,
+    "effects": {
+      "power": -20,
+      "science": -10,
+      "reliability": -0.15
+    },
+    "outcomes": ["Shielding protects the computer.", "Science and reliability fall."],
+    "source": "Game model",
+    "sourceNote": "Game model. Europa radiation event."
+  },
+  {
+    "id": "solar-flare",
+    "name": "Solar Flare",
+    "description": "Solar activity raises mission risk.",
+    "probability": 0.2,
+    "hazardType": "solar-flare",
+    "monthWindow": { "start": 3, "end": 7 },
+    "severity": "medium",
+    "consequence": "Safe mode costs observations; observing risks instruments.",
+    "resource": "power",
+    "warningLeadDays": 7,
+    "effects": {
+      "power": -15,
+      "data": -10,
+      "reliability": -0.08
+    },
+    "outcomes": ["Shielding limits damage.", "Power and data margins fall."],
+    "decision": {
+      "prompt": "The flare crosses the observation window.",
+      "choices": [
+        {
+          "id": "safe-mode",
+          "label": "ENTER SAFE MODE",
+          "detail": "Protect instruments. Suspend observations.",
+          "cost": "Lose 2 science days.",
+          "saved": "Instrument reliability."
+        },
+        {
+          "id": "keep-observing",
+          "label": "KEEP OBSERVING",
+          "detail": "Keep observing through the flare.",
+          "cost": "Risk instrument damage.",
+          "saved": "2 science days if stable."
+        }
+      ]
+    },
+    "source": "Game model",
+    "sourceNote": "Game model. Not live DONKI data."
+  },
+  {
+    "id": "instrument-fault",
+    "name": "Instrument Fault",
+    "description": "Instrument fault needs recovery.",
+    "probability": 0.15,
+    "hazardType": "instrument-fault",
+    "monthWindow": { "start": 5, "end": 15 },
+    "severity": "medium",
+    "consequence": "Science collection can stop for 10 days.",
+    "resource": "data",
+    "warningLeadDays": 3,
+    "effects": {
+      "science": -10,
+      "time": 10,
+      "reliability": -0.1
+    },
+    "outcomes": ["Redundancy supports recovery.", "Science collection falls."],
+    "source": "Game model",
+    "sourceNote": "Game model. Random event."
+  },
+  {
+    "id": "comms-dropout",
+    "name": "Communications Dropout",
+    "description": "A communications session fails.",
+    "probability": 0.18,
+    "hazardType": "comms-dropout",
+    "monthWindow": { "start": 10, "end": 18 },
+    "severity": "medium",
+    "consequence": "Queued data waits for the next link.",
+    "resource": "comms",
+    "warningLeadDays": 4,
+    "effects": {
+      "communications": -20,
+      "data": -15,
+      "reliability": -0.06
+    },
+    "outcomes": ["Strong radio restores the session.", "Queued data waits for next pass."],
+    "source": "Game model",
+    "sourceNote": "Game model. Random event."
+  },
+  {
+    "id": "power-dip",
+    "name": "Power Dip",
+    "description": "Available power falls.",
+    "probability": 0.2,
+    "hazardType": "power-dip",
+    "monthWindow": { "start": 2, "end": 10 },
+    "severity": "medium",
+    "consequence": "Some observations are skipped.",
+    "resource": "power",
+    "warningLeadDays": 2,
+    "effects": {
+      "power": -25,
+      "science": -5
+    },
+    "outcomes": ["Power margin protects science.", "Some observations are skipped."],
+    "source": "Game model",
+    "sourceNote": "Game model. Random event."
+  },
+  {
+    "id": "budget-cut",
+    "name": "Budget Cut",
+    "description": "Program funding falls.",
+    "probability": 0.1,
+    "hazardType": "budget-cut",
+    "monthWindow": { "start": 18, "end": 24 },
+    "severity": "low",
+    "consequence": "Mission scope must shrink.",
+    "resource": "budget",
+    "warningLeadDays": 30,
+    "effects": {
+      "budget": -35,
+      "reliability": -0.04
+    },
+    "outcomes": ["Low cost absorbs the cut.", "Mission scope must shrink."],
+    "source": "Game model",
+    "sourceNote": "Game model. Random event."
+  }
+]

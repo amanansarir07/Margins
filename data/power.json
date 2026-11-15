@@ -1,0 +1,50 @@
+[
+  {
+    "id": "solar-array",
+    "name": "Solar Array",
+    "massKg": 25,
+    "powerW": 180,
+    "costM": 50,
+    "destinationIds": ["moon", "mars"],
+    "kind": "solar",
+    "tier": "simple",
+    "source": "Game model",
+    "sourceNote": "Game model. Component balance value."
+  },
+  {
+    "id": "large-solar-array",
+    "name": "Large Solar Array",
+    "massKg": 40,
+    "powerW": 400,
+    "costM": 90,
+    "destinationIds": ["moon", "mars", "europa"],
+    "kind": "solar",
+    "tier": "advanced",
+    "source": "Game model",
+    "sourceNote": "Game model. Component balance value."
+  },
+  {
+    "id": "nuclear-generator",
+    "name": "Nuclear Generator",
+    "massKg": 30,
+    "powerW": 160,
+    "costM": 110,
+    "destinationIds": ["moon", "mars", "europa"],
+    "kind": "nuclear",
+    "tier": "advanced",
+    "source": "Game model",
+    "sourceNote": "Game model. Nuclear output ignores sunlight."
+  },
+  {
+    "id": "no-power",
+    "name": "No Power System",
+    "massKg": 0,
+    "powerW": 0,
+    "costM": 0,
+    "destinationIds": ["moon", "mars", "europa"],
+    "kind": "solar",
+    "tier": "simple",
+    "source": "Game model",
+    "sourceNote": "Game model. Empty selection for power failure."
+  }
+]

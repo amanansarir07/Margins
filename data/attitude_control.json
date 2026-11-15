@@ -1,0 +1,26 @@
+[
+  {
+    "id": "basic",
+    "name": "Basic Attitude Control",
+    "massKg": 8,
+    "powerW": 8,
+    "costM": 6,
+    "pointingAccuracy": 120,
+    "scienceEfficiency": 0.8,
+    "tier": "simple",
+    "source": "Game model",
+    "sourceNote": "Game model. Component balance values."
+  },
+  {
+    "id": "precise",
+    "name": "Precise Attitude Control",
+    "massKg": 20,
+    "powerW": 20,
+    "costM": 18,
+    "pointingAccuracy": 20,
+    "scienceEfficiency": 1,
+    "tier": "advanced",
+    "source": "Game model",
+    "sourceNote": "Game model. Component balance values."
+  }
+]

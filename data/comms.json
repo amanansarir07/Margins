@@ -1,0 +1,26 @@
+[
+  {
+    "id": "standard-radio",
+    "name": "Standard Radio",
+    "massKg": 12,
+    "powerW": 18,
+    "dataMbitPerDay": 100,
+    "costM": 35,
+    "antennaFactor": 0.4,
+    "tier": "simple",
+    "source": "Game model",
+    "sourceNote": "Game model. Component balance value."
+  },
+  {
+    "id": "high-gain-radio",
+    "name": "High-Gain Radio",
+    "massKg": 18,
+    "powerW": 25,
+    "dataMbitPerDay": 240,
+    "costM": 45,
+    "antennaFactor": 2.5,
+    "tier": "advanced",
+    "source": "Game model",
+    "sourceNote": "Game model. Component balance value."
+  }
+]

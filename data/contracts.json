@@ -1,0 +1,101 @@
+[
+  {
+    "id": "moon-light-mass",
+    "name": "Light Frame",
+    "scenarioId": "moon-ice-mapping",
+    "description": "Keep total spacecraft mass under 110 kg.",
+    "kind": "mass-under",
+    "threshold": 130,
+    "bonusStars": 1,
+    "source": "Game model",
+    "sourceNote": "Game model. Tuned against successful Moon designs."
+  },
+  {
+    "id": "moon-lean-budget",
+    "name": "Lean Moon",
+    "scenarioId": "moon-ice-mapping",
+    "description": "Keep budget under $360M.",
+    "kind": "budget-under",
+    "threshold": 360,
+    "bonusStars": 1,
+    "source": "Game model",
+    "sourceNote": "Game model. Tuned against successful Moon designs."
+  },
+  {
+    "id": "moon-very-lean-budget",
+    "name": "Very Lean Moon",
+    "scenarioId": "moon-ice-mapping",
+    "description": "Keep budget under $340M.",
+    "kind": "budget-under",
+    "threshold": 340,
+    "bonusStars": 1,
+    "source": "Game model",
+    "sourceNote": "Game model. Tuned against successful Moon designs."
+  },
+  {
+    "id": "mars-light-budget",
+    "name": "Lean Mars",
+    "scenarioId": "mars-minerals",
+    "description": "Keep budget under $430M.",
+    "kind": "budget-under",
+    "threshold": 405,
+    "bonusStars": 1,
+    "source": "Game model",
+    "sourceNote": "Game model. Tuned against successful Mars designs."
+  },
+  {
+    "id": "mars-light-mass",
+    "name": "Light Mars",
+    "scenarioId": "mars-minerals",
+    "description": "Keep total spacecraft mass under 150 kg.",
+    "kind": "mass-under",
+    "threshold": 160,
+    "bonusStars": 1,
+    "source": "Game model",
+    "sourceNote": "Game model. Tuned against successful Mars designs."
+  },
+  {
+    "id": "mars-very-lean-budget",
+    "name": "Very Lean Mars",
+    "scenarioId": "mars-minerals",
+    "description": "Keep budget under $390M.",
+    "kind": "budget-under",
+    "threshold": 390,
+    "bonusStars": 1,
+    "source": "Game model",
+    "sourceNote": "Game model. Tuned against successful Mars designs."
+  },
+  {
+    "id": "europa-light-budget",
+    "name": "Tight Europa Budget",
+    "scenarioId": "europa-ocean",
+    "description": "Keep budget under $500M.",
+    "kind": "budget-under",
+    "threshold": 485,
+    "bonusStars": 1,
+    "source": "Game model",
+    "sourceNote": "Game model. Tuned against successful Europa designs."
+  },
+  {
+    "id": "europa-light-mass",
+    "name": "Light Europa",
+    "scenarioId": "europa-ocean",
+    "description": "Keep total spacecraft mass under 210 kg.",
+    "kind": "mass-under",
+    "threshold": 180,
+    "bonusStars": 1,
+    "source": "Game model",
+    "sourceNote": "Game model. Tuned against successful Europa designs."
+  },
+  {
+    "id": "europa-very-lean-budget",
+    "name": "Very Lean Europa",
+    "scenarioId": "europa-ocean",
+    "description": "Keep budget under $460M.",
+    "kind": "budget-under",
+    "threshold": 460,
+    "bonusStars": 1,
+    "source": "Game model",
+    "sourceNote": "Game model. Tuned against successful Europa designs."
+  }
+]

@@ -1,0 +1,45 @@
+[
+  {
+    "id": "light-lifter",
+    "name": "Light Lifter",
+    "capacityByDestination": {
+      "moon": 140,
+      "mars": 220,
+      "europa": 220
+    },
+    "supportedOrbits": [
+      "flyby",
+      "low",
+      "mars-flyby",
+      "mars-low",
+      "europa-flyby",
+      "europa-low"
+    ],
+    "costM": 80,
+    "source": "Game model",
+    "sourceNote": "Game model. Launch compatibility and cost."
+  },
+  {
+    "id": "heavy-lifter",
+    "name": "Heavy Lifter",
+    "capacityByDestination": {
+      "moon": 400,
+      "mars": 300,
+      "europa": 250
+    },
+    "supportedOrbits": [
+      "flyby",
+      "high",
+      "low",
+      "mars-flyby",
+      "mars-high",
+      "mars-low",
+      "europa-flyby",
+      "europa-high",
+      "europa-low"
+    ],
+    "costM": 150,
+    "source": "Game model",
+    "sourceNote": "Game model. Launch compatibility and cost."
+  }
+]
