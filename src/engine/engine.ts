@@ -64,8 +64,8 @@ const resourceNames = [
 
 type ResolvedMissionOptions = Omit<
   Required<MissionOptions>,
-  "twistId" | "contractId"
-> & Pick<MissionOptions, "twistId" | "contractId">;
+  "twistId" | "contractId" | "objectiveId"
+> & Pick<MissionOptions, "twistId" | "contractId" | "objectiveId">;
 
 const defaultOptions: ResolvedMissionOptions = {
   difficulty: "engineer",
@@ -75,6 +75,37 @@ const defaultOptions: ResolvedMissionOptions = {
 
 function resolveOptions(options?: MissionOptions): ResolvedMissionOptions {
   return { ...defaultOptions, ...options };
+}
+
+function scenarioForOptions(
+  scenario: ScenarioRecord,
+  options: ResolvedMissionOptions,
+): ScenarioRecord {
+  if (!options.objectiveId) return scenario;
+  const objective = gameData.objectives.find(
+    (item) => item.id === options.objectiveId && item.scenarioId === scenario.id,
+  );
+  if (!objective) {
+    throw new Error(
+      `Objective "${options.objectiveId}" is not available for "${scenario.id}".`,
+    );
+  }
+  return {
+    ...scenario,
+    objective: objective.description,
+    requiredInstruments: objective.requiredInstruments,
+    requiredInstrumentAnyOf: objective.requiredInstrumentAnyOf,
+    scienceGoal: objective.scienceGoal,
+    criticalResources: objective.criticalResources,
+    events: objective.eventIds,
+    limits: {
+      ...scenario.limits,
+      budgetM: scenario.limits.budgetM * (objective.budgetMultiplier ?? 1),
+      timeDays: scenario.limits.timeDays * (objective.timeMultiplier ?? 1),
+    },
+    maxProgramMonths:
+      scenario.maxProgramMonths * (objective.timeMultiplier ?? 1),
+  };
 }
 
 function difficultyLimit(
@@ -320,9 +351,10 @@ export function previewResources(
   options?: MissionOptions,
 ): PreviewResourcesResult {
   const resolvedOptions = resolveOptions(options);
+  const effectiveScenario = scenarioForOptions(scenario, resolvedOptions);
   const resources = calculateResources(
-    calculateDesign(design, scenario, twistForOptions(resolvedOptions)),
-    scenario,
+    calculateDesign(design, effectiveScenario, twistForOptions(resolvedOptions)),
+    effectiveScenario,
     resolvedOptions,
   );
   return { resources, warnings: makeWarnings(resources) };
@@ -361,10 +393,11 @@ export function suggestFixes(
   options?: MissionOptions,
 ): SuggestedFix[] {
   const resolvedOptions = resolveOptions(options);
-  const original = evaluate(design, scenario, seed, resolvedOptions);
+  const effectiveScenario = scenarioForOptions(scenario, resolvedOptions);
+  const original = evaluate(design, effectiveScenario, seed, resolvedOptions);
   if (original.success) return [];
 
-  const originalPreview = previewResources(design, scenario, resolvedOptions);
+  const originalPreview = previewResources(design, effectiveScenario, resolvedOptions);
   const candidates: { design: Design; label: string }[] = [];
   const seen = new Set<string>([JSON.stringify(design)]);
   const addCandidate = (candidate: Design, label: string) => {
@@ -454,16 +487,24 @@ export function suggestFixes(
     }
   }
   for (const orbit of gameData.orbits) {
-    if (orbit.id !== design.orbitId && orbit.destinationId === scenario.destinationId) {
+    if (
+      orbit.id !== design.orbitId &&
+      orbit.destinationId === effectiveScenario.destinationId
+    ) {
       addCandidate({ ...design, orbitId: orbit.id }, `Orbit: switch to ${orbit.name}`);
     }
   }
 
   const suggestions = candidates.map(({ design: candidateDesign, label }) => {
-    const evaluation = evaluate(candidateDesign, scenario, seed, resolvedOptions);
+    const evaluation = evaluate(
+      candidateDesign,
+      effectiveScenario,
+      seed,
+      resolvedOptions,
+    );
     const candidatePreview = previewResources(
       candidateDesign,
-      scenario,
+      effectiveScenario,
       resolvedOptions,
     );
     const cost = roundImpact(
@@ -609,10 +650,15 @@ export function assessThreats(
   options?: MissionOptions,
 ): ThreatAssessment[] {
   const resolvedOptions = resolveOptions(options);
+  const effectiveScenario = scenarioForOptions(scenario, resolvedOptions);
   const twist = twistForOptions(resolvedOptions);
-  const calculated = calculateDesign(design, scenario, twist);
-  return getThreatBriefing(scenario, seed, twist).map((hazard) =>
-    assessHazard(hazard, calculated, calculateResources(calculated, scenario, resolvedOptions)),
+  const calculated = calculateDesign(design, effectiveScenario, twist);
+  return getThreatBriefing(effectiveScenario, seed, twist).map((hazard) =>
+    assessHazard(
+      hazard,
+      calculated,
+      calculateResources(calculated, effectiveScenario, resolvedOptions),
+    ),
   );
 }
 
@@ -623,10 +669,12 @@ export function evaluate(
   options?: MissionOptions,
 ): EvaluationResult {
   const resolvedOptions = resolveOptions(options);
+  const effectiveScenario = scenarioForOptions(scenario, resolvedOptions);
   const twist = twistForOptions(resolvedOptions);
-  const calculated = calculateDesign(design, scenario, twist);
-  const resources = calculateResources(calculated, scenario, resolvedOptions);
-  const launchMass = calculated.launchVehicle.capacityByDestination[scenario.destinationId] ?? 0;
+  const calculated = calculateDesign(design, effectiveScenario, twist);
+  const resources = calculateResources(calculated, effectiveScenario, resolvedOptions);
+  const launchMass =
+    calculated.launchVehicle.capacityByDestination[effectiveScenario.destinationId] ?? 0;
   const launchMassPass = calculated.totalMass <= launchMass;
   const launchOrbitPass = calculated.launchVehicle.supportedOrbits.includes(
     calculated.orbit.id,
@@ -638,8 +686,8 @@ export function evaluate(
     mass: resources.mass.margin >= 0,
     power:
       resources.power.margin >= 0 &&
-      (!scenario.requiredPowerKind ||
-        calculated.power.kind === scenario.requiredPowerKind),
+      (!effectiveScenario.requiredPowerKind ||
+        calculated.power.kind === effectiveScenario.requiredPowerKind),
     data: resources.data.margin >= 0,
     budget: resources.budget.margin >= 0,
     time: resources.time.margin >= 0,
@@ -653,10 +701,13 @@ export function evaluate(
 
   const hasRequiredInstrument =
     resolvedOptions.sandbox ||
-    scenario.requiredInstrumentAnyOf.length === 0 ||
-    scenario.requiredInstrumentAnyOf.some((id) =>
+    (effectiveScenario.requiredInstruments.every((id) =>
       design.instrumentIds.includes(id),
-    );
+    ) &&
+      (effectiveScenario.requiredInstrumentAnyOf.length === 0 ||
+        effectiveScenario.requiredInstrumentAnyOf.some((id) =>
+          design.instrumentIds.includes(id),
+        )));
   const scienceMultiplier = calculated.computer.processedDataScienceMultiplier ?? 1;
   const sciencePoints = Math.round(
     calculated.instruments.reduce(
@@ -671,7 +722,7 @@ export function evaluate(
       scienceMultiplier,
   );
 
-  const threats = assessThreats(design, scenario, seed, resolvedOptions);
+  const threats = assessThreats(design, effectiveScenario, seed, resolvedOptions);
   const events = threats.map((threat) => {
     const event = findById(gameData.eventsGame, threat.id, "event");
     const decisionId = resolvedOptions.decisions[threat.id];
@@ -740,7 +791,7 @@ export function evaluate(
     allChecks &&
     hasRequiredInstrument &&
     checks.componentCompatibility &&
-    (resolvedOptions.sandbox || adjustedScience >= scenario.scienceGoal) &&
+    (resolvedOptions.sandbox || adjustedScience >= effectiveScenario.scienceGoal) &&
     reliability >= 0.5;
 
   const reasons = [
@@ -758,18 +809,22 @@ export function evaluate(
       : []),
     ...(!launcherPass ? ["Heavy Lifter is grounded for this twist."] : []),
     ...(!hasRequiredInstrument
-      ? ["Add a spectrometer or radar."]
+      ? [
+          effectiveScenario.requiredInstruments.length > 0
+            ? `Add required instrument: ${effectiveScenario.requiredInstruments.join(", ")}.`
+            : "Add a spectrometer or radar.",
+        ]
       : []),
     ...(!checks.componentCompatibility
       ? ["Cadet mode blocks advanced components."]
       : []),
     ...(!checks.power &&
-    scenario.requiredPowerKind &&
-    calculated.power.kind !== scenario.requiredPowerKind
-      ? [`Use ${scenario.requiredPowerKind} power for this mission.`]
+    effectiveScenario.requiredPowerKind &&
+    calculated.power.kind !== effectiveScenario.requiredPowerKind
+      ? [`Use ${effectiveScenario.requiredPowerKind} power for this mission.`]
       : []),
-    ...(!resolvedOptions.sandbox && adjustedScience < scenario.scienceGoal
-      ? [`Science returned ${adjustedScience}; goal is ${scenario.scienceGoal}.`]
+    ...(!resolvedOptions.sandbox && adjustedScience < effectiveScenario.scienceGoal
+      ? [`Science returned ${adjustedScience}; goal is ${effectiveScenario.scienceGoal}.`]
       : []),
     ...events
       .filter((event) => event.occurred)
@@ -798,7 +853,7 @@ export function evaluate(
   const baseScoreBreakdown = {
     resourceMargins: Math.round(marginScore),
     science: Math.round(
-      Math.min(1, adjustedScience / Math.max(scenario.scienceGoal, 1)) * 100,
+      Math.min(1, adjustedScience / Math.max(effectiveScenario.scienceGoal, 1)) * 100,
     ),
     reliability: Math.round(reliability * 100),
     checks: Math.round(checksScore),
@@ -882,7 +937,9 @@ export function simulateTimeline(
   sampleCount = 32,
   options?: MissionOptions,
 ): FlightTimeline {
-  const evaluation = evaluate(design, scenario, seed, options);
+  const resolvedOptions = resolveOptions(options);
+  const effectiveScenario = scenarioForOptions(scenario, resolvedOptions);
+  const evaluation = evaluate(design, effectiveScenario, seed, resolvedOptions);
   const durationDays = Math.max(
     evaluation.resources.time.limit,
     evaluation.resources.time.used,

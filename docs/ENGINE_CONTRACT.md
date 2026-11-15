@@ -52,3 +52,11 @@ The launch-window model uses astronomy-engine. Any simplified launch-window beha
 Daily missions use the UTC date as a deterministic seed. They select one enabled scenario, one twist, and one scenario contract. The share code is derived from the same date and seed, so it is repeatable without a backend.
 
 Twists are passed through `MissionOptions`. Budget, communications, launcher, and hazard-window modifiers affect both the briefing and evaluation. Contracts are evaluated after resource calculation and can add one bonus star when their stated condition passes.
+
+## Mission objectives
+
+Each scenario has selectable objective records in `data/objectives.json`. The selected
+objective changes the description, science goal, instrument requirements, critical
+resources, visible hazard list, and optional budget or time limits. The same objective
+is passed through briefing, preview, evaluation, flight, and debrief. Objective hazard
+lists are deterministic for the mission seed and never differ between briefing and flight.

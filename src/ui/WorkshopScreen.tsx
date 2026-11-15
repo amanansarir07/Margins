@@ -151,6 +151,9 @@ export function WorkshopScreen({
   };
 
   const resources = preview.resources;
+  const objective = options.objectiveId
+    ? gameData.objectives.find((item) => item.id === options.objectiveId)
+    : undefined;
 
   return (
     <section className="screen workbench-screen" aria-labelledby="workbench-title">
@@ -158,6 +161,7 @@ export function WorkshopScreen({
         <div>
           <p className="eyebrow">Margins / workbench</p>
           <h1 id="workbench-title">{scenario.name}</h1>
+          {objective && <p className="workbench-objective">Objective: {objective.name}</p>}
         </div>
         <span className="workbench-mode">{options.difficulty ?? "engineer"}</span>
       </header>

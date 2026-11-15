@@ -81,6 +81,18 @@ export interface ScenarioRecord extends DataRecord {
   difficultyHints?: string[];
 }
 
+export interface ObjectiveRecord extends DataRecord {
+  scenarioId: string;
+  description: string;
+  requiredInstruments: string[];
+  requiredInstrumentAnyOf: string[];
+  scienceGoal: number;
+  criticalResources: string[];
+  eventIds: string[];
+  budgetMultiplier?: number;
+  timeMultiplier?: number;
+}
+
 export interface InstrumentRecord extends DataRecord {
   purpose: string;
   massKg: number;
@@ -304,6 +316,7 @@ export interface MissionOptions {
   decisions?: Record<string, string>;
   twistId?: string;
   contractId?: string;
+  objectiveId?: string;
 }
 
 export interface SuggestedFix {

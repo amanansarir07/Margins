@@ -1,7 +1,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { gameData } from "../src/engine/loadData";
 import { evaluate } from "../src/engine/engine";
-import type { Design, ScenarioRecord } from "../src/engine/types";
+import type { Design, MissionOptions, ScenarioRecord } from "../src/engine/types";
 
 const SAMPLE_COUNT = 20_000;
 const MAX_FILE_BYTES = 300_000;
@@ -100,8 +100,12 @@ function archetypeId(design: Design) {
   return `${bus}-${power}-${instruments}`;
 }
 
-function minMargin(design: Design, scenario: ScenarioRecord) {
-  const result = evaluate(design, scenario, 1);
+function minMargin(
+  design: Design,
+  scenario: ScenarioRecord,
+  options?: MissionOptions,
+) {
+  const result = evaluate(design, scenario, 1, options);
   return Math.min(
     ...Object.values(result.resources).map((resource) =>
       Number.isFinite(resource.limit)
@@ -147,18 +151,23 @@ function randomDesign(random: Random, scenario: ScenarioRecord): Design {
   };
 }
 
-function evaluateSample(scenario: ScenarioRecord, seed: number) {
+function evaluateSample(
+  scenario: ScenarioRecord,
+  seed: number,
+  objectiveId?: string,
+) {
   const random = mulberry32(seed);
+  const options = objectiveId ? { objectiveId } : undefined;
   const designs: EvaluatedDesign[] = [];
   for (let index = 0; index < SAMPLE_COUNT; index += 1) {
     const design = randomDesign(random, scenario);
-    const result = evaluate(design, scenario, seed + index);
+    const result = evaluate(design, scenario, seed + index, options);
     designs.push({
       design,
       cost: result.resources.budget.used,
       science: result.sciencePoints,
       score: result.score,
-      minMargin: minMargin(design, scenario),
+      minMargin: minMargin(design, scenario, options),
       resilience: result.reliability,
       schedule:
         result.resources.time.limit > 0
@@ -227,7 +236,11 @@ function compactSample(successes: EvaluatedDesign[]) {
   return rows;
 }
 
-function analyze(scenario: ScenarioRecord, designs: EvaluatedDesign[]) {
+function analyze(
+  scenario: ScenarioRecord,
+  designs: EvaluatedDesign[],
+  objectiveId?: string,
+) {
   const successful = designs.filter((item) => item.success);
   const top = [...designs]
     .sort((a, b) => b.score - a.score)
@@ -262,7 +275,10 @@ function analyze(scenario: ScenarioRecord, designs: EvaluatedDesign[]) {
       .map((contract) => {
         const passed = successful.filter(
           (item) =>
-            evaluate(item.design, scenario, 1, { contractId: contract.id }).contract
+            evaluate(item.design, scenario, 1, {
+              contractId: contract.id,
+              ...(objectiveId ? { objectiveId } : {}),
+            }).contract
               ?.passed,
         ).length;
         return [
@@ -298,6 +314,7 @@ function analyze(scenario: ScenarioRecord, designs: EvaluatedDesign[]) {
 
   return {
     scenario: scenario.id,
+    ...(objectiveId ? { objective: objectiveId } : {}),
     sampleCount: designs.length,
     successCount: successful.length,
     successRate: Math.round((successful.length / designs.length) * 10000) / 10000,
@@ -355,7 +372,7 @@ function writeReport(reports: ReturnType<typeof analyze>[]) {
   ];
   for (const report of reports) {
     lines.push(
-      `## ${report.scenario}`,
+      `## ${report.scenario}${"objective" in report ? ` · ${report.objective}` : ""}`,
       "",
       `- Success rate: ${(report.successRate * 100).toFixed(2)}%`,
       `- Top 5% archetypes: ${report.topFivePercent.archetypeCount}`,
@@ -391,18 +408,35 @@ function writeReport(reports: ReturnType<typeof analyze>[]) {
 }
 
 mkdirSync("data", { recursive: true });
-const reports = gameData.scenarios
-  .filter((scenario) => scenario.enabled)
-  .map((scenario, index) => {
-    const report = analyze(scenario, evaluateSample(scenario, 20261114 + index * 1009));
-    const outputPath = `data/designspace_${scenario.id}.json`;
-    writeFileSync(outputPath, `${JSON.stringify(report)}\n`, "utf8");
-    console.log(
-      `${scenario.name}: ${(report.successRate * 100).toFixed(2)}% success, ` +
-        `${report.topFivePercent.archetypeCount} top archetypes, ` +
-        `largest ${(report.topFivePercent.largestArchetypeShare * 100).toFixed(1)}%`,
-    );
-    return report;
-  });
+const reports = gameData.scenarios.filter((scenario) => scenario.enabled).flatMap(
+  (scenario, index) => {
+    const variants = [
+      { objectiveId: undefined, suffix: scenario.id },
+      ...gameData.objectives
+        .filter((objective) => objective.scenarioId === scenario.id)
+        .map((objective) => ({ objectiveId: objective.id, suffix: `${scenario.id}_${objective.id}` })),
+    ];
+    return variants.map(({ objectiveId, suffix }, variantIndex) => {
+      const report = analyze(
+        scenario,
+        evaluateSample(
+          scenario,
+          20261114 + index * 1009 + variantIndex * 131,
+          objectiveId,
+        ),
+        objectiveId,
+      );
+      const outputPath = `data/designspace_${suffix}.json`;
+      writeFileSync(outputPath, `${JSON.stringify(report)}\n`, "utf8");
+      console.log(
+        `${scenario.name}${objectiveId ? ` / ${objectiveId}` : ""}: ` +
+          `${(report.successRate * 100).toFixed(2)}% success, ` +
+          `${report.topFivePercent.archetypeCount} top archetypes, ` +
+          `largest ${(report.topFivePercent.largestArchetypeShare * 100).toFixed(1)}%`,
+      );
+      return report;
+    });
+  },
+);
 
 writeReport(reports);

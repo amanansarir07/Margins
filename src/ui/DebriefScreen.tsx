@@ -104,6 +104,9 @@ export function DebriefScreen({
     [design, instrumentNames, result, scenario, stars],
   );
   const patchTitle = missionName(design, scenario, instrumentNames);
+  const objective = options.objectiveId
+    ? gameData.objectives.find((item) => item.id === options.objectiveId)
+    : undefined;
   const [visibleStars, setVisibleStars] = useState(0);
   const [scoreShown, setScoreShown] = useState(0);
   const [patchError, setPatchError] = useState("");
@@ -206,6 +209,13 @@ export function DebriefScreen({
           {result.success ? "MISSION PASS" : "MISSION FAIL"}
         </Stamp>
       </header>
+      {objective && (
+        <div className="debrief-objective">
+          <strong>OBJECTIVE</strong>
+          <span>{objective.name}</span>
+          <small>{objective.description}</small>
+        </div>
+      )}
       <div className="debrief-score-row">
         <div className="debrief-stars" aria-label={`${visibleStars} stars earned`}>
           {Array.from({ length: Math.max(3, stars) }, (_, star) => (

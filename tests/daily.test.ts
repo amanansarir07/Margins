@@ -8,6 +8,7 @@ describe("daily missions", () => {
     const second = getDailyMission(new Date("2026-11-15T23:59:59Z"));
 
     expect(first).toEqual(second);
+    expect(first.objectiveId).toBeTruthy();
     expect(first.code).toMatch(/^MARGINS-2026-11-15-[A-Z]-[0-9A-F]{4}$/);
   });
 

@@ -793,6 +793,12 @@ body {
   align-self: start;
 }
 
+.workbench-objective {
+  color: var(--ink-navy);
+  font-weight: 800;
+  margin: 0.25rem 0 0;
+}
+
 .summary-stat {
   align-items: baseline;
   border-bottom: 1px solid var(--line);
@@ -1435,6 +1441,21 @@ body {
   font-size: 0.9rem;
 }
 
+.debrief-objective {
+  background: var(--launchpad-yellow);
+  border: 3px solid var(--ink-navy);
+  color: var(--ink-navy);
+  display: grid;
+  gap: 0.2rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+}
+
+.debrief-objective strong {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+}
+
 .workbench-callouts ol {
   display: grid;
   gap: 0.7rem;
@@ -2038,6 +2059,45 @@ body {
 .daily-briefing {
   display: grid;
   gap: 0.25rem;
+}
+
+.objective-picker {
+  margin-top: 1.25rem;
+}
+
+.objective-options {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.objective-option {
+  background: var(--light-surface);
+  border: 3px solid var(--ink-navy);
+  color: var(--ink-navy);
+  cursor: pointer;
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.7rem;
+  text-align: left;
+}
+
+.objective-option.selected,
+.objective-option:hover {
+  background: var(--launchpad-yellow);
+}
+
+.objective-option:focus-visible {
+  outline: 3px solid var(--deep-sky);
+  outline-offset: 3px;
+}
+
+.objective-option span {
+  font-size: 0.85rem;
+}
+
+.objective-option small {
+  font-weight: 700;
+  letter-spacing: 0.04em;
 }
 
 .daily-code {

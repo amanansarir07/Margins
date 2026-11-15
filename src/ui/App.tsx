@@ -86,6 +86,12 @@ export function App() {
               type: "SET_DESIGN",
               design: { ...state.design, scenarioId },
             });
+            const objective = gameData.objectives.find(
+              (item) => item.scenarioId === scenarioId,
+            );
+            if (objective) {
+              dispatch({ type: "SET_OBJECTIVE", objectiveId: objective.id });
+            }
             dispatch({ type: "START_SOLO" });
           }}
           onDifficultyChange={(difficulty) =>
@@ -107,8 +113,13 @@ export function App() {
             sandbox: state.sandbox,
             twistId: state.dailyMission?.twistId,
             contractId: state.dailyMission?.contractId,
+            objectiveId: state.objectiveId,
           }}
           sandbox={state.sandbox}
+          objectiveId={state.objectiveId}
+          onSelectObjective={(objectiveId) =>
+            dispatch({ type: "SET_OBJECTIVE", objectiveId })
+          }
           onContinue={() => dispatch({ type: "GO_TO", screen: "workshop" })}
         />
       )}
@@ -121,6 +132,7 @@ export function App() {
             sandbox: state.sandbox,
             twistId: state.dailyMission?.twistId,
             contractId: state.dailyMission?.contractId,
+            objectiveId: state.objectiveId,
           }}
           seed={state.seed}
           onDesignChange={(design) => dispatch({ type: "SET_DESIGN", design })}
@@ -136,6 +148,7 @@ export function App() {
             sandbox: state.sandbox,
             twistId: state.dailyMission?.twistId,
             contractId: state.dailyMission?.contractId,
+            objectiveId: state.objectiveId,
           }}
           onBack={() => dispatch({ type: "GO_TO", screen: "workshop" })}
           onLaunch={() => dispatch({ type: "GO_TO", screen: "flight" })}
@@ -151,6 +164,7 @@ export function App() {
             sandbox: state.sandbox,
             twistId: state.dailyMission?.twistId,
             contractId: state.dailyMission?.contractId,
+            objectiveId: state.objectiveId,
           }}
           onComplete={(timeline) =>
             dispatch({ type: "COMPLETE_FLIGHT", result: timeline.evaluation })
@@ -169,6 +183,7 @@ export function App() {
             sandbox: state.sandbox,
             twistId: state.dailyMission?.twistId,
             contractId: state.dailyMission?.contractId,
+            objectiveId: state.objectiveId,
           }}
           onRerun={() => dispatch({ type: "GO_TO", screen: "workshop" })}
           onApplyFix={(design) => {

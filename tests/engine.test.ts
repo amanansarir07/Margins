@@ -192,4 +192,32 @@ describe("mission engine", () => {
     );
     expect(evaluate(baseDesign, moon, 1, sandbox).success).toBe(true);
   });
+
+  it("applies the selected objective to requirements and science", () => {
+    const objectiveOptions: MissionOptions = {
+      objectiveId: "moon-subsurface-pockets",
+    };
+    const result = evaluate(baseDesign, moon, 1, objectiveOptions);
+
+    expect(result.success).toBe(false);
+    expect(result.reasons).toContain("Add required instrument: radar.");
+    expect(result.reasons.some((reason) => reason.includes("goal is 86"))).toBe(
+      true,
+    );
+  });
+
+  it("uses the objective hazard list for the visible flight events", () => {
+    const options: MissionOptions = { objectiveId: "moon-landing-zones" };
+    const timeline = simulateTimeline(baseDesign, moon, 9876, 32, options);
+    const allowed = new Set(["instrument-fault", "comms-dropout", "budget-cut"]);
+
+    expect(timeline.events.length).toBeGreaterThan(0);
+    expect(timeline.events.every((event) => allowed.has(event.id))).toBe(true);
+  });
+
+  it("rejects an objective from another scenario", () => {
+    expect(() =>
+      evaluate(baseDesign, moon, 1, { objectiveId: "mars-mineral-diversity" }),
+    ).toThrow('Objective "mars-mineral-diversity" is not available');
+  });
 });

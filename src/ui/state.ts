@@ -1,4 +1,5 @@
 import type { Design, Difficulty, EvaluationResult } from "../engine/types";
+import { gameData } from "../engine/loadData";
 import { loadLastDesign } from "./storage";
 import type { DailyMission } from "./daily";
 
@@ -18,6 +19,7 @@ export interface AppState {
   difficulty: Difficulty;
   sandbox: boolean;
   dailyMission: DailyMission | null;
+  objectiveId: string;
 }
 
 export type AppAction =
@@ -26,6 +28,7 @@ export type AppAction =
   | { type: "START_DAILY"; mission: DailyMission }
   | { type: "GO_TO"; screen: Exclude<Screen, "title"> }
   | { type: "SET_DESIGN"; design: Design }
+  | { type: "SET_OBJECTIVE"; objectiveId: string }
   | { type: "SET_DIFFICULTY"; difficulty: Difficulty }
   | { type: "SET_SANDBOX"; sandbox: boolean }
   | { type: "COMPLETE_FLIGHT"; result: EvaluationResult };
@@ -43,6 +46,10 @@ export const initialDesign: Design = {
 };
 
 const savedDesign = loadLastDesign();
+const initialScenarioId = savedDesign?.scenarioId ?? initialDesign.scenarioId;
+const initialObjective =
+  gameData.objectives.find((item) => item.scenarioId === initialScenarioId) ??
+  gameData.objectives[0];
 
 export const initialState: AppState = {
   screen: "title",
@@ -52,6 +59,7 @@ export const initialState: AppState = {
   difficulty: "engineer",
   sandbox: false,
   dailyMission: null,
+  objectiveId: initialObjective?.id ?? "moon-ice-concentration",
 };
 
 export function appReducer(state: AppState, action: AppAction): AppState {
@@ -66,6 +74,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         screen: "briefing",
         sandbox: false,
         dailyMission: action.mission,
+        objectiveId: action.mission.objectiveId,
         seed: action.mission.seed,
         design: { ...state.design, scenarioId: action.mission.scenarioId },
       };
@@ -73,6 +82,8 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       return { ...state, screen: action.screen };
     case "SET_DESIGN":
       return { ...state, design: action.design };
+    case "SET_OBJECTIVE":
+      return { ...state, objectiveId: action.objectiveId };
     case "SET_DIFFICULTY":
       return { ...state, difficulty: action.difficulty, sandbox: false };
     case "SET_SANDBOX":

@@ -5,6 +5,7 @@ export interface DailyMission {
   scenarioId: string;
   twistId: string;
   contractId: string;
+  objectiveId: string;
   seed: number;
   code: string;
 }
@@ -38,9 +39,13 @@ export function getDailyMission(date = new Date()): DailyMission {
   const contracts = gameData.contracts.filter(
     (contract) => contract.scenarioId === scenario.id,
   );
+  const objectives = gameData.objectives.filter(
+    (objective) => objective.scenarioId === scenario.id,
+  );
   const twist = twists[Math.floor(seed / 7) % twists.length];
   const contract = contracts[Math.floor(seed / 13) % contracts.length];
-  if (!twist || !contract) {
+  const objective = objectives[Math.floor(seed / 17) % objectives.length];
+  if (!twist || !contract || !objective) {
     throw new Error(`Daily mission data is incomplete for ${scenario.id}.`);
   }
   const destinationCode = scenario.destinationId.slice(0, 1).toUpperCase();
@@ -49,6 +54,7 @@ export function getDailyMission(date = new Date()): DailyMission {
     scenarioId: scenario.id,
     twistId: twist.id,
     contractId: contract.id,
+    objectiveId: objective.id,
     seed,
     code: `MARGINS-${dateString}-${destinationCode}-${hexSuffix(seed)}`,
   };

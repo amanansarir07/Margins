@@ -123,6 +123,17 @@ Probability only selects visible hazards for a seeded briefing. It does not crea
 - Optional `powerKind`: `solar` or `nuclear`
 - `bonusStars`: number
 
+## objectives.json
+
+- `id`, `name`, `scenarioId`, `description`
+- `requiredInstruments`: array of instrument IDs
+- `requiredInstrumentAnyOf`: array of instrument IDs
+- `scienceGoal`: number, science points
+- `criticalResources`: array of resource names
+- `eventIds`: array of game-event IDs shown in the threat briefing
+- Optional `budgetMultiplier`: ratio applied to the scenario budget cap
+- Optional `timeMultiplier`: ratio applied to the scenario time window
+
 ## twists.json
 
 - `id`, `name`, `description`

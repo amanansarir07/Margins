@@ -14,6 +14,7 @@ import missionReferencesJson from "../../data/mission_references.json";
 import mitigationsJson from "../../data/mitigations.json";
 import contractsJson from "../../data/contracts.json";
 import twistsJson from "../../data/twists.json";
+import objectivesJson from "../../data/objectives.json";
 import type {
   AttitudeControlRecord,
   CommsRecord,
@@ -26,6 +27,7 @@ import type {
   MitigationRecord,
   ContractRecord,
   TwistRecord,
+  ObjectiveRecord,
   OnboardComputerRecord,
   OrbitRecord,
   PowerRecord,
@@ -109,4 +111,5 @@ export const gameData = {
   ),
   contracts: validateRecords<ContractRecord>("contracts.json", contractsJson),
   twists: validateRecords<TwistRecord>("twists.json", twistsJson),
+  objectives: validateRecords<ObjectiveRecord>("objectives.json", objectivesJson),
 } as const;
